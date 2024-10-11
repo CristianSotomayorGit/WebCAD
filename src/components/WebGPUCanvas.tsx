@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from 'react';
 
 const vertexShaderCode = `
     @vertex
-    fn main(@location(0) position : vec3<f32>) -> @builtin(position) vec4<f32> {
-        return vec4<f32>(position, 1.0);
+    fn main(@location(0) position : vec2<f32>) -> @builtin(position) vec4<f32> {
+        return vec4<f32>(position, 0.0, 1.0);
     }
 `;
 
@@ -19,27 +19,23 @@ const gridSpacing = 0.1;
 
 // Precompute the number of vertices: each grid line has 2 vertices, and there are 2 * gridSize + 1 lines horizontally and vertically
 const numLines = 2 * gridSize + 1;
-const vertices = new Float32Array(numLines * 4 * 3); // 4 vertices per line (start and end for both horizontal and vertical)
+const vertices = new Float32Array(numLines * 4 * 2); // 4 vertices per line (start and end for both horizontal and vertical), 2 coordinates each
 let vertexIndex = 0;
 
 for (let i = -gridSize; i <= gridSize; i++) {
     // Vertical lines
     vertices[vertexIndex++] = i * gridSpacing;
     vertices[vertexIndex++] = -gridSize * gridSpacing;
-    vertices[vertexIndex++] = 0;
 
     vertices[vertexIndex++] = i * gridSpacing;
     vertices[vertexIndex++] = gridSize * gridSpacing;
-    vertices[vertexIndex++] = 0;
 
     // Horizontal lines
     vertices[vertexIndex++] = -gridSize * gridSpacing;
     vertices[vertexIndex++] = i * gridSpacing;
-    vertices[vertexIndex++] = 0;
 
     vertices[vertexIndex++] = gridSize * gridSpacing;
     vertices[vertexIndex++] = i * gridSpacing;
-    vertices[vertexIndex++] = 0;
 }
 
 const WebGPUCanvas: React.FC = () => {
@@ -57,7 +53,7 @@ const WebGPUCanvas: React.FC = () => {
         const format = formatRef.current;
 
         if (canvas && context && device && format) {
-            const gridDimension = window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight
+            const gridDimension = window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight;
 
             canvas.width = gridDimension;
             canvas.height = gridDimension;
@@ -106,6 +102,7 @@ const WebGPUCanvas: React.FC = () => {
                     usage: GPUBufferUsage.VERTEX,
                     mappedAtCreation: true,
                 });
+                
                 new Float32Array(vertexBuffer.getMappedRange()).set(vertices);
                 vertexBuffer.unmap();
                 vertexBufferRef.current = vertexBuffer;
@@ -122,12 +119,12 @@ const WebGPUCanvas: React.FC = () => {
                         entryPoint: 'main',
                         buffers: [
                             {
-                                arrayStride: 12, // 3 * 4 bytes for vec3<f32>
+                                arrayStride: 8, // 2 * 4 bytes for vec2<f32>
                                 attributes: [
                                     {
                                         shaderLocation: 0,
                                         offset: 0,
-                                        format: 'float32x3',
+                                        format: 'float32x2',
                                     },
                                 ],
                             },
@@ -157,7 +154,7 @@ const WebGPUCanvas: React.FC = () => {
                         colorAttachments: [
                             {
                                 view: textureView,
-                                clearValue: { r: 0, g: 0, b: 0, a: 1 }, // Clear to black
+                                clearValue: { r: 0.1294, g: 0.1569, b: 0.1882, a: 1 },
                                 loadOp: 'clear',
                                 storeOp: 'store',
                             },
@@ -166,7 +163,7 @@ const WebGPUCanvas: React.FC = () => {
 
                     renderPass.setPipeline(pipelineRef.current);
                     renderPass.setVertexBuffer(0, vertexBufferRef.current!);
-                    renderPass.draw(vertices.length / 3);
+                    renderPass.draw(vertices.length / 2);
                     renderPass.end();
 
                     deviceRef.current.queue.submit([commandEncoder.finish()]);
@@ -196,8 +193,6 @@ const WebGPUCanvas: React.FC = () => {
             }
             // Optionally, destroy WebGPU resources here if needed
         };
-
-
     }, []);
 
     return (
@@ -207,7 +202,6 @@ const WebGPUCanvas: React.FC = () => {
                 position: 'fixed',
                 left: 0,
                 top: 0,
-
             }}
         />
     );
