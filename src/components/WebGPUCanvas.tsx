@@ -1,9 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 
 const vertexShaderCode = `
+    struct Uniforms {
+        translation: vec2<f32>,
+    };
+    @group(0) @binding(0) var<uniform> uniforms: Uniforms;
+
     @vertex
-    fn main(@location(0) position : vec2<f32>) -> @builtin(position) vec4<f32> {
-        return vec4<f32>(position, 0.0, 1.0);
+    fn main(@location(0) position: vec2<f32>) -> @builtin(position) vec4<f32> {
+        let translatedPosition = position + uniforms.translation;
+        return vec4<f32>(translatedPosition, 0.0, 1.0);
     }
 `;
 
@@ -45,6 +51,46 @@ const WebGPUCanvas: React.FC = () => {
     const vertexBufferRef = useRef<GPUBuffer>();
     const contextRef = useRef<GPUCanvasContext>();
     const formatRef = useRef<GPUTextureFormat>();
+    const translationBufferRef = useRef<GPUBuffer>();
+    const bindGroupRef = useRef<GPUBindGroup>();
+    const isDraggingRef = useRef<boolean>(false);
+    const lastMousePositionRef = useRef<{ x: number; y: number } | null>(null);
+    const translationRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+    // Function to update translation
+    const updateTranslation = (x: number, y: number) => {
+        if (!deviceRef.current || !translationBufferRef.current) return;
+
+        const translationArray = new Float32Array([x, y]);
+        deviceRef.current.queue.writeBuffer(translationBufferRef.current, 0, translationArray);
+    };
+
+    // Mouse event handlers
+    const handleMouseDown = (event: MouseEvent) => {
+        isDraggingRef.current = true;
+        lastMousePositionRef.current = { x: event.clientX, y: event.clientY };
+    };
+
+    const handleMouseMove = (event: MouseEvent) => {
+        if (!isDraggingRef.current || !lastMousePositionRef.current) return;
+
+        const deltaX = event.clientX - lastMousePositionRef.current.x;
+        const deltaY = event.clientY - lastMousePositionRef.current.y;
+
+        // Update the translation based on the mouse movement
+        translationRef.current.x += deltaX / window.innerWidth * 2;
+        translationRef.current.y -= deltaY / window.innerHeight * 2; // Invert Y axis
+
+        updateTranslation(translationRef.current.x, translationRef.current.y);
+
+        // Update last mouse position
+        lastMousePositionRef.current = { x: event.clientX, y: event.clientY };
+    };
+
+    const handleMouseUp = () => {
+        isDraggingRef.current = false;
+        lastMousePositionRef.current = null;
+    };
 
     const resizeCanvas = () => {
         const canvas = canvasRef.current;
@@ -107,13 +153,67 @@ const WebGPUCanvas: React.FC = () => {
                 vertexBuffer.unmap();
                 vertexBufferRef.current = vertexBuffer;
 
-                // Create shader modules
+                // Create the translation uniform buffer
+                const translationArray = new Float32Array([0.0, 0.0]); // Initial translation values
+                const translationBuffer = device.createBuffer({
+                    size: translationArray.byteLength,
+                    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+                });
+                device.queue.writeBuffer(translationBuffer, 0, translationArray);
+                translationBufferRef.current = translationBuffer;
+
+                // Create shader modules and check for errors
                 const vertexModule = device.createShaderModule({ code: vertexShaderCode });
                 const fragmentModule = device.createShaderModule({ code: fragmentShaderCode });
 
-                // Create pipeline
+                const vertexCompilationInfo = await vertexModule.getCompilationInfo();
+                const fragmentCompilationInfo = await fragmentModule.getCompilationInfo();
+
+                if (vertexCompilationInfo.messages.some(msg => msg.type === 'error')) {
+                    console.error('Vertex shader compilation failed:', vertexCompilationInfo);
+                    return;
+                }
+
+                if (fragmentCompilationInfo.messages.some(msg => msg.type === 'error')) {
+                    console.error('Fragment shader compilation failed:', fragmentCompilationInfo);
+                    return;
+                }
+
+                // Create bind group layout
+                const bindGroupLayout = device.createBindGroupLayout({
+                    entries: [
+                        {
+                            binding: 0,
+                            visibility: GPUShaderStage.VERTEX,
+                            buffer: {
+                                type: 'uniform',
+                            },
+                        },
+                    ],
+                });
+
+                // Create the bind group
+                const bindGroup = device.createBindGroup({
+                    layout: bindGroupLayout,
+                    entries: [
+                        {
+                            binding: 0,
+                            resource: {
+                                buffer: translationBuffer,
+                            },
+                        },
+                    ],
+                });
+                bindGroupRef.current = bindGroup;
+
+                // Create a pipeline layout
+                const pipelineLayout = device.createPipelineLayout({
+                    bindGroupLayouts: [bindGroupLayout],
+                });
+
+                // Create the render pipeline
                 const pipeline = device.createRenderPipeline({
-                    layout: 'auto',
+                    layout: pipelineLayout,
                     vertex: {
                         module: vertexModule,
                         entryPoint: 'main',
@@ -141,6 +241,11 @@ const WebGPUCanvas: React.FC = () => {
                 });
                 pipelineRef.current = pipeline;
 
+                // Add mouse event listeners
+                window.addEventListener('mousedown', handleMouseDown);
+                window.addEventListener('mousemove', handleMouseMove);
+                window.addEventListener('mouseup', handleMouseUp);
+
                 // Start render loop
                 const render = () => {
                     if (!deviceRef.current || !pipelineRef.current || !contextRef.current) {
@@ -162,6 +267,7 @@ const WebGPUCanvas: React.FC = () => {
                     });
 
                     renderPass.setPipeline(pipelineRef.current);
+                    renderPass.setBindGroup(0, bindGroupRef.current!);
                     renderPass.setVertexBuffer(0, vertexBufferRef.current!);
                     renderPass.draw(vertices.length / 2);
                     renderPass.end();
@@ -187,11 +293,14 @@ const WebGPUCanvas: React.FC = () => {
         window.addEventListener('resize', handleResize);
 
         return () => {
+            // Cleanup function
             window.removeEventListener('resize', handleResize);
-            if (animationFrameId) {
+            window.removeEventListener('mousedown', handleMouseDown);
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+            if (animationFrameId !== undefined) {
                 cancelAnimationFrame(animationFrameId);
             }
-            // Optionally, destroy WebGPU resources here if needed
         };
     }, []);
 
