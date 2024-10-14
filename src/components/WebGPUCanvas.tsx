@@ -1,58 +1,40 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { MouseEvent, useEffect, useRef, useState } from 'react';
+import { Command } from '../command/command';
 
-const vertexShaderCode = `
-    struct Uniforms {
-        cameraOffset: vec2<f32>,  // Camera offset
-        zoomFactor: f32,          // Zoom factor
-        padding: f32,             // Padding for alignment
+const vertexShaderCode =
+    `    struct Uniforms {
+        cameraOffset: vec2<f32>,  
+        zoomFactor: f32,      
+        padding: f32,      
     };
     
     @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 
     @vertex
     fn main(@location(0) position: vec2<f32>) -> @builtin(position) vec4<f32> {
-        let cameraPosition = (position - uniforms.cameraOffset) * uniforms.zoomFactor;  // Apply camera offset and zoom
-        return vec4<f32>(cameraPosition, 0.0, 1.0);            // Output final position
-    }
-`;
+        let cameraPosition = (position - uniforms.cameraOffset) * uniforms.zoomFactor;  
+        return vec4<f32>(cameraPosition, 0.0, 1.0);            
+    }; `
 
-const gridFragmentShaderCode = `
-    @fragment
+const gridFragmentShaderCode =
+    `@fragment
     fn main() -> @location(0) vec4<f32> {
-        return vec4<f32>(59.0 / 255.0, 65.0 / 255.0, 72.0 / 255.0, 1.0); // Grid color
+        return vec4<f32>(59.0 / 255.0, 65.0 / 255.0, 72.0 / 255.0, 1.0); 
     }
-`;
+;`
 
-const lineFragmentShaderCode = `
-    @fragment
+const lineFragmentShaderCode =
+    `@fragment
     fn main() -> @location(0) vec4<f32> {
-        // Cyan color for the lines being drawn
         return vec4<f32>(0.0, 1.0, 1.0, 1.0);
     }
-`;
-
-const circleVertexShaderCode = `
-    @vertex
-    fn main(@location(0) position: vec2<f32>) -> @builtin(position) vec4<f32> {
-        let scale = 0.03;  // Increase the size of the vertex dots for lines
-        let scaledPosition = position * scale;  // Scale to make larger dots
-        return vec4<f32>(scaledPosition, 0.0, 1.0);
-    }
-`;
-
-const circleFragmentShaderCode = `
-    @fragment
-    fn main() -> @location(0) vec4<f32> {
-        // Gray color for the vertices of the lines
-        return vec4<f32>(0.5, 0.5, 0.5, 1.0);
-    }
-`;
+;`
 
 const gridSize = 10;
 const gridSpacing = 0.1;
 
 const numLines = 2 * gridSize + 1;
-const vertices = new Float32Array(numLines * 4 * 2); 
+const vertices = new Float32Array(numLines * 4 * 2);
 let vertexIndex = 0;
 
 for (let i = -gridSize; i <= gridSize; i++) {
@@ -78,43 +60,36 @@ const WebGPUCanvas: React.FC = () => {
     const formatRef = useRef<GPUTextureFormat>();
     const cameraBufferRef = useRef<GPUBuffer>();
     const bindGroupRef = useRef<GPUBindGroup>();
-    const circlePipelineRef = useRef<GPURenderPipeline>();
     const linePipelineRef = useRef<GPURenderPipeline>();
-    const gridPipelineRef = useRef<GPURenderPipeline>(); // For rendering the grid
+    const gridPipelineRef = useRef<GPURenderPipeline>();
     const isDraggingRef = useRef<boolean>(false);
-    const isPDownRef = useRef<boolean>(false);
-    const isLDownRef = useRef<boolean>(false); // New state to track 'L' command
-    const firstClickDetected = useRef<boolean>(false); // Track first click state
+    const firstClickDetected = useRef<boolean>(false);
     const lastMousePositionRef = useRef<{ x: number; y: number } | null>(null);
     const cameraOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-    const zoomFactorRef = useRef<number>(1.0); // Initial zoom factor is 1 (no zoom)
-    const commandRef = useRef<string>('Current Command: None');
+    const zoomFactorRef = useRef<number>(1.0);
+    const commandRef = useRef<string>(Command.NONE);
     const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
 
     const [command, setCommand] = useState(commandRef.current);
 
-    const lastVertexRef = useRef<{ x: number, y: number } | null>(null); // Track the last vertex
-    const linesRef = useRef<Array<{ start: { x: number; y: number }, end: { x: number; y: number } }>>([]); // Store permanent lines
-
-    // Function to update camera offset and zoom factor
+    const lastVertexRef = useRef<{ x: number, y: number } | null>(null);
+    const linesRef = useRef<Array<{ start: { x: number; y: number }, end: { x: number; y: number } }>>([]);
+    const tempLineRef = useRef<{ start: { x: number; y: number }, end: { x: number; y: number } }>();
     const updateCameraData = (x: number, y: number, zoom: number) => {
         if (!deviceRef.current || !cameraBufferRef.current) return;
 
-        const cameraData = new Float32Array([x, y, zoom, 0.0]);  // Include padding
+        const cameraData = new Float32Array([x, y, zoom, 0.0]);
         deviceRef.current.queue.writeBuffer(cameraBufferRef.current, 0, cameraData);
     };
 
-    // Function to transform mouse click to grid coordinates
     const getMousePositionOnGrid = (event: MouseEvent): { x: number, y: number } => {
         const canvas = canvasRef.current;
         if (!canvas) return { x: 0, y: 0 };
 
-        // Get normalized coordinates relative to the canvas (-1 to 1 range)
         const rect = canvas.getBoundingClientRect();
         const mouseX = ((event.clientX - rect.left) / canvas.width) * 2 - 1;
         const mouseY = -(((event.clientY - rect.top) / canvas.height) * 2 - 1);
 
-        // Apply camera offset and zoom to get the correct position on the grid
         const x = (mouseX / zoomFactorRef.current) + cameraOffsetRef.current.x;
         const y = (mouseY / zoomFactorRef.current) + cameraOffsetRef.current.y;
 
@@ -122,77 +97,94 @@ const WebGPUCanvas: React.FC = () => {
     };
 
     const handleMouseDown = (event: MouseEvent) => {
-        if (isLDownRef.current) {
-            const { x, y } = getMousePositionOnGrid(event);
+        switch (event.button) {
+            case 0:
+                if (commandRef.current === Command.LINE) {
+                    const { x, y } = getMousePositionOnGrid(event);
 
-            if (!firstClickDetected.current) {
-                // The first click determines the starting vertex
-                lastVertexRef.current = { x, y };
-                firstClickDetected.current = true; // Mark the first click as detected
-            } else {
-                // If a line is already started, finalize the line and make the second point the new starting point
-                linesRef.current.push({
-                    start: lastVertexRef.current!,
-                    end: { x, y }
-                });
-                lastVertexRef.current = { x, y }; // Set the last point as the new starting point
-                setMousePosition(null); // Clear the dynamic line after the second click
-            }
-        } else {
-            // Regular pan mode
-            isDraggingRef.current = true;
-            lastMousePositionRef.current = { x: event.clientX, y: event.clientY };
+                    if (!firstClickDetected.current) {
+                        lastVertexRef.current = { x, y };
+                        firstClickDetected.current = true;
+                    }
+
+                    else {
+                        linesRef.current.push({
+                            start: lastVertexRef.current!,
+                            end: { x, y }
+                        });
+                        lastVertexRef.current = { x, y };
+                        setMousePosition(null);
+                    }
+                }
+
+                break;
+
+            case 1:
+                commandRef.current = Command.PAN;
+                setCommand(commandRef.current);
+
+                isDraggingRef.current = true;
+                lastMousePositionRef.current = { x: event.clientX, y: event.clientY };
+
+                break;
+
+            case 2:
+            //implement some right click
         }
     };
 
-    const handleMouseMove = (event: MouseEvent) => {
-        const { x, y } = getMousePositionOnGrid(event);
-        setMousePosition({ x, y }); // Update the mouse position continuously
+    const handleMouseUp = (event: MouseEvent) => {
+        switch (event.button) {
+            case 1:
+                commandRef.current = Command.NONE;
+                setCommand(commandRef.current);
+        }
 
-        if (!isPDownRef.current || !isDraggingRef.current || !lastMousePositionRef.current) return;
-
-        const deltaX = event.clientX - lastMousePositionRef.current.x;
-        const deltaY = event.clientY - lastMousePositionRef.current.y;
-
-        cameraOffsetRef.current.x -= deltaX / window.innerWidth * 2;  
-        cameraOffsetRef.current.y += deltaY / window.innerHeight * 2;  
-
-        updateCameraData(cameraOffsetRef.current.x, cameraOffsetRef.current.y, zoomFactorRef.current);
-        lastMousePositionRef.current = { x: event.clientX, y: event.clientY };
-    };
-
-    const handleMouseUp = () => {
         isDraggingRef.current = false;
         lastMousePositionRef.current = null;
     };
 
-    const handlePDown = (event: KeyboardEvent) => {
-        if (event.key === 'p' || event.key === 'P') {
-            if (isPDownRef.current === false) {
-                isPDownRef.current = true;
-                commandRef.current = 'Current Command Pan';
-                setCommand(commandRef.current);
-            } else {
-                isPDownRef.current = false;
-                commandRef.current = 'Current Command: None';
-                setCommand(commandRef.current);
+    const handleMouseMove = (event: MouseEvent) => {
+        if (commandRef.current === Command.PAN) {
+            const { x, y } = getMousePositionOnGrid(event);
+            setMousePosition({ x, y });
+
+            if (commandRef.current !== Command.PAN || !isDraggingRef.current || !lastMousePositionRef.current) return;
+
+            const deltaX = event.clientX - lastMousePositionRef.current.x;
+            const deltaY = event.clientY - lastMousePositionRef.current.y;
+
+            cameraOffsetRef.current.x -= deltaX / window.innerWidth * 2;
+            cameraOffsetRef.current.y += deltaY / window.innerHeight * 2;
+
+            updateCameraData(cameraOffsetRef.current.x, cameraOffsetRef.current.y, zoomFactorRef.current);
+            lastMousePositionRef.current = { x: event.clientX, y: event.clientY };
+        }
+
+        if (commandRef.current === Command.LINE) {
+            const { x, y } = getMousePositionOnGrid(event);
+
+            if (firstClickDetected.current) {
+                tempLineRef.current = {
+                    start: lastVertexRef.current!,
+                    end: { x, y }
+                }
             }
         }
     };
 
-    const handleLDown = (event: KeyboardEvent) => {
-        if (event.key === 'l' || event.key === 'L') {
-            if (isLDownRef.current === false) {
-                isLDownRef.current = true;
-                firstClickDetected.current = false; // Reset for new line drawing session
-                commandRef.current = 'Current Command: Line Drawing';
-                setCommand(commandRef.current);
-            } else {
-                isLDownRef.current = false;
-                commandRef.current = 'Current Command: None';
-                setCommand(commandRef.current);
-            }
+    const handleCommandKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+            commandRef.current = Command.NONE
+            tempLineRef.current = undefined;
+        
         }
+        if (event.key === 'p' || event.key === 'P') commandRef.current = Command.POINT;
+        if (event.key === 'l' || event.key === 'L') {
+            commandRef.current = Command.LINE;
+            firstClickDetected.current = false;
+        }
+        setCommand(commandRef.current);
     };
 
     const handleScroll = (event: WheelEvent) => {
@@ -265,7 +257,7 @@ const WebGPUCanvas: React.FC = () => {
                 vertexBuffer.unmap();
                 vertexBufferRef.current = vertexBuffer;
 
-                const cameraDataArray = new Float32Array([0.0, 0.0, 1.0, 0.0]); // Initial camera data with padding
+                const cameraDataArray = new Float32Array([0.0, 0.0, 1.0, 0.0]);
                 const cameraBuffer = device.createBuffer({
                     size: cameraDataArray.byteLength,
                     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -275,14 +267,10 @@ const WebGPUCanvas: React.FC = () => {
 
                 const vertexModule = device.createShaderModule({ code: vertexShaderCode });
                 const lineFragmentModule = device.createShaderModule({ code: lineFragmentShaderCode });
-                const circleFragmentModule = device.createShaderModule({ code: circleFragmentShaderCode });
-                const circleVertexModule = device.createShaderModule({ code: circleVertexShaderCode });
                 const gridFragmentModule = device.createShaderModule({ code: gridFragmentShaderCode });
 
                 const vertexCompilationInfo = await vertexModule.getCompilationInfo();
                 const lineCompilationInfo = await lineFragmentModule.getCompilationInfo();
-                const circleVertexCompilationInfo = await circleVertexModule.getCompilationInfo();
-                const circleFragmentCompilationInfo = await circleFragmentModule.getCompilationInfo();
                 const gridFragmentCompilationInfo = await gridFragmentModule.getCompilationInfo();
 
                 if (vertexCompilationInfo.messages.some(msg => msg.type === 'error')) {
@@ -292,16 +280,6 @@ const WebGPUCanvas: React.FC = () => {
 
                 if (lineCompilationInfo.messages.some(msg => msg.type === 'error')) {
                     console.error('Line fragment shader compilation failed:', lineCompilationInfo);
-                    return;
-                }
-
-                if (circleVertexCompilationInfo.messages.some(msg => msg.type === 'error')) {
-                    console.error('Circle vertex shader compilation failed:', circleVertexCompilationInfo);
-                    return;
-                }
-
-                if (circleFragmentCompilationInfo.messages.some(msg => msg.type === 'error')) {
-                    console.error('Circle fragment shader compilation failed:', circleFragmentCompilationInfo);
                     return;
                 }
 
@@ -328,7 +306,7 @@ const WebGPUCanvas: React.FC = () => {
                         {
                             binding: 0,
                             resource: {
-                                buffer: cameraBuffer,  
+                                buffer: cameraBuffer,
                             },
                         },
                     ],
@@ -368,37 +346,6 @@ const WebGPUCanvas: React.FC = () => {
                 });
                 pipelineRef.current = pipeline;
 
-                // Circle pipeline for vertices (gray)
-                const circlePipeline = device.createRenderPipeline({
-                    layout: pipelineLayout,
-                    vertex: {
-                        module: circleVertexModule,
-                        entryPoint: 'main',
-                        buffers: [
-                            {
-                                arrayStride: 8,
-                                attributes: [
-                                    {
-                                        shaderLocation: 0,
-                                        offset: 0,
-                                        format: 'float32x2',
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                    fragment: {
-                        module: circleFragmentModule,
-                        entryPoint: 'main',
-                        targets: [{ format }],
-                    },
-                    primitive: {
-                        topology: 'point-list',
-                    },
-                });
-                circlePipelineRef.current = circlePipeline;
-
-                // Pipeline for grid rendering
                 const gridPipeline = device.createRenderPipeline({
                     layout: pipelineLayout,
                     vertex: {
@@ -431,9 +378,9 @@ const WebGPUCanvas: React.FC = () => {
                 window.addEventListener('mousedown', handleMouseDown);
                 window.addEventListener('mousemove', handleMouseMove);
                 window.addEventListener('mouseup', handleMouseUp);
-                window.addEventListener('keydown', handlePDown);
-                window.addEventListener('keydown', handleLDown);
                 window.addEventListener('wheel', handleScroll);
+                window.addEventListener('keydown', handleCommandKeyDown);
+
 
                 const render = () => {
                     if (!deviceRef.current || !pipelineRef.current || !contextRef.current) {
@@ -454,36 +401,17 @@ const WebGPUCanvas: React.FC = () => {
                         ],
                     });
 
-                    // Draw the grid
                     renderPass.setPipeline(gridPipelineRef.current);
                     renderPass.setBindGroup(0, bindGroupRef.current!);
                     renderPass.setVertexBuffer(0, vertexBufferRef.current!);
                     renderPass.draw(vertices.length / 2);
 
-                    // Draw gray circles for each clicked vertex
-                    if (lastVertexRef.current) {
-                        renderPass.setPipeline(circlePipelineRef.current!);
-
-                        const clickedVertices = new Float32Array([lastVertexRef.current.x, lastVertexRef.current.y]);
-                        const clickedVertexBuffer = deviceRef.current!.createBuffer({
-                            size: clickedVertices.byteLength,
-                            usage: GPUBufferUsage.VERTEX,
-                            mappedAtCreation: true,
-                        });
-                        new Float32Array(clickedVertexBuffer.getMappedRange()).set(clickedVertices);
-                        clickedVertexBuffer.unmap();
-
-                        renderPass.setVertexBuffer(0, clickedVertexBuffer);
-                        renderPass.draw(1);
-                    }
-
-                    // Draw all permanent lines
                     if (linesRef.current.length > 0) {
                         renderPass.setPipeline(pipelineRef.current!);
 
                         linesRef.current.forEach(line => {
                             const lineVertices = new Float32Array([
-                                line.start.x, line.start.y, 
+                                line.start.x, line.start.y,
                                 line.end.x, line.end.y
                             ]);
                             const lineVertexBuffer = device.createBuffer({
@@ -497,6 +425,28 @@ const WebGPUCanvas: React.FC = () => {
                             renderPass.setVertexBuffer(0, lineVertexBuffer);
                             renderPass.draw(2);
                         });
+                    }
+
+                    if (tempLineRef.current) {
+                        renderPass.setPipeline(pipelineRef.current!);
+                        const tempLine = tempLineRef.current
+
+                        const lineVertices = new Float32Array([
+                            tempLine.start.x, tempLine.start.y,
+                            tempLine.end.x, tempLine.end.y
+                        ]);
+                        const lineVertexBuffer = device.createBuffer({
+                            size: lineVertices.byteLength,
+                            usage: GPUBufferUsage.VERTEX,
+                            mappedAtCreation: true,
+                        });
+                        new Float32Array(lineVertexBuffer.getMappedRange()).set(lineVertices);
+                        lineVertexBuffer.unmap();
+
+                        renderPass.setVertexBuffer(0, lineVertexBuffer);
+                        renderPass.draw(2);
+
+
                     }
 
                     renderPass.end();
@@ -525,9 +475,9 @@ const WebGPUCanvas: React.FC = () => {
             window.removeEventListener('mousedown', handleMouseDown);
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
-            window.removeEventListener('keydown', handlePDown);
-            window.removeEventListener('keydown', handleLDown);
+            window.removeEventListener('keydown', handleCommandKeyDown);
             window.removeEventListener('wheel', handleScroll);
+            // window.removeEventListener('mousedown', handleScrollWheelDown);
 
             if (animationFrameId !== undefined) {
                 cancelAnimationFrame(animationFrameId);
@@ -559,7 +509,7 @@ const WebGPUCanvas: React.FC = () => {
                 <a style={{
                     display: 'block',
                     textAlign: 'left',
-                }}>{command}</a>
+                }}>Command: {command}</a>
             </div>
         </div>
     );
