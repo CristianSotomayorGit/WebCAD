@@ -1,0 +1,4 @@
+point zoom scaling
+grid zoom scaling
+more drawing tools
+research dxf

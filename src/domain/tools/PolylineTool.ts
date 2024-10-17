@@ -50,6 +50,8 @@ export class PolylineTool implements Tool {
 
             const worldPosition = this.renderer.screenToWorld(x, y);
 
+
+
             this.currentPolyline.updateLastPoint(worldPosition.x, worldPosition.y);
         }
     }
