@@ -15,7 +15,6 @@ const WebGPUCanvas: React.FC = () => {
   useEffect(() => {
     const initRenderer = async () => {
 
-      console.log('hello')
       if (canvasRef.current) {
         rendererRef.current = new Renderer(
           canvasRef.current,
@@ -76,9 +75,14 @@ const handleKeyDown = (event: KeyboardEvent) => {
     setActiveToolName('Select');
     toolManagerRef.current?.setActiveTool('Select');
   } else if (event.key === 'p' || event.key === 'P') {
-    setActiveToolName('Point');
-    toolManagerRef.current?.setActiveTool('Point');
+    setActiveToolName('Polyline');
+    toolManagerRef.current?.setActiveTool('Polyline');
   }
+
+// } else if (event.key === 'p' || event.key === 'P') {
+//   setActiveToolName('Point');
+//   toolManagerRef.current?.setActiveTool('Point');
+// }
 };
 
   const handleWheel = (event: WheelEvent) => {
