@@ -1,4 +1,4 @@
-// src/domain/tools/LineTool.ts
+// LineTool.ts
 
 import { Tool } from './Tool';
 import { EntityManager } from '../managers/EntityManager';
@@ -12,6 +12,7 @@ export class LineTool implements Tool {
   private isDrawing = false;
   private startVertex: { x: number; y: number } | null = null;
   private currentLine: Line | null = null;
+  private temporaryEndPoint: Point | null = null;
   private constraintManager: ConstraintManager;
   private isOrthoConstraintActive = false;
 
@@ -31,6 +32,7 @@ export class LineTool implements Tool {
       const worldPosition = this.renderer.screenToWorld(x, y);
 
       if (!this.isDrawing) {
+        // Start drawing
         this.startVertex = worldPosition;
         this.isDrawing = true;
 
@@ -46,31 +48,40 @@ export class LineTool implements Tool {
           this.renderer
         );
 
-        const line = new Line(
-          startPoint,
-          endPoint,
-          this.renderer
-        );
+        const line = new Line(startPoint, endPoint, this.renderer);
 
         this.entityManager.addEntity(line);
-        this.entityManager.addEntity(line.getStartpoint());
+        this.entityManager.addEntity(startPoint);
 
         this.currentLine = line;
       } else {
+        // Finish drawing
         if (this.currentLine) {
-          const endpoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
+          let endPointPosition = { x: worldPosition.x, y: worldPosition.y };
 
           // Apply constraints if any
           if (this.constraintManager.hasConstraints() && this.startVertex) {
-            const constrainedPoint = this.constraintManager.applyConstraints(
-              { x: endpoint.getX(), y: endpoint.getY() },
+            endPointPosition = this.constraintManager.applyConstraints(
+              endPointPosition,
               this.startVertex
             );
-            endpoint.setX(constrainedPoint.x);
-            endpoint.setY(constrainedPoint.y);
           }
 
+          const endpoint = new Point(
+            endPointPosition.x,
+            endPointPosition.y,
+            this.renderer
+          );
+
           this.currentLine.setEndPoint(endpoint);
+
+          // Remove temporary endpoint
+          if (this.temporaryEndPoint) {
+            this.entityManager.removeTemporaryEntity(this.temporaryEndPoint);
+            this.temporaryEndPoint = null;
+          }
+
+          // Add finalized endpoint as a permanent entity
           this.entityManager.addEntity(endpoint);
 
           this.currentLine = null;
@@ -88,21 +99,32 @@ export class LineTool implements Tool {
       const y = event.clientY - canvasRect.top;
       const worldPosition = this.renderer.screenToWorld(x, y);
 
-      let endPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
+      let endPointPosition = { x: worldPosition.x, y: worldPosition.y };
 
       // Apply constraints if any
       if (this.constraintManager.hasConstraints() && this.startVertex) {
-        const constrainedPoint = this.constraintManager.applyConstraints(
-          { x: endPoint.getX(), y: endPoint.getY() },
+        endPointPosition = this.constraintManager.applyConstraints(
+          endPointPosition,
           this.startVertex
         );
-        endPoint.setX(constrainedPoint.x);
-        endPoint.setY(constrainedPoint.y);
       }
+
+      const endPoint = new Point(
+        endPointPosition.x,
+        endPointPosition.y,
+        this.renderer
+      );
 
       this.currentLine.setEndPoint(endPoint);
 
-      // Update temporary entities
+      // Update temporary endpoint entity
+      if (this.temporaryEndPoint) {
+        this.entityManager.removeTemporaryEntity(this.temporaryEndPoint);
+      }
+      this.temporaryEndPoint = endPoint;
+      this.entityManager.addTemporaryEntity(this.temporaryEndPoint);
+
+      // Update temporary line entity
       this.entityManager.addTemporaryEntity(this.currentLine);
       this.entityManager.removeTemporaryEntity(this.currentLine);
     }
@@ -116,9 +138,12 @@ export class LineTool implements Tool {
     if (event.key === 'Escape' && this.isDrawing) {
       if (this.currentLine) {
         this.entityManager.removeEntity(this.currentLine);
-        this.entityManager.removeEntity(this.currentLine.getEndpoint());
         this.entityManager.removeEntity(this.currentLine.getStartpoint());
         this.currentLine = null;
+      }
+      if (this.temporaryEndPoint) {
+        this.entityManager.removeTemporaryEntity(this.temporaryEndPoint);
+        this.temporaryEndPoint = null;
       }
       this.isDrawing = false;
       this.startVertex = null;
