@@ -12,7 +12,6 @@ export class PointTool implements Tool {
 
   public onMouseDown(event: MouseEvent): void {
 
-    console.log('mogger!')
     if (event.button === 0) { // Left mouse button
       const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
       const x = event.clientX - canvasRect.left;
@@ -33,5 +32,9 @@ export class PointTool implements Tool {
 
   public onMouseUp(event: MouseEvent): void {
     // No action needed for mouse up in this tool
+  }
+
+  public onKeyDown(event: KeyboardEvent): void {
+    
   }
 }

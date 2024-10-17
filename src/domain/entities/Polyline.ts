@@ -53,4 +53,8 @@ export class Polyline {
     }
     return points;
   }
+
+  public removeLastLine() {
+    this.lines.pop();
+  }
 }

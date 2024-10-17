@@ -52,4 +52,5 @@ export class ToolManager {
   public getZoomTool(): ZoomTool {
     return this.zoomTool;
   }
+
 }

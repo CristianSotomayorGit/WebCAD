@@ -83,6 +83,8 @@ export class LineTool implements Tool {
     if (event.key === 'Escape' && this.isDrawing) {
       if (this.currentLine) {
         this.entityManager.removeEntity(this.currentLine);
+        this.entityManager.removeEntity(this.currentLine.getEndpoint());
+        this.entityManager.removeEntity(this.currentLine.getStartpoint());
         this.currentLine = null;
       }
       this.isDrawing = false;

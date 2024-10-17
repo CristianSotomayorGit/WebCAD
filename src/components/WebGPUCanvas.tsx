@@ -68,6 +68,7 @@ const WebGPUCanvas: React.FC = () => {
   };
 
 const handleKeyDown = (event: KeyboardEvent) => {
+
   if (event.key === 'l' || event.key === 'L') {
     setActiveToolName('Line');
     toolManagerRef.current?.setActiveTool('Line');
@@ -77,6 +78,8 @@ const handleKeyDown = (event: KeyboardEvent) => {
   } else if (event.key === 'p' || event.key === 'P') {
     setActiveToolName('Polyline');
     toolManagerRef.current?.setActiveTool('Polyline');
+  } else {
+    toolManagerRef.current?.getActiveTool().onKeyDown(event);
   }
 
 // } else if (event.key === 'p' || event.key === 'P') {

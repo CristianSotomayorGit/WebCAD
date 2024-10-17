@@ -31,12 +31,12 @@ export class PolylineTool implements Tool {
                 polyline.addPoint(newPoint);
 
                 this.entityManager.addEntity(polyline);
-                this
 
                 this.currentPolyline = polyline;
             } else {
                 if (this.currentPolyline) {
                     this.currentPolyline.addPoint(newPoint);
+
                 }
             }
         }
@@ -63,10 +63,14 @@ export class PolylineTool implements Tool {
             if (event.key === 'Escape') {
                 if (this.currentPolyline) {
                     this.entityManager.removeEntity(this.currentPolyline);
+                    for (const point of this.currentPolyline.getPoints()) {
+                        this.entityManager.removeEntity(point);
+                    }
                     this.currentPolyline = null;
                 }
                 this.isDrawing = false;
             } else if (event.key === 'Enter' || event.key === 'Return' || event.key === ' ') {
+                this.currentPolyline?.removeLastLine();
                 this.isDrawing = false;
                 this.currentPolyline = null;
             }
