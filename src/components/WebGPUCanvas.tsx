@@ -1,5 +1,3 @@
-// src/components/WebGPUCanvas.tsx
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Renderer } from '../infrastructure/rendering/Renderer';
 import { EntityManager } from '../domain/managers/EntityManager';
@@ -31,9 +29,6 @@ const WebGPUCanvas: React.FC = () => {
           rendererRef.current
         );
 
-        // panToolRef.current = new PanTool(rendererRef.current);
-
-        // Set up event listeners
         canvasRef.current.addEventListener('mousedown', handleMouseDown);
         canvasRef.current.addEventListener('mousemove', handleMouseMove);
         canvasRef.current.addEventListener('mouseup', handleMouseUp);
@@ -46,7 +41,7 @@ const WebGPUCanvas: React.FC = () => {
 
     return () => {
       if (rendererRef.current) {
-        rendererRef.current.dispose(); // Dispose renderer to remove event listeners
+        rendererRef.current.dispose(); 
       }
       if (canvasRef.current) {
         canvasRef.current.removeEventListener('mousedown', handleMouseDown);
@@ -65,7 +60,7 @@ const WebGPUCanvas: React.FC = () => {
 
   const handleMouseMove = (event: MouseEvent) => {
     toolManagerRef.current?.getPanTool().onMouseMove(event);
-    // toolManagerRef.current?.getActiveTool().onMouseMove(event);
+    toolManagerRef.current?.getActiveTool().onMouseMove(event);
   };
 
   const handleMouseUp = (event: MouseEvent) => {

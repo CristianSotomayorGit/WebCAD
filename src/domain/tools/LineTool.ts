@@ -1,5 +1,3 @@
-// src/domain/tools/LineTool.ts
-
 import { Tool } from './Tool';
 import { EntityManager } from '../managers/EntityManager';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
@@ -17,16 +15,14 @@ export class LineTool implements Tool {
   ) { }
 
   public onMouseDown(event: MouseEvent): void {
-    if (event.button === 0) { // Left mouse button
+    if (event.button === 0) {
       const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
       const x = event.clientX - canvasRect.left;
       const y = event.clientY - canvasRect.top;
 
-      // Convert screen coordinates to world coordinates
       const worldPosition = this.renderer.screenToWorld(x, y);
 
       if (!this.isDrawing) {
-        // Start drawing a new line
         this.startVertex = worldPosition;
         this.isDrawing = true;
 
@@ -42,7 +38,6 @@ export class LineTool implements Tool {
           this.renderer
         );
 
-        // Create the line and add it to the entity manager
         const line = new Line(
           startPoint,
           endPoint,
@@ -51,19 +46,14 @@ export class LineTool implements Tool {
 
         this.entityManager.addEntity(line);
         this.entityManager.addEntity(line.getStartpoint());
-        // this.entityManager.addEntity(line.getEndpoint());
 
-        // Keep reference to the current line being drawn
         this.currentLine = line;
       } else {
-        // Finish drawing the line
         if (this.currentLine) {
-          // Update the end point of the line
           const endpoint = new Point(worldPosition.x, worldPosition.y, this.renderer)
           this.currentLine.setEndPoint(endpoint);
           this.entityManager.addEntity(endpoint);
 
-          // Reset currentLine
           this.currentLine = null;
         }
         this.isDrawing = false;
@@ -77,13 +67,11 @@ export class LineTool implements Tool {
       const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
       const x = event.clientX - canvasRect.left;
       const y = event.clientY - canvasRect.top;
-
-      // Convert screen coordinates to world coordinates
       const worldPosition = this.renderer.screenToWorld(x, y);
-
       const endPoint = new Point(worldPosition.x, worldPosition.y, this.renderer)
-      // Update the end point of the line being drawn
       this.currentLine.setEndPoint(endPoint);
+      this.entityManager.addTemporaryEntity(this.currentLine)
+      this.entityManager.removeTemporaryEntity(this.currentLine)
     }
   }
 
@@ -93,9 +81,7 @@ export class LineTool implements Tool {
 
   public onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Escape' && this.isDrawing) {
-      // Cancel drawing
       if (this.currentLine) {
-        // Remove the line from the entity manager
         this.entityManager.removeEntity(this.currentLine);
         this.currentLine = null;
       }
