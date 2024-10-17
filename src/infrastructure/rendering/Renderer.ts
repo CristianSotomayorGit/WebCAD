@@ -457,6 +457,8 @@ import { LineShader } from '../../shaders/LineShader';
 import { PointShader } from '../../shaders/PointShader';
 import { Point } from '../../domain/entities/Point';
 import { Line } from '../../domain/entities/Line';
+import { PolylineShader } from '../../shaders/PolylineShader';
+import { Polyline } from '../../domain/entities/Polyline';
 
 export class Renderer {
   private device!: GPUDevice;
@@ -465,6 +467,7 @@ export class Renderer {
   private gridPipeline!: GPURenderPipeline;
   private pointPipeline!: GPURenderPipeline;
   private linePipeline!: GPURenderPipeline;
+  private polylinePipeline!: GPURenderPipeline;
   private tempLinePipeline!: GPURenderPipeline;
   private bindGroup!: GPUBindGroup;
   private cameraBuffer!: GPUBuffer;
@@ -737,6 +740,53 @@ export class Renderer {
       },
     });
 
+    // When creating the pipeline in Renderer.ts
+    const polylineVertexShaderModule = this.device.createShaderModule({
+      code: PolylineShader.VERTEX,
+    });
+
+    const polylineFragmentShaderModule = this.device.createShaderModule({
+      code: PolylineShader.FRAGMENT,
+    });
+
+    const polylinePipelineLayout = this.device.createPipelineLayout({
+      bindGroupLayouts: [bindGroupLayout],
+    });
+
+    this.polylinePipeline = this.device.createRenderPipeline({
+      layout: polylinePipelineLayout,
+      vertex: {
+        module: polylineVertexShaderModule, 
+        entryPoint: 'vs_main',
+        buffers: [
+          {
+            arrayStride: 8, // 2 floats x 4 bytes per float
+            attributes: [
+              {
+                shaderLocation: 0,
+                offset: 0,
+                format: 'float32x2',
+              },
+            ],
+          },
+        ],
+      },
+      fragment: {
+        module: polylineFragmentShaderModule,
+        entryPoint: 'fs_main',
+        targets: [
+          {
+            format: this.format,
+          },
+        ],
+      },
+      primitive: {
+        topology: 'line-strip', // Use 'line-strip' for polylines
+        stripIndexFormat: undefined,
+      },
+    });
+
+
     // Setup temporary line pipeline
     const tempLineVertexShaderModule = this.device.createShaderModule({
       code: LineShader.VERTEX,
@@ -868,22 +918,22 @@ export class Renderer {
     const entities = this.entityManager.getEntities();
     const tempEntities = this.entityManager.getTemporaryEntities();
 
-    // Draw perm lines
-    let count2 = 2;
     entities.forEach((entity) => {
       if (entity instanceof Line) {
         entity.draw(renderPass);
-        count2++
       }
     });
 
-    let count = 0
-    // Draw temp entities
     tempEntities.forEach((entity) => {
       if (entity instanceof Line) {
-        console.log(count)
         entity.draw(renderPass);
-        count++
+      }
+    });
+
+    entities.forEach((entity) => {
+      if (entity instanceof Polyline) {
+
+        entity.draw(renderPass);
       }
     });
 
@@ -946,6 +996,10 @@ export class Renderer {
 
   public getTempLinePipeline(): GPURenderPipeline {
     return this.tempLinePipeline;
+  }
+
+  public getPolylinePipeline(): GPURenderPipeline {
+    return this.polylinePipeline;
   }
 
 }
