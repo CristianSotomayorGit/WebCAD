@@ -11,6 +11,7 @@ import { PointTool } from '../tools/PointTool';
 import { PolylineTool } from '../tools/PolylineTool';
 import { CircleTool } from '../tools/CircleTool';
 import { SplineTool } from '../tools/SplineTool';
+import { RectangleTool  } from '../tools/RectangleTool';
 
 export class ToolManager {
   private activeTool: Tool;
@@ -26,6 +27,7 @@ export class ToolManager {
     this.tools['Polyline'] = new PolylineTool(entityManager, renderer);
     this.tools['Circle'] = new CircleTool(entityManager,renderer)
     this.tools['Spline'] = new SplineTool(entityManager, renderer);
+    this.tools['Rectangle'] = new RectangleTool(entityManager, renderer);
 
     this.activeTool = this.tools['Select'];
 

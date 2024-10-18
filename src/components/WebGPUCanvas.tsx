@@ -81,9 +81,12 @@ const WebGPUCanvas: React.FC = () => {
     } else if (event.key === 'c' || event.key === 'C') {
       setActiveToolName('Circle');
       toolManagerRef.current?.setActiveTool('Circle');
-    } else if (event.key === 's' || event.key === 's') {
+    } else if (event.key === 's' || event.key === 'S') {
       setActiveToolName('Spline');
       toolManagerRef.current?.setActiveTool('Spline');
+    } else if (event.key === 'r' || event.key === 'R') {
+      setActiveToolName('Rectangle');
+      toolManagerRef.current?.setActiveTool('Rectangle');
     } else {
       toolManagerRef.current?.getActiveTool().onKeyDown(event);
     }
