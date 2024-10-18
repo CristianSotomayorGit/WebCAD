@@ -40,7 +40,7 @@ const WebGPUCanvas: React.FC = () => {
 
     return () => {
       if (rendererRef.current) {
-        rendererRef.current.dispose(); 
+        rendererRef.current.dispose();
       }
       if (canvasRef.current) {
         canvasRef.current.removeEventListener('mousedown', handleMouseDown);
@@ -67,26 +67,27 @@ const WebGPUCanvas: React.FC = () => {
     // toolManagerRef.current?.getActiveTool().onMouseUp(event);
   };
 
-const handleKeyDown = (event: KeyboardEvent) => {
+  const handleKeyDown = (event: KeyboardEvent) => {
 
-  if (event.key === 'l' || event.key === 'L') {
-    setActiveToolName('Line');
-    toolManagerRef.current?.setActiveTool('Line');
-  } else if (event.key === 's' || event.key === 'S') {
-    setActiveToolName('Select');
-    toolManagerRef.current?.setActiveTool('Select');
-  } else if (event.key === 'p' || event.key === 'P') {
-    setActiveToolName('Polyline');
-    toolManagerRef.current?.setActiveTool('Polyline');
-  } else {
-    toolManagerRef.current?.getActiveTool().onKeyDown(event);
-  }
+    if (event.key === 'l' || event.key === 'L') {
+      setActiveToolName('Line');
+      toolManagerRef.current?.setActiveTool('Line');
+    } else if (event.key === 's' || event.key === 'S') {
+      setActiveToolName('Select');
+      toolManagerRef.current?.setActiveTool('Select');
+    } else if (event.key === 'p' || event.key === 'P') {
+      setActiveToolName('Polyline');
+      toolManagerRef.current?.setActiveTool('Polyline');
+    } else {
+      toolManagerRef.current?.getActiveTool().onKeyDown(event);
+    }
 
-// } else if (event.key === 'p' || event.key === 'P') {
-//   setActiveToolName('Point');
-//   toolManagerRef.current?.setActiveTool('Point');
-// }
-};
+    // } else if (event.key === 'p' || event.key === 'P') {
+    //   setActiveToolName('Point');
+    //   toolManagerRef.current?.setActiveTool('Point');
+    // }
+  };
+
 
   const handleWheel = (event: WheelEvent) => {
     toolManagerRef.current?.getZoomTool().onWheelScroll(event);

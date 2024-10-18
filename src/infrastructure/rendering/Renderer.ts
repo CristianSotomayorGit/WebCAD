@@ -912,7 +912,7 @@ export class Renderer {
     // Draw Grid
     // renderPass.setPipeline(this.gridPipeline);
     // renderPass.setBindGroup(0, this.bindGroup);
-    this.grid.draw(renderPass);
+    // this.grid.draw(renderPass);
 
 
     const entities = this.entityManager.getEntities();

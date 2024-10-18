@@ -1,3 +1,5 @@
+// src/domain/entities/Line.ts
+
 import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { Point } from './Point';
 
@@ -14,14 +16,14 @@ export class Line {
   constructor(
     startPoint: Point,
     endPoint: Point,
-    renderer: Renderer,
+    renderer: Renderer
   ) {
     this.device = renderer.getDevice();
     this.renderer = renderer;
     this.pipeline = this.renderer.getLinePipeline();
     this.bindGroup = renderer.getBindGroup();
     this.startPoint = startPoint;
-    this.endPoint = endPoint
+    this.endPoint = endPoint;
     this.vertices = new Float32Array([
       this.startPoint.getX(), this.startPoint.getY(),
       this.endPoint.getX(), this.endPoint.getY(),
@@ -39,6 +41,11 @@ export class Line {
   }
 
   private updateVertexBuffer() {
+    this.vertices[0] = this.startPoint.getX();
+    this.vertices[1] = this.startPoint.getY();
+    this.vertices[2] = this.endPoint.getX();
+    this.vertices[3] = this.endPoint.getY();
+
     this.device.queue.writeBuffer(
       this.vertexBuffer,
       0,
@@ -52,9 +59,6 @@ export class Line {
     this.endPoint.setX(endpoint.getX());
     this.endPoint.setY(endpoint.getY());
 
-    this.vertices[2] = this.endPoint.getX();
-    this.vertices[3] = this.endPoint.getY();
-
     this.updateVertexBuffer();
   }
 
@@ -65,11 +69,11 @@ export class Line {
     renderPass.draw(2);
   }
 
-  public getStartpoint() : Point {
-    return this.startPoint
+  public getStartpoint(): Point {
+    return this.startPoint;
   }
 
-  public getEndpoint() : Point {
-    return this.endPoint
+  public getEndpoint(): Point {
+    return this.endPoint;
   }
 }
