@@ -459,16 +459,21 @@ import { Point } from '../../domain/entities/Point';
 import { Line } from '../../domain/entities/Line';
 import { PolylineShader } from '../../shaders/PolylineShader';
 import { Polyline } from '../../domain/entities/Polyline';
+import { CircleShader } from '../../shaders/CircleShader';
+import { Circle } from '../../domain/entities/Circle';
 
 export class Renderer {
   private device!: GPUDevice;
   private context!: GPUCanvasContext;
   private format!: GPUTextureFormat;
+
   private gridPipeline!: GPURenderPipeline;
   private pointPipeline!: GPURenderPipeline;
   private linePipeline!: GPURenderPipeline;
   private polylinePipeline!: GPURenderPipeline;
+  private circlePipeline!: GPURenderPipeline;
   private tempLinePipeline!: GPURenderPipeline;
+
   private bindGroup!: GPUBindGroup;
   private cameraBuffer!: GPUBuffer;
   private camera: Camera;
@@ -756,7 +761,7 @@ export class Renderer {
     this.polylinePipeline = this.device.createRenderPipeline({
       layout: polylinePipelineLayout,
       vertex: {
-        module: polylineVertexShaderModule, 
+        module: polylineVertexShaderModule,
         entryPoint: 'vs_main',
         buffers: [
           {
@@ -830,6 +835,50 @@ export class Renderer {
         topology: 'line-list',
       },
     });
+
+    const circleVertexShaderModule = this.device.createShaderModule({
+      code: CircleShader.VERTEX,
+    });
+
+    const circleFragmentShaderModule = this.device.createShaderModule({
+      code: CircleShader.FRAGMENT,
+    });
+
+    const circlePipelineLayout = this.device.createPipelineLayout({
+      bindGroupLayouts: [bindGroupLayout],
+    });
+
+    this.circlePipeline = this.device.createRenderPipeline({
+      layout: circlePipelineLayout,
+      vertex: {
+        module: circleVertexShaderModule,
+        entryPoint: 'main',
+        buffers: [
+          {
+            arrayStride: 8, // 2 * sizeof(float)
+            attributes: [
+              {
+                shaderLocation: 0,
+                offset: 0,
+                format: 'float32x2',
+              },
+            ],
+          },
+        ],
+      },
+      fragment: {
+        module: circleFragmentShaderModule,
+        entryPoint: 'main',
+        targets: [
+          {
+            format: this.format,
+          },
+        ],
+      },
+      primitive: {
+        topology: 'triangle-strip',
+      },
+    });
   }
 
   private createBindGroupLayout(): GPUBindGroupLayout {
@@ -883,6 +932,67 @@ export class Renderer {
   public getDevice(): GPUDevice {
     return this.device;
   }
+
+
+
+  private startRendering() {
+    const renderLoop = () => {
+      this.render();
+      requestAnimationFrame(renderLoop);
+    };
+    requestAnimationFrame(renderLoop);
+  }
+
+  public dispose() {
+    window.removeEventListener('resize', this.resizeCanvas.bind(this));
+  }
+
+  public getCanvas(): HTMLCanvasElement {
+    return this.canvas;
+  }
+
+  public getBindGroup(): GPUBindGroup {
+    return this.bindGroup;
+  }
+
+  public screenToWorld(screenX: number, screenY: number): { x: number; y: number } {
+    const canvasRect = this.canvas.getBoundingClientRect();
+    const ndcX = (screenX / canvasRect.width) * 2 - 1;
+    const ndcY = -((screenY / canvasRect.height) * 2 - 1);
+
+    const zoom = this.camera.getZoom();
+    const offset = this.camera.getOffset();
+
+    const worldX = ndcX / zoom + offset.x;
+    const worldY = ndcY / zoom + offset.y;
+
+    return { x: worldX, y: worldY };
+  }
+
+  public getPointPipeline(): GPURenderPipeline {
+    return this.pointPipeline;
+  }
+
+  public getGridPipeline(): GPURenderPipeline {
+    return this.gridPipeline;
+  }
+
+  public getLinePipeline(): GPURenderPipeline {
+    return this.linePipeline;
+  }
+
+  public getTempLinePipeline(): GPURenderPipeline {
+    return this.tempLinePipeline;
+  }
+
+  public getPolylinePipeline(): GPURenderPipeline {
+    return this.polylinePipeline;
+  }
+
+  public getCirclePipeline(): GPURenderPipeline {
+    return this.circlePipeline;
+  }
+
 
   public render() {
     if (!this.device) throw new Error('Device not yet initialized')
@@ -944,63 +1054,15 @@ export class Renderer {
       }
     });
 
+
+    // Draw Points
+    entities.forEach((entity) => {
+      if (entity instanceof Circle) {
+        entity.draw(renderPass);
+      }
+    });
     renderPass.end();
     this.device.queue.submit([commandEncoder.finish()]);
   }
-
-  private startRendering() {
-    const renderLoop = () => {
-      this.render();
-      requestAnimationFrame(renderLoop);
-    };
-    requestAnimationFrame(renderLoop);
-  }
-
-  public dispose() {
-    window.removeEventListener('resize', this.resizeCanvas.bind(this));
-  }
-
-  public getCanvas(): HTMLCanvasElement {
-    return this.canvas;
-  }
-
-  public getBindGroup(): GPUBindGroup {
-    return this.bindGroup;
-  }
-
-  public screenToWorld(screenX: number, screenY: number): { x: number; y: number } {
-    const canvasRect = this.canvas.getBoundingClientRect();
-    const ndcX = (screenX / canvasRect.width) * 2 - 1;
-    const ndcY = -((screenY / canvasRect.height) * 2 - 1);
-
-    const zoom = this.camera.getZoom();
-    const offset = this.camera.getOffset();
-
-    const worldX = ndcX / zoom + offset.x;
-    const worldY = ndcY / zoom + offset.y;
-
-    return { x: worldX, y: worldY };
-  }
-
-  public getPointPipeline(): GPURenderPipeline {
-    return this.pointPipeline;
-  }
-
-  public getGridPipeline(): GPURenderPipeline {
-    return this.gridPipeline;
-  }
-
-  public getLinePipeline(): GPURenderPipeline {
-    return this.linePipeline;
-  }
-
-  public getTempLinePipeline(): GPURenderPipeline {
-    return this.tempLinePipeline;
-  }
-
-  public getPolylinePipeline(): GPURenderPipeline {
-    return this.polylinePipeline;
-  }
-
 }
 

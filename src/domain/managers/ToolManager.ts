@@ -9,6 +9,7 @@ import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { ZoomTool } from '../tools/ZoomTool';
 import { PointTool } from '../tools/PointTool';
 import { PolylineTool } from '../tools/PolylineTool';
+import { CircleTool } from '../tools/CircleTool';
 
 export class ToolManager {
   private activeTool: Tool;
@@ -22,6 +23,7 @@ export class ToolManager {
     this.tools['Line'] = new LineTool(entityManager, renderer);
     this.tools['Point'] = new PointTool(entityManager, renderer);
     this.tools['Polyline'] = new PolylineTool(entityManager, renderer);
+    this.tools['Circle'] = new CircleTool(entityManager,renderer)
 
 
     this.activeTool = this.tools['Select'];

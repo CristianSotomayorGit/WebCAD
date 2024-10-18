@@ -78,6 +78,9 @@ const WebGPUCanvas: React.FC = () => {
     } else if (event.key === 'p' || event.key === 'P') {
       setActiveToolName('Polyline');
       toolManagerRef.current?.setActiveTool('Polyline');
+    } else if (event.key === 'c' || event.key === 'C') {
+      setActiveToolName('Circle');
+      toolManagerRef.current?.setActiveTool('Circle');
     } else {
       toolManagerRef.current?.getActiveTool().onKeyDown(event);
     }
