@@ -72,15 +72,18 @@ const WebGPUCanvas: React.FC = () => {
     if (event.key === 'l' || event.key === 'L') {
       setActiveToolName('Line');
       toolManagerRef.current?.setActiveTool('Line');
-    } else if (event.key === 's' || event.key === 'S') {
-      setActiveToolName('Select');
-      toolManagerRef.current?.setActiveTool('Select');
+    // } else if (event.key === 's' || event.key === 'S') {
+    //   setActiveToolName('Select');
+    //   toolManagerRef.current?.setActiveTool('Select');
     } else if (event.key === 'p' || event.key === 'P') {
       setActiveToolName('Polyline');
       toolManagerRef.current?.setActiveTool('Polyline');
     } else if (event.key === 'c' || event.key === 'C') {
       setActiveToolName('Circle');
       toolManagerRef.current?.setActiveTool('Circle');
+    } else if (event.key === 's' || event.key === 's') {
+      setActiveToolName('Spline');
+      toolManagerRef.current?.setActiveTool('Spline');
     } else {
       toolManagerRef.current?.getActiveTool().onKeyDown(event);
     }
