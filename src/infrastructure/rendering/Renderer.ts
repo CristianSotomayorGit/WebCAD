@@ -13,6 +13,8 @@ import { Circle } from '../../domain/entities/Circle';
 import { Spline } from '../../domain/entities/Spline';
 import { RectangleShader } from '../../shaders/RectangleShader';
 import { Rectangle } from '../../domain/entities/Rectangle';
+import { PolygonShader } from '../../shaders/PolygonShader';
+import { Polygon } from '../../domain/entities/Polygon';
 
 export class Renderer {
   private device!: GPUDevice;
@@ -27,6 +29,7 @@ export class Renderer {
   private splinePipeline!: GPURenderPipeline;
   private rectanglePipeline!: GPURenderPipeline;
   private tempLinePipeline!: GPURenderPipeline;
+  private polygonPipeline!: GPURenderPipeline;
 
   private bindGroup!: GPUBindGroup;
   private cameraBuffer!: GPUBuffer;
@@ -521,7 +524,60 @@ export class Renderer {
         topology: 'line-list', // Changed to 'line-list' for outline
       },
     });
-  }
+
+      // Polygon Pipeline
+  const polygonVertexShaderModule = this.device.createShaderModule({
+    code: PolygonShader.VERTEX,
+  });
+
+  const polygonFragmentShaderModule = this.device.createShaderModule({
+    code: PolygonShader.FRAGMENT,
+  });
+
+  const polygonPipelineLayout = this.device.createPipelineLayout({
+    bindGroupLayouts: [bindGroupLayout],
+  });
+
+  this.polygonPipeline = this.device.createRenderPipeline({
+    layout: polygonPipelineLayout,
+    vertex: {
+      module: polygonVertexShaderModule,
+      entryPoint: 'main',
+      buffers: [
+        {
+          arrayStride: 2 * 4, // 2 floats per vertex (x, y)
+          attributes: [
+            {
+              shaderLocation: 0,
+              offset: 0,
+              format: 'float32x2',
+            },
+          ],
+        },
+      ],
+    },
+    fragment: {
+      module: polygonFragmentShaderModule,
+      entryPoint: 'main',
+      targets: [
+        {
+          format: this.format,
+        },
+      ],
+    },
+    primitive: {
+      topology: 'line-strip',
+      stripIndexFormat: undefined,
+      frontFace: 'ccw',
+      cullMode: 'none',
+    },
+    // If you have multisampling:
+    // multisample: {
+    //   count: this.sampleCount,
+    // },
+  });
+}
+  
 
   private createBindGroupLayout(): GPUBindGroupLayout {
     return this.device.createBindGroupLayout({
@@ -643,6 +699,10 @@ export class Renderer {
     return this.rectanglePipeline;
   }
 
+  public getPolygonPipeline(): GPURenderPipeline {
+    return this.polygonPipeline
+  }
+
 
   public render() {
     if (!this.device) throw new Error('Device not yet initialized')
@@ -724,8 +784,13 @@ export class Renderer {
       }
     });
 
+    entities.forEach((entity) => {
+      if (entity instanceof Polygon) {
+        entity.draw(renderPass);
+      }
+    });
+
     renderPass.end();
     this.device.queue.submit([commandEncoder.finish()]);
   }
 }
-
