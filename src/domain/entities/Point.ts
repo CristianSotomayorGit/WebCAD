@@ -67,21 +67,42 @@ export class Point {
     renderPass.drawIndexed(this.vertexCount);
   }
 
-  public getX() : number{
-    return this.x
+  public getX(): number {
+    return this.x;
   }
 
   public setX(x: number) {
-    this.x = x
+    this.x = x;
+    this.updateBuffers();
   }
 
-  public getY() : number{
-    return this.y
+  public getY(): number {
+    return this.y;
   }
 
   public setY(y: number) {
-    this.y = y
+    this.y = y;
+    this.updateBuffers();
   }
 
-  
+  private updateBuffers() {
+    // Recreate the vertex buffer with the new position
+    if (this.vertexBuffer) {
+      this.vertexBuffer.destroy();
+    }
+    // Recreate buffers
+    this.createBuffers();
+  }
+
+  public dispose() {
+    // Destroy GPU resources
+    if (this.vertexBuffer) {
+      this.vertexBuffer.destroy();
+      this.vertexBuffer = null as any;
+    }
+    if (this.indexBuffer) {
+      this.indexBuffer.destroy();
+      this.indexBuffer = null as any;
+    }
+  }
 }

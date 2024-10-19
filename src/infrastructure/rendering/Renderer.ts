@@ -11,6 +11,8 @@ import { Polyline } from '../../domain/entities/Polyline';
 import { CircleShader } from '../../shaders/CircleShader';
 import { Circle } from '../../domain/entities/Circle';
 import { Spline } from '../../domain/entities/Spline';
+import { RectangleShader } from '../../shaders/RectangleShader';
+import { Rectangle } from '../../domain/entities/Rectangle';
 
 export class Renderer {
   private device!: GPUDevice;
@@ -23,6 +25,7 @@ export class Renderer {
   private polylinePipeline!: GPURenderPipeline;
   private circlePipeline!: GPURenderPipeline;
   private splinePipeline!: GPURenderPipeline;
+  private rectanglePipeline!: GPURenderPipeline;
   private tempLinePipeline!: GPURenderPipeline;
 
   private bindGroup!: GPUBindGroup;
@@ -474,6 +477,50 @@ export class Renderer {
         topology: 'line-strip',
       }
     });
+
+    const rectangleVertexShaderModule = this.device.createShaderModule({
+      code: RectangleShader.VERTEX,
+    });
+
+    const rectangleFragmentShaderModule = this.device.createShaderModule({
+      code: RectangleShader.FRAGMENT,
+    });
+
+    const rectanglePipelineLayout = this.device.createPipelineLayout({
+      bindGroupLayouts: [bindGroupLayout],
+    });
+
+    this.rectanglePipeline = this.device.createRenderPipeline({
+      layout: rectanglePipelineLayout,
+      vertex: {
+        module: rectangleVertexShaderModule,
+        entryPoint: 'main',
+        buffers: [
+          {
+            arrayStride: 2 * 4, // 2 floats per vertex (x, y)
+            attributes: [
+              {
+                shaderLocation: 0,
+                offset: 0,
+                format: 'float32x2',
+              },
+            ],
+          },
+        ],
+      },
+      fragment: {
+        module: rectangleFragmentShaderModule,
+        entryPoint: 'main',
+        targets: [
+          {
+            format: this.format,
+          },
+        ],
+      },
+      primitive: {
+        topology: 'line-list', // Changed to 'line-list' for outline
+      },
+    });
   }
 
   private createBindGroupLayout(): GPUBindGroupLayout {
@@ -592,6 +639,10 @@ export class Renderer {
     return this.splinePipeline;
   }
 
+  public getRectanglePipeline(): GPURenderPipeline {
+    return this.rectanglePipeline;
+  }
+
 
   public render() {
     if (!this.device) throw new Error('Device not yet initialized')
@@ -663,6 +714,12 @@ export class Renderer {
 
     entities.forEach((entity) => {
       if (entity instanceof Spline) {
+        entity.draw(renderPass);
+      }
+    });
+
+    entities.forEach((entity) => {
+      if (entity instanceof Rectangle) {
         entity.draw(renderPass);
       }
     });
