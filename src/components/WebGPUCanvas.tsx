@@ -76,8 +76,8 @@ const WebGPUCanvas: React.FC = () => {
     //   setActiveToolName('Select');
     //   toolManagerRef.current?.setActiveTool('Select');
     } else if (event.key === 'p' || event.key === 'P') {
-      setActiveToolName('Polyline');
-      toolManagerRef.current?.setActiveTool('Polyline');
+      setActiveToolName('Polygon');
+      toolManagerRef.current?.setActiveTool('Polygon');
     } else if (event.key === 'c' || event.key === 'C') {
       setActiveToolName('Circle');
       toolManagerRef.current?.setActiveTool('Circle');
