@@ -6,16 +6,8 @@ research dxf
 Additional Drawing Tools
 1. Rectangle and Polygon Tools
 
-    Rectangle Tool: Allows users to draw rectangles by specifying two opposite corners.
-    Polygon Tool: Enables drawing of regular polygons (e.g., triangles, pentagons) by specifying the number of sides and radius.
-
-2. Arc and Ellipse Tools
-
-    Arc Tool: Provides the Additional Drawing Tools
-1. Rectangle and Polygon Tools
-
-    Rectangle Tool: Allows users to draw rectangles by specifying two opposite corners.
-    Polygon Tool: Enables drawing of regular polygons (e.g., triangles, pentagons) by specifying the number of sides and radius.
+    *Rectangle Tool: Allows users to draw rectangles by specifying two opposite corners.
+    *Polygon Tool: Enables drawing of regular polygons (e.g., triangles, pentagons) by specifying the number of sides and radius.
 
 2. Arc and Ellipse Tools
 

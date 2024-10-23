@@ -8,6 +8,7 @@ export class ZoomTool implements Tool {
 
     constructor(camera: Camera) {
         this.camera = camera;
+        this.setZoom(1);
     }
 
     public isActive(): boolean {
@@ -23,6 +24,10 @@ export class ZoomTool implements Tool {
         }
     }
 
+    public setZoom(zoom: number){
+        this.camera.setZoom(zoom);
+    }
+
     public onMouseDown(event: MouseEvent): void {
 
     }
@@ -32,5 +37,9 @@ export class ZoomTool implements Tool {
 
     public onMouseUp(event: MouseEvent): void {
 
+    }
+
+    public onKeyDown(event: KeyboardEvent): void {
+        
     }
 }

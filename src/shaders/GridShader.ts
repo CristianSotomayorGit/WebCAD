@@ -27,8 +27,9 @@
 export enum GridShader {
     FRAGMENT =
     `
+    
 @fragment
-fn fs_main(
+fn main(
     @location(0) fragPosition: vec2<f32>,
     @location(1) zoomFactor: f32
 ) -> @location(0) vec4<f32> {
@@ -68,7 +69,7 @@ struct VertexOutput {
 };
 
 @vertex
-fn vs_main(@location(0) position: vec2<f32>) -> VertexOutput {
+fn main(@location(0) position: vec2<f32>) -> VertexOutput {
   var out: VertexOutput;
   out.position = vec4<f32>(position, 0.0, 1.0);
   out.fragPosition = (position + uniforms.cameraOffset);

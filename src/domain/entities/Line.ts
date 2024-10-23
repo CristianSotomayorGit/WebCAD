@@ -76,4 +76,11 @@ export class Line {
   public getEndpoint(): Point {
     return this.endPoint;
   }
+
+  public getLength(): number {
+    const dx = this.endPoint.getX() - this.startPoint.getX();
+    const dy = this.endPoint.getY() - this.startPoint.getY();
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
 }

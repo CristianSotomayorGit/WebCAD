@@ -3,4 +3,5 @@
 
 export interface Entity {
   draw(renderPass: GPURenderPassEncoder, device: GPUDevice): void;
+  select(): void;
 }

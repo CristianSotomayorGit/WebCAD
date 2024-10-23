@@ -7,13 +7,6 @@ interface CommandToolbarProps {
 const CommandToolbar: React.FC<CommandToolbarProps> = ({ activeTool }) => {
   return (
     <div style={toolbarStyle}>
-      <div>
-        <button>Point</button>
-        <button>Line</button>
-        <button>Polyline</button>
-        <button>Circle</button>
-        <button>Arc</button>
-      </div>
       <span style={toolNameStyle}>{ `  Active Tool: ${activeTool}`}</span>
     </div>
   );
