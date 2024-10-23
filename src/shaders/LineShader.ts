@@ -1,11 +1,12 @@
 export enum LineShader {
     FRAGMENT =
     `
-    @fragment
-    fn main() -> @location(0) vec4<f32> {
-        // Cyan color for the lines being drawn
-        return vec4<f32>(0.0, 1.0, 1.0, 1.0);
-    }
+  @group(0) @binding(1) var<uniform> color: vec4<f32>; // Add color uniform
+
+  @fragment
+  fn main() -> @location(0) vec4<f32> {
+    return color; // Use the uniform color
+  }
 `,
     VERTEX= `
     struct Uniforms {

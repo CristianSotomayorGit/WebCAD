@@ -1,30 +1,32 @@
 export enum PointShader {
-    FRAGMENT =
-    `
-    @fragment
-    fn main() -> @location(0) vec4<f32> {
-      return vec4<f32>(0.5, 0.5, 0.5, 1.0); // Gray color
-    }
-`,
-    VERTEX = `
-    struct Uniforms {
-      cameraOffset: vec2<f32>,
-      zoomFactor: f32,
-      padding: f32,
-    }
+  FRAGMENT =
+  `
+  @group(0) @binding(1) var<uniform> color: vec4<f32>; // Add color uniform
 
-    @group(0) @binding(0) var<uniform> uniforms: Uniforms;
+  @fragment
+  fn main() -> @location(0) vec4<f32> {
+    return color; // Use the uniform color
+  }
+  `,
+  VERTEX = `
+  struct Uniforms {
+    cameraOffset: vec2<f32>,
+    zoomFactor: f32,
+    padding: f32,
+  }
 
-    struct VertexOutput {
-      @builtin(position) position: vec4<f32>,
-    }
+  @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 
-    @vertex
-    fn main(@location(0) position: vec2<f32>) -> VertexOutput {
-      var output: VertexOutput;
-      let pos = (position - uniforms.cameraOffset) * uniforms.zoomFactor;
-      output.position = vec4<f32>(pos, 0.0, 1.0);
-      return output;
-    }
-    `
+  struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+  }
+
+  @vertex
+  fn main(@location(0) position: vec2<f32>) -> VertexOutput {
+    var output: VertexOutput;
+    let pos = (position - uniforms.cameraOffset) * uniforms.zoomFactor;
+    output.position = vec4<f32>(pos, 0.0, 1.0);
+    return output;
+  }
+  `
 }

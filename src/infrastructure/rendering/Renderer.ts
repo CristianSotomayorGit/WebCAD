@@ -33,6 +33,7 @@ export class Renderer {
 
   private bindGroup!: GPUBindGroup;
   private cameraBuffer!: GPUBuffer;
+  private colorBuffer!: GPUBuffer;
   private camera: Camera;
   private grid!: Grid;
 
@@ -77,7 +78,7 @@ export class Renderer {
 
     // The context will be configured in resizeCanvas()
     this.setupPipelines();
-    this.setupCameraBuffer();
+    this.setupBuffers();
 
     this.grid = new Grid(this); // Initialize grid after device is ready
   }
@@ -129,7 +130,24 @@ export class Renderer {
       code: GridShader.FRAGMENT,
     });
 
-    const bindGroupLayout = this.createBindGroupLayout();
+    const bindGroupLayout = this.device.createBindGroupLayout({
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX, // Visibility for camera buffer
+          buffer: {
+            type: 'uniform',
+          },
+        },
+        {
+          binding: 1,
+          visibility: GPUShaderStage.FRAGMENT, // Visibility for color buffer
+          buffer: {
+            type: 'uniform',
+          },
+        },
+      ],
+    });
 
     const gridPipelineLayout = this.device.createPipelineLayout({
       bindGroupLayouts: [bindGroupLayout],
@@ -139,7 +157,7 @@ export class Renderer {
       layout: gridPipelineLayout,
       vertex: {
         module: gridVertexShaderModule,
-        entryPoint: 'vs_main',
+        entryPoint: 'main',
         buffers: [
           {
             arrayStride: 2 * 4, // 2 floats (x, y)
@@ -155,7 +173,7 @@ export class Renderer {
       },
       fragment: {
         module: gridFragmentShaderModule,
-        entryPoint: 'fs_main',
+        entryPoint: 'main',
         targets: [
           {
             format: this.format,
@@ -223,40 +241,57 @@ export class Renderer {
     });
 
     const pointPipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [bindGroupLayout],
+      bindGroupLayouts: [this.device.createBindGroupLayout({
+        entries: [
+          {
+            binding: 0,
+            visibility: GPUShaderStage.VERTEX, // Visibility for camera buffer
+            buffer: {
+              type: 'uniform',
+            },
+          },
+          {
+            binding: 1,
+            visibility: GPUShaderStage.FRAGMENT, // Visibility for color buffer
+            buffer: {
+              type: 'uniform',
+            },
+          },
+        ],
+      })],
     });
 
-    this.pointPipeline = this.device.createRenderPipeline({
-      layout: pointPipelineLayout,
-      vertex: {
-        module: pointVertexShaderModule,
-        entryPoint: 'main',
-        buffers: [
-          {
-            arrayStride: 2 * 4, // 2 floats (x, y)
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
-          },
-        ],
-      },
-      fragment: {
-        module: pointFragmentShaderModule,
-        entryPoint: 'main',
-        targets: [
-          {
-            format: this.format,
-          },
-        ],
-      },
-      primitive: {
-        topology: 'triangle-list',
-      },
-    });
+    // this.pointPipeline = this.device.createRenderPipeline({
+    //   layout: pointPipelineLayout,
+    //   vertex: {
+    //     module: pointVertexShaderModule,
+    //     entryPoint: 'main',
+    //     buffers: [
+    //       {
+    //         arrayStride: 2 * 4, // 2 floats (x, y)
+    //         attributes: [
+    //           {
+    //             shaderLocation: 0,
+    //             offset: 0,
+    //             format: 'float32x2',
+    //           },
+    //         ],
+    //       },
+    //     ],
+    //   },
+    //   fragment: {
+    //     module: pointFragmentShaderModule,
+    //     entryPoint: 'main',
+    //     targets: [
+    //       {
+    //         format: this.format,
+    //       },
+    //     ],
+    //   },
+    //   primitive: {
+    //     topology: 'triangle-list',
+    //   },
+    // });
 
     const lineVertexShaderModule = this.device.createShaderModule({
       code: LineShader.VERTEX,
@@ -319,7 +354,7 @@ export class Renderer {
       layout: polylinePipelineLayout,
       vertex: {
         module: polylineVertexShaderModule,
-        entryPoint: 'vs_main',
+        entryPoint: 'main',
         buffers: [
           {
             arrayStride: 8, // 2 floats x 4 bytes per float
@@ -335,7 +370,7 @@ export class Renderer {
       },
       fragment: {
         module: polylineFragmentShaderModule,
-        entryPoint: 'fs_main',
+        entryPoint: 'main',
         targets: [
           {
             format: this.format,
@@ -591,23 +626,37 @@ export class Renderer {
     });
   }
 
-  private setupCameraBuffer() {
+  private setupBuffers() {
     const cameraData = new Float32Array([0, 0, 1, 0]);//-4 1 1 
+    const initialColor = new Float32Array([1.0, 0.0, 0.0, 1.0])
     // const cameraData = new Float32Array([-1,1, 1, 0]);//-4 1 1 
 
     this.cameraBuffer = this.device.createBuffer({
       size: cameraData.byteLength,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
-    this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
 
-    this.bindGroup = this.device.createBindGroup({
+    this.colorBuffer = this.device.createBuffer({
+      size: initialColor.byteLength,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
+    this.device.queue.writeBuffer(this.colorBuffer, 0, initialColor);
+
+    return this.device.createBindGroup({
       layout: this.gridPipeline.getBindGroupLayout(0),
       entries: [
         {
           binding: 0,
           resource: {
             buffer: this.cameraBuffer,
+          },
+        },
+        {
+          binding: 1, // Assuming colorBuffer is the second binding
+          resource: {
+            buffer: this.colorBuffer, // Add the color buffer
           },
         },
       ],
@@ -630,6 +679,17 @@ export class Renderer {
   public getDevice(): GPUDevice {
     return this.device;
   }
+
+  public updateColorBuffer(newColor: Float32Array) {
+    // Ensure the new color is of the correct size (4 components for RGBA)
+    if (newColor.length !== 4) {
+      throw new Error("Color must be a Float32Array with 4 components (RGBA).");
+    }
+  
+    // Write the new color to the buffer
+    this.device.queue.writeBuffer(this.colorBuffer, 0, newColor);
+  }
+  
 
 
 
@@ -667,16 +727,16 @@ export class Renderer {
     return { x: worldX, y: worldY };
   }
 
-  public getPointPipeline(): GPURenderPipeline {
-    return this.pointPipeline;
-  }
+  // public getPointPipeline(): GPURenderPipeline {
+  //   return this.pointPipeline;
+  // }
 
   public getGridPipeline(): GPURenderPipeline {
     return this.gridPipeline;
   }
 
   public getLinePipeline(): GPURenderPipeline {
-    return this.linePipeline;
+    return  this.linePipeline;
   }
 
   public getTempLinePipeline(): GPURenderPipeline {
@@ -721,7 +781,7 @@ export class Renderer {
           view: textureView,
           clearValue: { r: 0.1294, g: 0.1569, b: 0.1882, a: 1 },
           loadOp: 'clear',
-          storeOp: 'store',
+          storeOp: 'store'
         },
       ],
     });
@@ -741,56 +801,69 @@ export class Renderer {
     entities.forEach((entity) => {
       if (entity instanceof Line) {
         entity.draw(renderPass);
+        console.log(entity.getLength())
+
       }
     });
 
-    tempEntities.forEach((entity) => {
-      if (entity instanceof Line) {
-        entity.draw(renderPass);
-      }
-    });
+    // tempEntities.forEach((entity) => {
+    //   if (entity instanceof Line) {
+    //     entity.draw(renderPass);
+    //   }
+    // });
 
-    entities.forEach((entity) => {
-      if (entity instanceof Polyline) {
+    // entities.forEach((entity) => {
+    //   if (entity instanceof Polyline) {
 
-        entity.draw(renderPass);
-      }
-    });
+    //     entity.draw(renderPass);
+    //   }
+    // });
 
-    // Draw Points
+    // // Draw Points
+  
     entities.forEach((entity) => {
       if (entity instanceof Point) {
+        this.updateColorBuffer(entity.getColor())
         entity.draw(renderPass);
       }
     });
 
 
-    // Draw Points
-    entities.forEach((entity) => {
-      if (entity instanceof Circle) {
-        entity.draw(renderPass);
-      }
-    });
+    // // Draw Points
+    // entities.forEach((entity) => {
+    //   if (entity instanceof Circle) {
+    //     entity.draw(renderPass);
+    //   }
+    // });
 
-    entities.forEach((entity) => {
-      if (entity instanceof Spline) {
-        entity.draw(renderPass);
-      }
-    });
+    // entities.forEach((entity) => {
+    //   if (entity instanceof Spline) {
+    //     entity.draw(renderPass);
+    //   }
+    // });
 
-    entities.forEach((entity) => {
-      if (entity instanceof Rectangle) {
-        entity.draw(renderPass);
-      }
-    });
+    // entities.forEach((entity) => {
+    //   if (entity instanceof Rectangle) {
+    //     entity.draw(renderPass);
+    //   }
+    // });
 
-    entities.forEach((entity) => {
-      if (entity instanceof Polygon) {
-        entity.draw(renderPass);
-      }
-    });
+    // entities.forEach((entity) => {
+    //   if (entity instanceof Polygon) {
+    //     entity.draw(renderPass);
+    //   }
+    // });
+
+    // entities.forEach((entity) => {
+    //     entity.draw(renderPass);
+    //     console.log()
+    // });
 
     renderPass.end();
     this.device.queue.submit([commandEncoder.finish()]);
+  }
+
+  public getFormat(): GPUTextureFormat {
+    return this.format;
   }
 }
