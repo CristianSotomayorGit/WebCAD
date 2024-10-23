@@ -228,50 +228,50 @@ export class Renderer {
     //     topology: 'line-list',
     //   },
     // });
-
+ 
     // Setup temporary line pipeline
-    const tempLineVertexShaderModule = this.device.createShaderModule({
-      code: LineShader.VERTEX,
-    });
+    // const tempLineVertexShaderModule = this.device.createShaderModule({
+    //   code: LineShader.VERTEX,
+    // });
 
-    const tempLineFragmentShaderModule = this.device.createShaderModule({
-      code: LineShader.FRAGMENT,
-    });
+    // const tempLineFragmentShaderModule = this.device.createShaderModule({
+    //   code: LineShader.FRAGMENT,
+    // });
 
-    const tempLinePipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [bindGroupLayout],
-    });
-    this.tempLinePipeline = this.device.createRenderPipeline({
-      layout: tempLinePipelineLayout,
-      vertex: {
-        module: tempLineVertexShaderModule,
-        entryPoint: 'main',
-        buffers: [
-          {
-            arrayStride: 2 * 4,
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
-          },
-        ],
-      },
-      fragment: {
-        module: tempLineFragmentShaderModule,
-        entryPoint: 'main',
-        targets: [
-          {
-            format: this.format,
-          },
-        ],
-      },
-      primitive: {
-        topology: 'line-list',
-      },
-    });
+    // const tempLinePipelineLayout = this.device.createPipelineLayout({
+    //   bindGroupLayouts: [bindGroupLayout],
+    // });
+    // this.tempLinePipeline = this.device.createRenderPipeline({
+    //   layout: tempLinePipelineLayout,
+    //   vertex: {
+    //     module: tempLineVertexShaderModule,
+    //     entryPoint: 'main',
+    //     buffers: [
+    //       {
+    //         arrayStride: 2 * 4,
+    //         attributes: [
+    //           {
+    //             shaderLocation: 0,
+    //             offset: 0,
+    //             format: 'float32x2',
+    //           },
+    //         ],
+    //       },
+    //     ],
+    //   },
+    //   fragment: {
+    //     module: tempLineFragmentShaderModule,
+    //     entryPoint: 'main',
+    //     targets: [
+    //       {
+    //         format: this.format,
+    //       },
+    //     ],
+    //   },
+    //   primitive: {
+    //     topology: 'line-list',
+    //   },
+    // });
 
     const circleVertexShaderModule = this.device.createShaderModule({
       code: CircleShader.VERTEX,
