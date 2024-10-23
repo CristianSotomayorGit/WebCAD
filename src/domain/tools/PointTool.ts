@@ -21,7 +21,7 @@ export class PointTool implements Tool {
       const worldPosition = this.renderer.screenToWorld(x, y);
 
       // Create a new point at the world position
-      const point = new Point(worldPosition.x, worldPosition.y, new Float32Array([0.2, 0.2, 0.2, 1.0]), this.renderer);
+      const point = new Point(worldPosition.x, worldPosition.y, this.renderer);
       this.entityManager.addEntity(point);
     }
   }

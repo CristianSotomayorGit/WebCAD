@@ -16,13 +16,12 @@ export class Point {
   constructor(
     private x: number,
     private y: number,
-    color: Float32Array,
     private renderer: Renderer
   ) {
+    this.color = new Float32Array([0.5, 0.5, 0.5, 1.0]);
     this.device = renderer.getDevice();
     this.pipeline = this.setupPipeline();
     this.bindGroup = this.setupBindGroup();
-    this.color = color;
     this.createBuffers();
   }
 
@@ -93,7 +92,7 @@ export class Point {
 
   private setupBindGroup(): GPUBindGroup {
     const cameraData = new Float32Array([0, 0, 1, 0]);//-4 1 1 
-    const initialColor = new Float32Array([1.0, 0.0, 0.0, 1.0])
+    const initialColor = this.color;
     // const cameraData = new Float32Array([-1,1, 1, 0]);//-4 1 1 
 
     this.cameraBuffer = this.device.createBuffer({
