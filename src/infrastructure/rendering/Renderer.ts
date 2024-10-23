@@ -2,19 +2,7 @@ import { EntityManager } from '../../domain/managers/EntityManager';
 import { Camera } from '../../domain/Camera';
 import { Grid } from '../../domain/entities/Grid';
 import { GridShader } from '../../shaders/GridShader';
-import { LineShader } from '../../shaders/LineShader';
-import { PointShader } from '../../shaders/PointShader';
-import { Point } from '../../domain/entities/Point';
 import { Line } from '../../domain/entities/Line';
-import { PolylineShader } from '../../shaders/PolylineShader';
-import { Polyline } from '../../domain/entities/Polyline';
-import { CircleShader } from '../../shaders/CircleShader';
-import { Circle } from '../../domain/entities/Circle';
-import { Spline } from '../../domain/entities/Spline';
-import { RectangleShader } from '../../shaders/RectangleShader';
-import { Rectangle } from '../../domain/entities/Rectangle';
-import { PolygonShader } from '../../shaders/PolygonShader';
-import { Polygon } from '../../domain/entities/Polygon';
 
 export class Renderer {
   private device!: GPUDevice;
@@ -22,20 +10,12 @@ export class Renderer {
   private format!: GPUTextureFormat;
 
   private gridPipeline!: GPURenderPipeline;
-  private pointPipeline!: GPURenderPipeline;
-  private linePipeline!: GPURenderPipeline;
-  private polylinePipeline!: GPURenderPipeline;
-  private circlePipeline!: GPURenderPipeline;
-  private splinePipeline!: GPURenderPipeline;
-  private rectanglePipeline!: GPURenderPipeline;
-  private tempLinePipeline!: GPURenderPipeline;
-  private polygonPipeline!: GPURenderPipeline;
 
   private bindGroup!: GPUBindGroup;
   private cameraBuffer!: GPUBuffer;
   private colorBuffer!: GPUBuffer;
   private camera: Camera;
-  private grid!: Grid;
+  // private grid!: Grid;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -80,7 +60,7 @@ export class Renderer {
     this.setupPipelines();
     this.setupBuffers();
 
-    this.grid = new Grid(this); // Initialize grid after device is ready
+    // this.grid = new Grid(this); // Initialize grid after device is ready
   }
 
   public resizeCanvas() {
@@ -228,165 +208,20 @@ export class Renderer {
     //     topology: 'line-list',
     //   },
     // });
- 
-    // Setup temporary line pipeline
-    // const tempLineVertexShaderModule = this.device.createShaderModule({
-    //   code: LineShader.VERTEX,
-    // });
-
-    const splineVertexShaderModule = this.device.createShaderModule({
-      code: CircleShader.VERTEX,
-    });
-
-    const splineFragmentShaderModule = this.device.createShaderModule({
-      code: CircleShader.FRAGMENT,
-    });
-
-    const splinePipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [bindGroupLayout],
-    });
-
-    this.splinePipeline = this.device.createRenderPipeline({
-      layout: splinePipelineLayout,
-      vertex: {
-        module: splineVertexShaderModule,
-        entryPoint: 'main',
-        buffers: [
-          {
-            arrayStride: 8, // 2 floats (x, y)
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
-          },
-        ],
-      },
-      fragment: {
-        module: splineFragmentShaderModule,
-        entryPoint: 'main',
-        targets: [
-          {
-            format: this.format,
-          },
-        ],
-      },
-      primitive: {
-        topology: 'line-strip',
-      }
-    });
-
-    const rectangleVertexShaderModule = this.device.createShaderModule({
-      code: RectangleShader.VERTEX,
-    });
-
-    const rectangleFragmentShaderModule = this.device.createShaderModule({
-      code: RectangleShader.FRAGMENT,
-    });
-
-    const rectanglePipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [bindGroupLayout],
-    });
-
-    this.rectanglePipeline = this.device.createRenderPipeline({
-      layout: rectanglePipelineLayout,
-      vertex: {
-        module: rectangleVertexShaderModule,
-        entryPoint: 'main',
-        buffers: [
-          {
-            arrayStride: 2 * 4, // 2 floats per vertex (x, y)
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
-          },
-        ],
-      },
-      fragment: {
-        module: rectangleFragmentShaderModule,
-        entryPoint: 'main',
-        targets: [
-          {
-            format: this.format,
-          },
-        ],
-      },
-      primitive: {
-        topology: 'line-list', // Changed to 'line-list' for outline
-      },
-    });
-
-      // Polygon Pipeline
-  const polygonVertexShaderModule = this.device.createShaderModule({
-    code: PolygonShader.VERTEX,
-  });
-
-  const polygonFragmentShaderModule = this.device.createShaderModule({
-    code: PolygonShader.FRAGMENT,
-  });
-
-  const polygonPipelineLayout = this.device.createPipelineLayout({
-    bindGroupLayouts: [bindGroupLayout],
-  });
-
-  this.polygonPipeline = this.device.createRenderPipeline({
-    layout: polygonPipelineLayout,
-    vertex: {
-      module: polygonVertexShaderModule,
-      entryPoint: 'main',
-      buffers: [
-        {
-          arrayStride: 2 * 4, // 2 floats per vertex (x, y)
-          attributes: [
-            {
-              shaderLocation: 0,
-              offset: 0,
-              format: 'float32x2',
-            },
-          ],
-        },
-      ],
-    },
-    fragment: {
-      module: polygonFragmentShaderModule,
-      entryPoint: 'main',
-      targets: [
-        {
-          format: this.format,
-        },
-      ],
-    },
-    primitive: {
-      topology: 'line-strip',
-      stripIndexFormat: undefined,
-      frontFace: 'ccw',
-      cullMode: 'none',
-    },
-    // If you have multisampling:
-    // multisample: {
-    //   count: this.sampleCount,
-    // },
-  });
-}
-  
-
-  private createBindGroupLayout(): GPUBindGroupLayout {
-    return this.device.createBindGroupLayout({
-      entries: [
-        {
-          binding: 0,
-          visibility: GPUShaderStage.VERTEX,
-          buffer: { type: 'uniform' },
-        },
-      ],
-    });
   }
+
+
+  // private createBindGroupLayout(): GPUBindGroupLayout {
+  //   return this.device.createBindGroupLayout({
+  //     entries: [
+  //       {
+  //         binding: 0,
+  //         visibility: GPUShaderStage.VERTEX,
+  //         buffer: { type: 'uniform' },
+  //       },
+  //     ],
+  //   });
+  // }
 
   private setupBuffers() {
     const cameraData = new Float32Array([0, 0, 1, 0]);//-4 1 1 
@@ -447,11 +282,11 @@ export class Renderer {
     if (newColor.length !== 4) {
       throw new Error("Color must be a Float32Array with 4 components (RGBA).");
     }
-  
+
     // Write the new color to the buffer
     this.device.queue.writeBuffer(this.colorBuffer, 0, newColor);
   }
-  
+
 
 
 
@@ -489,42 +324,9 @@ export class Renderer {
     return { x: worldX, y: worldY };
   }
 
-  // public getPointPipeline(): GPURenderPipeline {
-  //   return this.pointPipeline;
-  // }
-
   public getGridPipeline(): GPURenderPipeline {
     return this.gridPipeline;
   }
-
-  public getLinePipeline(): GPURenderPipeline {
-    return  this.linePipeline;
-  }
-
-  public getTempLinePipeline(): GPURenderPipeline {
-    return this.tempLinePipeline;
-  }
-
-  public getPolylinePipeline(): GPURenderPipeline {
-    return this.polylinePipeline;
-  }
-
-  public getCirclePipeline(): GPURenderPipeline {
-    return this.circlePipeline;
-  }
-
-  public getSplinePipeline(): GPURenderPipeline {
-    return this.splinePipeline;
-  }
-
-  public getRectanglePipeline(): GPURenderPipeline {
-    return this.rectanglePipeline;
-  }
-
-  public getPolygonPipeline(): GPURenderPipeline {
-    return this.polygonPipeline
-  }
-
 
   public render() {
     if (!this.device) throw new Error('Device not yet initialized')
@@ -583,7 +385,7 @@ export class Renderer {
     // });
 
     // // Draw Points
-  
+
     // entities.forEach((entity) => {
     //   if (entity instanceof Point) {
     //     this.updateColorBuffer(entity.getColor())
@@ -618,8 +420,8 @@ export class Renderer {
     // });
 
     entities.forEach((entity) => {
-        entity.draw(renderPass);
-        console.log()
+      entity.draw(renderPass);
+      console.log()
     });
 
     renderPass.end();
