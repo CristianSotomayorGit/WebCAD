@@ -228,55 +228,11 @@ export class Renderer {
     //     topology: 'line-list',
     //   },
     // });
- 
+
     // Setup temporary line pipeline
     // const tempLineVertexShaderModule = this.device.createShaderModule({
     //   code: LineShader.VERTEX,
     // });
-
-    const splineVertexShaderModule = this.device.createShaderModule({
-      code: CircleShader.VERTEX,
-    });
-
-    const splineFragmentShaderModule = this.device.createShaderModule({
-      code: CircleShader.FRAGMENT,
-    });
-
-    const splinePipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [bindGroupLayout],
-    });
-
-    this.splinePipeline = this.device.createRenderPipeline({
-      layout: splinePipelineLayout,
-      vertex: {
-        module: splineVertexShaderModule,
-        entryPoint: 'main',
-        buffers: [
-          {
-            arrayStride: 8, // 2 floats (x, y)
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
-          },
-        ],
-      },
-      fragment: {
-        module: splineFragmentShaderModule,
-        entryPoint: 'main',
-        targets: [
-          {
-            format: this.format,
-          },
-        ],
-      },
-      primitive: {
-        topology: 'line-strip',
-      }
-    });
 
     const rectangleVertexShaderModule = this.device.createShaderModule({
       code: RectangleShader.VERTEX,
@@ -322,59 +278,59 @@ export class Renderer {
       },
     });
 
-      // Polygon Pipeline
-  const polygonVertexShaderModule = this.device.createShaderModule({
-    code: PolygonShader.VERTEX,
-  });
+    // Polygon Pipeline
+    const polygonVertexShaderModule = this.device.createShaderModule({
+      code: PolygonShader.VERTEX,
+    });
 
-  const polygonFragmentShaderModule = this.device.createShaderModule({
-    code: PolygonShader.FRAGMENT,
-  });
+    const polygonFragmentShaderModule = this.device.createShaderModule({
+      code: PolygonShader.FRAGMENT,
+    });
 
-  const polygonPipelineLayout = this.device.createPipelineLayout({
-    bindGroupLayouts: [bindGroupLayout],
-  });
+    const polygonPipelineLayout = this.device.createPipelineLayout({
+      bindGroupLayouts: [bindGroupLayout],
+    });
 
-  this.polygonPipeline = this.device.createRenderPipeline({
-    layout: polygonPipelineLayout,
-    vertex: {
-      module: polygonVertexShaderModule,
-      entryPoint: 'main',
-      buffers: [
-        {
-          arrayStride: 2 * 4, // 2 floats per vertex (x, y)
-          attributes: [
-            {
-              shaderLocation: 0,
-              offset: 0,
-              format: 'float32x2',
-            },
-          ],
-        },
-      ],
-    },
-    fragment: {
-      module: polygonFragmentShaderModule,
-      entryPoint: 'main',
-      targets: [
-        {
-          format: this.format,
-        },
-      ],
-    },
-    primitive: {
-      topology: 'line-strip',
-      stripIndexFormat: undefined,
-      frontFace: 'ccw',
-      cullMode: 'none',
-    },
-    // If you have multisampling:
-    // multisample: {
-    //   count: this.sampleCount,
-    // },
-  });
-}
-  
+    this.polygonPipeline = this.device.createRenderPipeline({
+      layout: polygonPipelineLayout,
+      vertex: {
+        module: polygonVertexShaderModule,
+        entryPoint: 'main',
+        buffers: [
+          {
+            arrayStride: 2 * 4, // 2 floats per vertex (x, y)
+            attributes: [
+              {
+                shaderLocation: 0,
+                offset: 0,
+                format: 'float32x2',
+              },
+            ],
+          },
+        ],
+      },
+      fragment: {
+        module: polygonFragmentShaderModule,
+        entryPoint: 'main',
+        targets: [
+          {
+            format: this.format,
+          },
+        ],
+      },
+      primitive: {
+        topology: 'line-strip',
+        stripIndexFormat: undefined,
+        frontFace: 'ccw',
+        cullMode: 'none',
+      },
+      // If you have multisampling:
+      // multisample: {
+      //   count: this.sampleCount,
+      // },
+    });
+  }
+
 
   private createBindGroupLayout(): GPUBindGroupLayout {
     return this.device.createBindGroupLayout({
@@ -447,11 +403,11 @@ export class Renderer {
     if (newColor.length !== 4) {
       throw new Error("Color must be a Float32Array with 4 components (RGBA).");
     }
-  
+
     // Write the new color to the buffer
     this.device.queue.writeBuffer(this.colorBuffer, 0, newColor);
   }
-  
+
 
 
 
@@ -498,7 +454,7 @@ export class Renderer {
   }
 
   public getLinePipeline(): GPURenderPipeline {
-    return  this.linePipeline;
+    return this.linePipeline;
   }
 
   public getTempLinePipeline(): GPURenderPipeline {
@@ -583,7 +539,7 @@ export class Renderer {
     // });
 
     // // Draw Points
-  
+
     // entities.forEach((entity) => {
     //   if (entity instanceof Point) {
     //     this.updateColorBuffer(entity.getColor())
@@ -618,8 +574,8 @@ export class Renderer {
     // });
 
     entities.forEach((entity) => {
-        entity.draw(renderPass);
-        console.log()
+      entity.draw(renderPass);
+      console.log()
     });
 
     renderPass.end();

@@ -223,7 +223,6 @@ export class Point {
     this.color = newColor;
   }
 
-
   public updateCameraBuffer() {
     const { x, y } = this.renderer.getCamera().getOffset();
     const zoom = this.renderer.getCamera().getZoom();
@@ -234,12 +233,10 @@ export class Point {
   }
 
   public updateColorBuffer(newColor: Float32Array) {
-    // Ensure the new color is of the correct size (4 components for RGBA)
     if (newColor.length !== 4) {
       throw new Error("Color must be a Float32Array with 4 components (RGBA).");
     }
   
-    // Write the new color to the buffer
     this.device.queue.writeBuffer(this.colorBuffer, 0, newColor);
   }
 }
