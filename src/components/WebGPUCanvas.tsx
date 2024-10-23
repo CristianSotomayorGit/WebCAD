@@ -76,7 +76,7 @@ const WebGPUCanvas: React.FC = () => {
 
   const handleMouseMove = (event: MouseEvent) => {
     toolManagerRef.current?.getPanTool().onMouseMove(event);
-    // toolManagerRef.current?.getActiveTool().onMouseMove(event);
+    toolManagerRef.current?.getActiveTool().onMouseMove(event);
 
     if (isSnappingRef.current) {
       // console.log('screen', event.clientX, event.clientY);

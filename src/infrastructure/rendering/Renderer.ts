@@ -229,161 +229,6 @@ export class Renderer {
     //   },
     // });
 
-
-
-    // Setup point pipeline
-    const pointVertexShaderModule = this.device.createShaderModule({
-      code: PointShader.VERTEX,
-    });
-
-    const pointFragmentShaderModule = this.device.createShaderModule({
-      code: PointShader.FRAGMENT,
-    });
-
-    const pointPipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [this.device.createBindGroupLayout({
-        entries: [
-          {
-            binding: 0,
-            visibility: GPUShaderStage.VERTEX, // Visibility for camera buffer
-            buffer: {
-              type: 'uniform',
-            },
-          },
-          {
-            binding: 1,
-            visibility: GPUShaderStage.FRAGMENT, // Visibility for color buffer
-            buffer: {
-              type: 'uniform',
-            },
-          },
-        ],
-      })],
-    });
-
-    // this.pointPipeline = this.device.createRenderPipeline({
-    //   layout: pointPipelineLayout,
-    //   vertex: {
-    //     module: pointVertexShaderModule,
-    //     entryPoint: 'main',
-    //     buffers: [
-    //       {
-    //         arrayStride: 2 * 4, // 2 floats (x, y)
-    //         attributes: [
-    //           {
-    //             shaderLocation: 0,
-    //             offset: 0,
-    //             format: 'float32x2',
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //   },
-    //   fragment: {
-    //     module: pointFragmentShaderModule,
-    //     entryPoint: 'main',
-    //     targets: [
-    //       {
-    //         format: this.format,
-    //       },
-    //     ],
-    //   },
-    //   primitive: {
-    //     topology: 'triangle-list',
-    //   },
-    // });
-
-    const lineVertexShaderModule = this.device.createShaderModule({
-      code: LineShader.VERTEX,
-    });
-
-    const lineFragmentShaderModule = this.device.createShaderModule({
-      code: LineShader.FRAGMENT,
-    });
-
-    const linePipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [bindGroupLayout],
-    });
-
-    this.linePipeline = this.device.createRenderPipeline({
-      layout: linePipelineLayout,
-      vertex: {
-        module: lineVertexShaderModule,
-        entryPoint: 'main',
-        buffers: [
-          {
-            arrayStride: 2 * 4, // Each vertex is 2 floats (x, y)
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
-          },
-        ],
-      },
-      fragment: {
-        module: lineFragmentShaderModule,
-        entryPoint: 'main',
-        targets: [
-          {
-            format: this.format,
-          },
-        ],
-      },
-      primitive: {
-        topology: 'line-list',
-      },
-    });
-
-    // When creating the pipeline in Renderer.ts
-    const polylineVertexShaderModule = this.device.createShaderModule({
-      code: PolylineShader.VERTEX,
-    });
-
-    const polylineFragmentShaderModule = this.device.createShaderModule({
-      code: PolylineShader.FRAGMENT,
-    });
-
-    const polylinePipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [bindGroupLayout],
-    });
-
-    this.polylinePipeline = this.device.createRenderPipeline({
-      layout: polylinePipelineLayout,
-      vertex: {
-        module: polylineVertexShaderModule,
-        entryPoint: 'main',
-        buffers: [
-          {
-            arrayStride: 8, // 2 floats x 4 bytes per float
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
-          },
-        ],
-      },
-      fragment: {
-        module: polylineFragmentShaderModule,
-        entryPoint: 'main',
-        targets: [
-          {
-            format: this.format,
-          },
-        ],
-      },
-      primitive: {
-        topology: 'line-strip', // Use 'line-strip' for polylines
-        stripIndexFormat: undefined,
-      },
-    });
-
-
     // Setup temporary line pipeline
     const tempLineVertexShaderModule = this.device.createShaderModule({
       code: LineShader.VERTEX,
@@ -798,19 +643,20 @@ export class Renderer {
     const entities = this.entityManager.getEntities();
     const tempEntities = this.entityManager.getTemporaryEntities();
 
-    entities.forEach((entity) => {
-      if (entity instanceof Line) {
-        entity.draw(renderPass);
-        console.log(entity.getLength())
-
-      }
-    });
-
-    // tempEntities.forEach((entity) => {
+    // entities.forEach((entity) => {
     //   if (entity instanceof Line) {
     //     entity.draw(renderPass);
+    //     console.log(entity.getLength())
+
     //   }
     // });
+
+    tempEntities.forEach((entity) => {
+      if (entity instanceof Line) {
+        entity.draw(renderPass);
+        // console.log('hi')
+      }
+    });
 
     // entities.forEach((entity) => {
     //   if (entity instanceof Polyline) {
@@ -821,12 +667,12 @@ export class Renderer {
 
     // // Draw Points
   
-    entities.forEach((entity) => {
-      if (entity instanceof Point) {
-        this.updateColorBuffer(entity.getColor())
-        entity.draw(renderPass);
-      }
-    });
+    // entities.forEach((entity) => {
+    //   if (entity instanceof Point) {
+    //     this.updateColorBuffer(entity.getColor())
+    //     entity.draw(renderPass);
+    //   }
+    // });
 
 
     // // Draw Points
@@ -854,10 +700,10 @@ export class Renderer {
     //   }
     // });
 
-    // entities.forEach((entity) => {
-    //     entity.draw(renderPass);
-    //     console.log()
-    // });
+    entities.forEach((entity) => {
+        entity.draw(renderPass);
+        console.log()
+    });
 
     renderPass.end();
     this.device.queue.submit([commandEncoder.finish()]);
