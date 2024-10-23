@@ -234,50 +234,6 @@ export class Renderer {
     //   code: LineShader.VERTEX,
     // });
 
-    const rectangleVertexShaderModule = this.device.createShaderModule({
-      code: RectangleShader.VERTEX,
-    });
-
-    const rectangleFragmentShaderModule = this.device.createShaderModule({
-      code: RectangleShader.FRAGMENT,
-    });
-
-    const rectanglePipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [bindGroupLayout],
-    });
-
-    this.rectanglePipeline = this.device.createRenderPipeline({
-      layout: rectanglePipelineLayout,
-      vertex: {
-        module: rectangleVertexShaderModule,
-        entryPoint: 'main',
-        buffers: [
-          {
-            arrayStride: 2 * 4, // 2 floats per vertex (x, y)
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
-          },
-        ],
-      },
-      fragment: {
-        module: rectangleFragmentShaderModule,
-        entryPoint: 'main',
-        targets: [
-          {
-            format: this.format,
-          },
-        ],
-      },
-      primitive: {
-        topology: 'line-list', // Changed to 'line-list' for outline
-      },
-    });
-
     // Polygon Pipeline
     const polygonVertexShaderModule = this.device.createShaderModule({
       code: PolygonShader.VERTEX,
