@@ -239,4 +239,8 @@ export class Point {
   
     this.device.queue.writeBuffer(this.colorBuffer, 0, newColor);
   }
+
+  public getRenderer() {
+    return this.renderer;
+  }
 }

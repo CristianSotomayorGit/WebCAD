@@ -14,6 +14,7 @@ import { SplineTool } from '../tools/SplineTool';
 import { RectangleTool } from '../tools/RectangleTool';
 import { Polygon } from '../entities/Polygon';
 import { PolygonTool } from '../tools/PolygonTool';
+import { ConstraintManager } from './ConstraintManager';
 
 export class ToolManager {
   private activeTool: Tool;
@@ -22,9 +23,9 @@ export class ToolManager {
   private tools: { [key: string]: Tool } = {};
   private activeToolName: string = 'Select';
 
-  constructor(entityManager: EntityManager, renderer: Renderer) {
+  constructor(entityManager: EntityManager, constraintManager: ConstraintManager, renderer: Renderer, ) {
     // this.tools['Select'] = new SelectTool();
-    this.tools['Line'] = new LineTool(entityManager, renderer);
+    this.tools['Line'] = new LineTool(entityManager, constraintManager, renderer);
     this.tools['Point'] = new PointTool(entityManager, renderer);
     this.tools['Polyline'] = new PolylineTool(entityManager, renderer);
     this.tools['Circle'] = new CircleTool(entityManager, renderer)

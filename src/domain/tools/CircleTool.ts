@@ -15,40 +15,38 @@ export class CircleTool implements Tool {
   constructor(
     private entityManager: EntityManager,
     private renderer: Renderer
-  ) {}
+  ) { }
 
-  public onMouseDown(event: MouseEvent): void {
-    if (event.button === 0) { // Left mouse button
+  public onLeftclick(event: MouseEvent): void {
 
-        console.log('niggaszzzzzzzzz')
-      const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-      const x = event.clientX - canvasRect.left;
-      const y = event.clientY - canvasRect.top;
-      const worldPosition = this.renderer.screenToWorld(x, y);
+    console.log('niggaszzzzzzzzz')
+    const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
+    const x = event.clientX - canvasRect.left;
+    const y = event.clientY - canvasRect.top;
+    const worldPosition = this.renderer.screenToWorld(x, y);
 
-      if (!this.isDrawing) {
-        // Start drawing
-        this.centerPoint = worldPosition;
-        this.isDrawing = true;
+    if (!this.isDrawing) {
+      // Start drawing
+      this.centerPoint = worldPosition;
+      this.isDrawing = true;
 
-        // Create a circle with zero radius
-        this.currentCircle = new Circle(this.centerPoint, 0, this.renderer);
-        this.entityManager.addEntity(this.currentCircle);
+      // Create a circle with zero radius
+      this.currentCircle = new Circle(this.centerPoint, 0, this.renderer);
+      this.entityManager.addEntity(this.currentCircle);
 
-        // Create and add the center point
-        const center = new Point(this.centerPoint.x, this.centerPoint.y, this.renderer);
-        this.entityManager.addEntity(center);
-      } else {
-        // Finish drawing
-        this.isDrawing = false;
-        this.centerPoint = null;
-        this.currentCircle = null;
+      // Create and add the center point
+      const center = new Point(this.centerPoint.x, this.centerPoint.y, this.renderer);
+      this.entityManager.addEntity(center);
+    } else {
+      // Finish drawing
+      this.isDrawing = false;
+      this.centerPoint = null;
+      this.currentCircle = null;
 
-        // Remove the temporary point
-        if (this.temporaryPoint) {
-          this.entityManager.removeTemporaryEntity(this.temporaryPoint);
-          this.temporaryPoint = null;
-        }
+      // Remove the temporary point
+      if (this.temporaryPoint) {
+        this.entityManager.removeTemporaryEntity(this.temporaryPoint);
+        this.temporaryPoint = null;
       }
     }
   }
