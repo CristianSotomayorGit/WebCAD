@@ -19,22 +19,20 @@ export class RectangleTool implements Tool {
     this.renderer = renderer;
   }
 
-  public onMouseDown(event: MouseEvent): void {
-    if (event.button === 0) {
-      const { x, y } = this.getWorldPosition(event);
+  public onLeftclick(event: MouseEvent): void {
+    const { x, y } = this.getWorldPosition(event);
 
-      if (!this.isDrawing) {
-        // First click: set the starting point
-        this.isDrawing = true;
-        this.startPoint = new Point(x, y, this.renderer);
-        this.entityManager.addEntity(this.startPoint);
+    if (!this.isDrawing) {
+      // First click: set the starting point
+      this.isDrawing = true;
+      this.startPoint = new Point(x, y, this.renderer);
+      this.entityManager.addEntity(this.startPoint);
 
-        this.currentRectangle = new Rectangle(this.renderer, x, y);
-        this.entityManager.addEntity(this.currentRectangle);
-      } else {
-        // Second click: finalize the rectangle
-        this.finishDrawing(x, y);
-      }
+      this.currentRectangle = new Rectangle(this.renderer, x, y);
+      this.entityManager.addEntity(this.currentRectangle);
+    } else {
+      // Second click: finalize the rectangle
+      this.finishDrawing(x, y);
     }
   }
 

@@ -16,12 +16,9 @@ export class PanTool implements Tool {
     return this.isPanning;
   }
 
-  public onMouseDown(event: MouseEvent): void {
-    if (event.button === 1) { // Middle mouse button
-
-      this.isPanning = true;
-      this.lastMousePosition = { x: event.clientX, y: event.clientY };
-    }
+  public onWheelClick(event: MouseEvent): void {
+    this.isPanning = true;
+    this.lastMousePosition = { x: event.clientX, y: event.clientY };
   }
 
   public onMouseMove(event: MouseEvent): void {
@@ -29,19 +26,19 @@ export class PanTool implements Tool {
       const deltaX = event.clientX - this.lastMousePosition.x;
       const deltaY = event.clientY - this.lastMousePosition.y;
       const zoom = this.camera.getZoom();
-  
+
       const panSpeed = 0.00125; // Adjust this value between 0 and 1 for desired panning speed
-  
+
       // Adjust camera offset accordingly
       const offset = this.camera.getOffset();
       this.camera.setOffset(
         offset.x - (deltaX / zoom) * panSpeed,
         offset.y - (deltaY / zoom) * -panSpeed
       );
-  
+
       // Update camera buffer
       // this.renderer.updateCameraBuffer();
-  
+
       // Update last mouse position
       this.lastMousePosition = { x: event.clientX, y: event.clientY };
     }

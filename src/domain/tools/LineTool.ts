@@ -1,4 +1,4 @@
-// LineTool.ts
+// tools/LineTool.ts
 
 import { Tool } from './Tool';
 import { EntityManager } from '../managers/EntityManager';
@@ -6,90 +6,172 @@ import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { Line } from '../entities/Line';
 import { Point } from '../entities/Point';
 import { ConstraintManager } from '../managers/ConstraintManager';
+import { ConstraintType } from '../constraints/ConstraintTypes';
 import { OrthogonalConstraint } from '../constraints/OrthogonalConstraint';
+import { PointSnapConstraint } from '../constraints/PointSnapConstraint';
 
 export class LineTool implements Tool {
   private isDrawing = false;
-  private startVertex: { x: number; y: number } | null = null;
+  private startVertex: Point | null = null;
   private currentLine: Line | null = null;
   private temporaryEndPoint: Point | null = null;
   private constraintManager: ConstraintManager;
-  private isOrthoConstraintActive = false;
+  private renderer: Renderer;
 
   constructor(
     private entityManager: EntityManager,
-    private renderer: Renderer
+    constraintManager: ConstraintManager,
+    renderer: Renderer
   ) {
-    this.constraintManager = new ConstraintManager();
+    this.renderer = renderer;
+    this.constraintManager = constraintManager;
   }
 
-  public onMouseDown(event: MouseEvent): void {
-    if (event.button === 0) {
-      const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-      const x = event.clientX - canvasRect.left;
-      const y = event.clientY - canvasRect.top;
+  public onLeftclick(event: MouseEvent): void {
+    const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
+    const x = event.clientX - canvasRect.left;
+    const y = event.clientY - canvasRect.top;
+    const mouseWorldPosition = this.renderer.screenToWorld(x, y);
 
-      const worldPosition = this.renderer.screenToWorld(x, y);
+    if (!mouseWorldPosition) {
+      throw new Error('Mouse world position error');
+    }
 
-      if (!this.isDrawing) {
-        // Start drawing
-        this.startVertex = worldPosition;
-        this.isDrawing = true;
+    if (this.constraintManager.hasActiveConstraints()) {
+      this.createConstrainedLine(mouseWorldPosition);
+    } else {
+      this.createLine(mouseWorldPosition);
+    }
+  }
 
-        const startPoint = new Point(
-          this.startVertex.x,
-          this.startVertex.y,
-          this.renderer
+  private createConstrainedLine(mouseWorldPosition: { x: number; y: number }) {
+    const worldPosition = mouseWorldPosition;
+
+    if (!this.isDrawing) {
+      // Start drawing
+      this.startVertex = this.findNearestPoint(worldPosition) || new Point(worldPosition.x, worldPosition.y, this.renderer);
+      this.isDrawing = true;
+
+      // Apply constraints to the start vertex if applicable
+      if (this.constraintManager.hasActiveConstraints()) {
+        this.startVertex = this.constraintManager.applyConstraints(
+          this.startVertex,
+          this.startVertex, // Reference point can be itself or another logic
+          'start'
+        );
+      }
+
+      const endPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
+
+      // Apply constraints to the end point if applicable
+      const constrainedEndPoint = this.constraintManager.applyConstraints(
+        endPoint,
+        this.startVertex,
+        'end'
+      );
+
+      const line = new Line(this.startVertex, constrainedEndPoint, this.renderer);
+
+      this.entityManager.addEntity(line);
+      this.entityManager.addEntity(this.startVertex);
+      this.entityManager.addEntity(constrainedEndPoint);
+
+      this.currentLine = line;
+      this.temporaryEndPoint = constrainedEndPoint;
+    } else {
+      // Finish drawing
+      if (this.currentLine && this.startVertex) {
+        let endPointPosition = { x: worldPosition.x, y: worldPosition.y };
+
+        // Apply constraints to the end point
+        const tempPoint = new Point(endPointPosition.x, endPointPosition.y, this.renderer);
+        let endPointConstrainedPosition = this.constraintManager.applyConstraints(
+          tempPoint,
+          this.startVertex,
+          'end'
         );
 
-        const endPoint = new Point(
-          worldPosition.x,
-          worldPosition.y,
-          this.renderer
-        );
+        endPointPosition = { x: endPointConstrainedPosition.getX(), y: endPointConstrainedPosition.getY() }
 
-        const line = new Line(startPoint, endPoint, this.renderer);
+        const endpoint = this.findNearestPoint(endPointPosition) || new Point(endPointPosition.x, endPointPosition.y, this.renderer);
 
-        this.entityManager.addEntity(line);
-        this.entityManager.addEntity(startPoint);
+        this.currentLine.setEndPoint(endpoint);
 
-        this.currentLine = line;
-      } else {
-        // Finish drawing
-        if (this.currentLine) {
-          let endPointPosition = { x: worldPosition.x, y: worldPosition.y };
-
-          // Apply constraints if any
-          if (this.constraintManager.hasConstraints() && this.startVertex) {
-            endPointPosition = this.constraintManager.applyConstraints(
-              endPointPosition,
-              this.startVertex
-            );
-          }
-
-          const endpoint = new Point(
-            endPointPosition.x,
-            endPointPosition.y,
-            this.renderer
-          );
-
-          this.currentLine.setEndPoint(endpoint);
-
-          // Remove temporary endpoint
-          if (this.temporaryEndPoint) {
-            this.entityManager.removeTemporaryEntity(this.temporaryEndPoint);
-            this.temporaryEndPoint = null;
-          }
-
-          // Add finalized endpoint as a permanent entity
-          this.entityManager.addEntity(endpoint);
-
-          this.currentLine = null;
+        // Clean up temporary endpoint
+        if (this.temporaryEndPoint) {
+          this.entityManager.removeTemporaryEntity(this.temporaryEndPoint);
+          this.temporaryEndPoint = null;
         }
-        this.isDrawing = false;
-        this.startVertex = null;
+
+        this.entityManager.addEntity(endpoint);
+        this.currentLine = null;
+      }
+
+      this.isDrawing = false;
+      this.startVertex = null;
+    }
+  }
+
+  private createLine(mouseWorldPosition: { x: number; y: number }) {
+    const worldPosition = mouseWorldPosition;
+
+    if (!this.isDrawing) {
+      // Start drawing
+      this.startVertex = new Point(worldPosition.x, worldPosition.y, this.renderer);
+      this.isDrawing = true;
+
+      const endPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
+      const line = new Line(this.startVertex, endPoint, this.renderer);
+
+      this.entityManager.addEntity(line);
+      this.entityManager.addEntity(this.startVertex);
+
+      this.currentLine = line;
+      this.temporaryEndPoint = endPoint;
+    } else {
+      // Finish drawing
+      if (this.currentLine) {
+        const endpoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
+        this.currentLine.setEndPoint(endpoint);
+
+        if (this.temporaryEndPoint) {
+          this.entityManager.removeTemporaryEntity(this.temporaryEndPoint);
+          this.temporaryEndPoint = null;
+        }
+
+        this.entityManager.addEntity(endpoint);
+        this.currentLine = null;
+      }
+
+      this.isDrawing = false;
+      this.startVertex = null;
+    }
+  }
+
+  private findNearestPoint(mouseWorldPosition: { x: number; y: number }): Point | null {
+    let nearest: Point | null = null;
+    let minDist = Infinity;
+    const threshold = 0.02; // Adjust as needed
+
+    for (const entity of this.entityManager.getEntities()) {
+      if (entity instanceof Point) {
+        const dx = entity.getX() - mouseWorldPosition.x;
+        const dy = entity.getY() - mouseWorldPosition.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < minDist && dist <= threshold) {
+          minDist = dist;
+          nearest = entity;
+
+          entity.setColor(new Float32Array([1.0, 1.0, 0.0, 1.0])); // Highlight nearest point
+          console.log('NEAR');
+        } else {
+          entity.setColor(new Float32Array([0.5, 0.5, 0.5, 1.0])); // Reset color
+        }
       }
     }
+
+    return nearest;
   }
 
   public onMouseMove(event: MouseEvent): void {
@@ -99,34 +181,22 @@ export class LineTool implements Tool {
       const y = event.clientY - canvasRect.top;
       const worldPosition = this.renderer.screenToWorld(x, y);
 
-      let endPointPosition = { x: worldPosition.x, y: worldPosition.y };
+      if (!worldPosition || !this.startVertex) return;
 
-      // Apply constraints if any
-      if (this.constraintManager.hasConstraints() && this.startVertex) {
-        endPointPosition = this.constraintManager.applyConstraints(
-          endPointPosition,
-          this.startVertex
-        );
-      }
+      let endPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
 
-      const endPoint = new Point(
-        endPointPosition.x,
-        endPointPosition.y,
-        this.renderer
-      );
+      // Apply constraints to the end point
+      endPoint = this.constraintManager.applyConstraints(endPoint, this.startVertex, 'end');
 
       this.currentLine.setEndPoint(endPoint);
 
-      // Update temporary endpoint entity
+      // Manage temporary endpoint
       if (this.temporaryEndPoint) {
         this.entityManager.removeTemporaryEntity(this.temporaryEndPoint);
       }
+
       this.temporaryEndPoint = endPoint;
       this.entityManager.addTemporaryEntity(this.temporaryEndPoint);
-
-      // Update temporary line entity
-      this.entityManager.addTemporaryEntity(this.currentLine);
-      this.entityManager.removeTemporaryEntity(this.currentLine);
     }
   }
 
@@ -147,21 +217,7 @@ export class LineTool implements Tool {
       }
       this.isDrawing = false;
       this.startVertex = null;
-    } else if (event.key === 'Shift') {
-      // Toggle orthogonal constraint
-      this.toggleOrthoConstraint();
     }
-  }
-
-  private toggleOrthoConstraint(): void {
-    this.isOrthoConstraintActive = !this.isOrthoConstraintActive;
-
-    if (this.isOrthoConstraintActive) {
-      // Activate orthogonal constraint
-      this.constraintManager.addConstraint(new OrthogonalConstraint());
-    } else {
-      // Deactivate orthogonal constraint
-      this.constraintManager.clearConstraints();
-    }
+    // Additional key handling can be done via the React component
   }
 }

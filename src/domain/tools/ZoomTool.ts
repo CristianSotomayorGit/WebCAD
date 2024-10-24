@@ -24,11 +24,11 @@ export class ZoomTool implements Tool {
         }
     }
 
-    public setZoom(zoom: number){
+    public setZoom(zoom: number) {
         this.camera.setZoom(zoom);
     }
 
-    public onMouseDown(event: MouseEvent): void {
+    public onLeftclick(event: MouseEvent): void {
 
     }
 
@@ -40,6 +40,6 @@ export class ZoomTool implements Tool {
     }
 
     public onKeyDown(event: KeyboardEvent): void {
-        
+
     }
 }

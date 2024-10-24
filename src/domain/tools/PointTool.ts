@@ -10,20 +10,17 @@ export class PointTool implements Tool {
     private renderer: Renderer
   ) { }
 
-  public onMouseDown(event: MouseEvent): void {
+  public onLeftclick(event: MouseEvent): void {
+    const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
+    const x = event.clientX - canvasRect.left;
+    const y = event.clientY - canvasRect.top;
 
-    if (event.button === 0) { // Left mouse button
-      const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-      const x = event.clientX - canvasRect.left;
-      const y = event.clientY - canvasRect.top;
+    // Convert screen coordinates to world coordinates
+    const worldPosition = this.renderer.screenToWorld(x, y);
 
-      // Convert screen coordinates to world coordinates
-      const worldPosition = this.renderer.screenToWorld(x, y);
-
-      // Create a new point at the world position
-      const point = new Point(worldPosition.x, worldPosition.y, this.renderer);
-      this.entityManager.addEntity(point);
-    }
+    // Create a new point at the world position
+    const point = new Point(worldPosition.x, worldPosition.y, this.renderer);
+    this.entityManager.addEntity(point);
   }
 
   public onMouseMove(event: MouseEvent): void {

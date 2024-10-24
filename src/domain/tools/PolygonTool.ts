@@ -21,10 +21,10 @@ export class PolygonTool implements Tool {
     this.renderer = renderer;
   }
 
-  public onMouseDown(event: MouseEvent): void {
+  public onLeftclick(event: MouseEvent): void {
     const { x, y } = this.getWorldPosition(event);
 
-    if (!this.isDrawing && event.button === 0) {
+    if (!this.isDrawing) {
       // First click: set the center
       this.centerX = x;
       this.centerY = y;
@@ -32,7 +32,7 @@ export class PolygonTool implements Tool {
 
       let centerPoint = new Point(this.centerX, this.centerY, this.renderer)
       this.entityManager.addEntity(centerPoint)
-      
+
       // Display the input box
       this.showInputBox(event.clientX, event.clientY);
 

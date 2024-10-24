@@ -21,40 +21,37 @@ export class PolylineTool implements Tool {
     this.constraintManager = new ConstraintManager();
   }
 
-  public onMouseDown(event: MouseEvent): void {
-    if (event.button === 0) {
-      const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-      const x = event.clientX - canvasRect.left;
-      const y = event.clientY - canvasRect.top;
-      console.log(this.tempLastPointPosition);
+  public onLeftclick(event: MouseEvent): void {
+    const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
+    const x = event.clientX - canvasRect.left;
+    const y = event.clientY - canvasRect.top;
+    console.log(this.tempLastPointPosition);
 
-      let worldPosition = this.renderer.screenToWorld(x, y);
+    let worldPosition = this.renderer.screenToWorld(x, y);
 
-      if (this.constraintManager.hasConstraints() && this.isDrawing && this.currentPolyline) {
-        worldPosition = this.applyOrthogonalConstraint(worldPosition, this.tempLastPointPosition);
-      }
-
-
-      const newPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
-      this.entityManager.addEntity(newPoint);
-
-      if (!this.isDrawing) {
-        this.isDrawing = true;
-
-        const polyline = new Polyline(this.renderer);
-        polyline.addPoint(newPoint);
-
-        this.entityManager.addEntity(polyline);
-
-        this.currentPolyline = polyline;
-      } else {
-        if (!this.currentPolyline) throw new Error('Current Polyline is null')
-        this.currentPolyline.addPoint(newPoint);
-      }
-
-      this.tempLastPointPosition = worldPosition;
-
+    if (this.constraintManager.hasConstraints() && this.isDrawing && this.currentPolyline) {
+      worldPosition = this.applyOrthogonalConstraint(worldPosition, this.tempLastPointPosition);
     }
+
+
+    const newPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
+    this.entityManager.addEntity(newPoint);
+
+    if (!this.isDrawing) {
+      this.isDrawing = true;
+
+      const polyline = new Polyline(this.renderer);
+      polyline.addPoint(newPoint);
+
+      this.entityManager.addEntity(polyline);
+
+      this.currentPolyline = polyline;
+    } else {
+      if (!this.currentPolyline) throw new Error('Current Polyline is null')
+      this.currentPolyline.addPoint(newPoint);
+    }
+
+    this.tempLastPointPosition = worldPosition;
   }
 
   public onMouseMove(event: MouseEvent): void {

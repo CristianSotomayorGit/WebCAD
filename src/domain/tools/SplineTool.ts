@@ -18,33 +18,31 @@ export class SplineTool implements Tool {
     this.renderer = renderer;
   }
 
-  public onMouseDown(event: MouseEvent): void {
-    if (event.button === 0) {
-      const { x, y } = this.getWorldPosition(event);
+  public onLeftclick(event: MouseEvent): void {
+    const { x, y } = this.getWorldPosition(event);
 
-      // Remove the temporary point if it exists
-      if (this.tempPoint) {
-        this.currentSpline!.getControlPoints().pop();
-        this.entityManager.removeEntity(this.tempPoint);
-        this.tempPoint = null;
-      }
-
-      const newPoint = new Point(x, y, this.renderer);
-      this.entityManager.addEntity(newPoint);
-
-      if (!this.isDrawing) {
-        this.isDrawing = true;
-        this.currentSpline = new Spline(this.renderer);
-        this.currentSpline.addControlPoint(newPoint);
-        this.entityManager.addEntity(this.currentSpline);
-      } else {
-        this.currentSpline!.addControlPoint(newPoint);
-      }
-
-      // Add a new temporary point for dynamic feedback
-      this.tempPoint = new Point(x, y, this.renderer);
-      this.currentSpline!.addControlPoint(this.tempPoint);
+    // Remove the temporary point if it exists
+    if (this.tempPoint) {
+      this.currentSpline!.getControlPoints().pop();
+      this.entityManager.removeEntity(this.tempPoint);
+      this.tempPoint = null;
     }
+
+    const newPoint = new Point(x, y, this.renderer);
+    this.entityManager.addEntity(newPoint);
+
+    if (!this.isDrawing) {
+      this.isDrawing = true;
+      this.currentSpline = new Spline(this.renderer);
+      this.currentSpline.addControlPoint(newPoint);
+      this.entityManager.addEntity(this.currentSpline);
+    } else {
+      this.currentSpline!.addControlPoint(newPoint);
+    }
+
+    // Add a new temporary point for dynamic feedback
+    this.tempPoint = new Point(x, y, this.renderer);
+    this.currentSpline!.addControlPoint(this.tempPoint);
   }
 
   public onMouseMove(event: MouseEvent): void {

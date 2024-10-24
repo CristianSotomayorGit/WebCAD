@@ -1,15 +1,12 @@
-// src/domain/constraints/Constraint.ts
+// constraints/Constraint.ts
+
+import { ConstraintType } from './ConstraintTypes';
+import { Point } from '../entities/Point';
+
+export type ConstraintTarget = 'start' | 'end' | 'both';
 
 export interface Constraint {
-    /**
-     * Applies the constraint to a given point, possibly modifying it.
-     * @param currentPoint The current point being adjusted.
-     * @param referencePoint A reference point (e.g., the starting point of a line).
-     * @returns The adjusted point after applying the constraint.
-     */
-    apply(
-      currentPoint: { x: number; y: number },
-      referencePoint: { x: number; y: number }
-    ): { x: number; y: number };
-  }
-  
+  type: ConstraintType;
+  target: ConstraintTarget;
+  apply(point: Point, referencePoint?: Point): Point;
+}
