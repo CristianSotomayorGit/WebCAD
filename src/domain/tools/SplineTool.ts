@@ -1,24 +1,14 @@
 // src/domain/tools/SplineTool.ts
 
-import { Tool } from './Tool';
-import { EntityManager } from '../managers/EntityManager';
-import { Renderer } from '../../infrastructure/rendering/Renderer';
+import { AbstractDrawingTool } from './AbstractDrawingTool';
 import { Spline } from '../entities/Spline';
 import { Point } from '../entities/Point';
 
-export class SplineTool implements Tool {
-  private isDrawing = false;
+export class SplineTool extends AbstractDrawingTool {
   private currentSpline: Spline | null = null;
-  private renderer: Renderer;
-  private entityManager: EntityManager;
   private tempPoint: Point | null = null;
 
-  constructor(entityManager: EntityManager, renderer: Renderer) {
-    this.entityManager = entityManager;
-    this.renderer = renderer;
-  }
-
-  public onLeftclick(event: MouseEvent): void {
+  public onLeftClick(event: MouseEvent): void {
     const { x, y } = this.getWorldPosition(event);
 
     // Remove the temporary point if it exists
@@ -28,8 +18,7 @@ export class SplineTool implements Tool {
       this.tempPoint = null;
     }
 
-    const newPoint = new Point(x, y, this.renderer);
-    this.entityManager.addEntity(newPoint);
+    const newPoint = this.createAndAddPoint(x, y);
 
     if (!this.isDrawing) {
       this.isDrawing = true;
@@ -41,7 +30,7 @@ export class SplineTool implements Tool {
     }
 
     // Add a new temporary point for dynamic feedback
-    this.tempPoint = new Point(x, y, this.renderer);
+    this.tempPoint = this.createAndAddPoint(x, y);
     this.currentSpline!.addControlPoint(this.tempPoint);
   }
 
@@ -57,30 +46,20 @@ export class SplineTool implements Tool {
     }
   }
 
-  public onMouseUp(event: MouseEvent): void {
-    // No action needed on mouse up
-  }
-
   public onKeyDown(event: KeyboardEvent): void {
+    super.onKeyDown(event);
+
     if (this.isDrawing) {
-      if (event.key === 'Escape') {
-        // Cancel drawing
-        this.cancelDrawing();
-      } else if (event.key === 'Enter' || event.key === 'Return' || event.key === ' ') {
+      if (event.key === 'Enter' || event.key === 'Return' || event.key === ' ') {
         // Finish drawing
         this.finishDrawing();
       }
     }
   }
 
-  private getWorldPosition(event: MouseEvent): { x: number; y: number } {
-    const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-    const screenX = event.clientX - canvasRect.left;
-    const screenY = event.clientY - canvasRect.top;
-    return this.renderer.screenToWorld(screenX, screenY);
-  }
+  protected cancelDrawing(): void {
+    super.cancelDrawing();
 
-  private cancelDrawing(): void {
     if (this.currentSpline) {
       // Remove the temporary point if it exists
       if (this.tempPoint) {
@@ -97,7 +76,6 @@ export class SplineTool implements Tool {
 
       this.currentSpline = null;
     }
-    this.isDrawing = false;
   }
 
   private finishDrawing(): void {
@@ -113,5 +91,6 @@ export class SplineTool implements Tool {
       this.currentSpline = null;
     }
     this.isDrawing = false;
+    this.points = [];
   }
 }

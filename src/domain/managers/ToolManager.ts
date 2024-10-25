@@ -28,10 +28,10 @@ export class ToolManager {
     // Initialize tools
     this.tools['Line'] = new LineTool(entityManager, renderer);
     this.tools['Point'] = new PointTool(entityManager, renderer);
-    // this.tools['Polyline'] = new PolylineTool(entityManager, renderer);
+    this.tools['Polyline'] = new PolylineTool(entityManager, renderer);
     // // Uncomment if CircleTool is available
     // // this.tools['Circle'] = new CircleTool(entityManager, renderer);
-    // this.tools['Spline'] = new SplineTool(entityManager, renderer);
+    this.tools['Spline'] = new SplineTool(entityManager, renderer);
     // this.tools['Rectangle'] = new RectangleTool(entityManager, renderer);
     // this.tools['Polygon'] = new PolygonTool(entityManager, renderer);
     // this.tools['Arc'] = new ArcTool(entityManager, renderer);
