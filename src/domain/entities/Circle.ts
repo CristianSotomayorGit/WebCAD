@@ -1,8 +1,8 @@
 // src/domain/entities/Circle.ts
 
 import { RenderableEntity } from './RenderableEntity';
-import { CircleShader } from '../../shaders/CircleShader';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
+import { CircleShader } from '../../shaders/CircleShader';
 
 export class Circle extends RenderableEntity {
   private centerX: number;
@@ -102,10 +102,11 @@ export class Circle extends RenderableEntity {
     }
   }
 
-  public dispose(): void {
+  public override dispose(): void {
     if (this.vertexBuffer) {
       this.vertexBuffer.destroy();
       this.vertexBuffer = null;
     }
+    super.dispose();
   }
 }
