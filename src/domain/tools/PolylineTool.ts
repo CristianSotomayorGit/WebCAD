@@ -25,7 +25,6 @@ export class PolylineTool implements Tool {
     const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
     const x = event.clientX - canvasRect.left;
     const y = event.clientY - canvasRect.top;
-    console.log(this.tempLastPointPosition);
 
     let worldPosition = this.renderer.screenToWorld(x, y);
 
@@ -62,7 +61,6 @@ export class PolylineTool implements Tool {
 
       let worldPosition = this.renderer.screenToWorld(x, y);
 
-      console.log(worldPosition, this.tempLastPointPosition)
       if (this.isOrthoConstraintActive) {
         // const lastPointPosition = this.getLastPointPosition();
         worldPosition = this.applyOrthogonalConstraint(worldPosition, this.tempLastPointPosition);

@@ -11,7 +11,7 @@ export class OrthogonalConstraint implements Constraint {
   private renderer: Renderer;
 
 
-  constructor(target: ConstraintTarget = 'end', renderer: Renderer) {
+  constructor(target: ConstraintTarget = 'both', renderer: Renderer) {
     this.target = target;
     this.renderer = renderer;
   }

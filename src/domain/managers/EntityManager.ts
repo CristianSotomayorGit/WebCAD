@@ -5,6 +5,7 @@ export class EntityManager {
   private temporaryEntities: any[] = [];
 
   public addEntity(entity: any): void {
+    if (!entity) throw new Error('Entity could not be added')
     this.entities.push(entity);
   }
 

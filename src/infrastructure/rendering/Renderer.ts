@@ -3,6 +3,7 @@ import { Camera } from '../../domain/Camera';
 import { Grid } from '../../domain/entities/Grid';
 import { GridShader } from '../../shaders/GridShader';
 import { Line } from '../../domain/entities/Line';
+import { Arc } from '../../domain/entities/Arc';
 
 export class Renderer {
   private device!: GPUDevice;
@@ -365,17 +366,15 @@ export class Renderer {
     // entities.forEach((entity) => {
     //   if (entity instanceof Line) {
     //     entity.draw(renderPass);
-    //     console.log(entity.getLength())
 
     //   }
     // });
 
     tempEntities.forEach((entity) => {
-      if (entity instanceof Line) {
         entity.draw(renderPass);
-        // console.log('hi')
-      }
     });
+
+  
 
     // entities.forEach((entity) => {
     //   if (entity instanceof Polyline) {
@@ -414,14 +413,14 @@ export class Renderer {
     // });
 
     // entities.forEach((entity) => {
-    //   if (entity instanceof Polygon) {
+    //   if (entity instanceof Arc) {
+    //     console.log('hello')
     //     entity.draw(renderPass);
     //   }
     // });
 
     entities.forEach((entity) => {
       entity.draw(renderPass);
-      console.log()
     });
 
     renderPass.end();
