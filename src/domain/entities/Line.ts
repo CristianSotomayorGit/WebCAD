@@ -2,8 +2,8 @@
 
 import { RenderableEntity } from './RenderableEntity';
 import { LineShader } from '../../shaders/LineShader';
-import { Point } from './Point';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
+import { Point } from './Point';
 
 export class Line extends RenderableEntity {
   private startPoint: Point;
@@ -96,5 +96,21 @@ export class Line extends RenderableEntity {
     renderPass.setBindGroup(0, this.bindGroup);
     renderPass.setVertexBuffer(0, this.vertexBuffer);
     renderPass.draw(2);
+  }
+
+  public override dispose(): void {
+    if (this.vertexBuffer) {
+      this.vertexBuffer.destroy();
+      this.vertexBuffer = null as any;
+    }
+    super.dispose();
+  }
+
+  public getStartPoint(): Point {
+    return this.startPoint;
+  }
+
+  public getEndPoint(): Point {
+    return this.endPoint;
   }
 }
