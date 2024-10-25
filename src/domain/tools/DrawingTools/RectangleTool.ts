@@ -1,32 +1,21 @@
 // src/domain/tools/RectangleTool.ts
 
-import { Tool } from './DrawingTool';
-import { EntityManager } from '../../managers/EntityManager';
-import { Renderer } from '../../../infrastructure/rendering/Renderer';
+import { AbstractDrawingTool } from './AbstractDrawingTool';
 import { Rectangle } from '../../entities/Rectangle';
 import { Point } from '../../entities/Point';
 
-export class RectangleTool implements Tool {
-  private isDrawing = false;
+export class RectangleTool extends AbstractDrawingTool {
   private currentRectangle: Rectangle | null = null;
-  private renderer: Renderer;
-  private entityManager: EntityManager;
   private startPoint: Point | null = null;
   private tempEndPoint: Point | null = null;
 
-  constructor(entityManager: EntityManager, renderer: Renderer) {
-    this.entityManager = entityManager;
-    this.renderer = renderer;
-  }
-
-  public onLeftclick(event: MouseEvent): void {
+  public onLeftClick(event: MouseEvent): void {
     const { x, y } = this.getWorldPosition(event);
 
     if (!this.isDrawing) {
       // First click: set the starting point
       this.isDrawing = true;
-      this.startPoint = new Point(x, y, this.renderer);
-      this.entityManager.addEntity(this.startPoint);
+      this.startPoint = this.createAndAddPoint(x, y);
 
       this.currentRectangle = new Rectangle(this.renderer, x, y);
       this.entityManager.addEntity(this.currentRectangle);
@@ -48,50 +37,19 @@ export class RectangleTool implements Tool {
         this.tempEndPoint.setX(x);
         this.tempEndPoint.setY(y);
       } else {
-        this.tempEndPoint = new Point(x, y, this.renderer);
-        this.entityManager.addEntity(this.tempEndPoint);
+        this.tempEndPoint = this.createAndAddPoint(x, y);
       }
     }
-  }
-
-  public onMouseUp(event: MouseEvent): void {
-    // No action needed on mouse up
   }
 
   public onKeyDown(event: KeyboardEvent): void {
+    super.onKeyDown(event);
+
     if (this.isDrawing) {
-      if (event.key === 'Escape') {
-        this.cancelDrawing();
-      } else if (event.key === 'Enter' || event.key === 'Return' || event.key === ' ') {
+      if (event.key === 'Enter' || event.key === 'Return' || event.key === ' ') {
         this.finishDrawing();
       }
     }
-  }
-
-  private getWorldPosition(event: MouseEvent): { x: number; y: number } {
-    const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-    const screenX = event.clientX - canvasRect.left;
-    const screenY = event.clientY - canvasRect.top;
-    return this.renderer.screenToWorld(screenX, screenY);
-  }
-
-  private cancelDrawing(): void {
-    if (this.currentRectangle) {
-      this.entityManager.removeEntity(this.currentRectangle);
-      this.currentRectangle.dispose();
-      this.currentRectangle = null;
-    }
-    if (this.startPoint) {
-      this.entityManager.removeEntity(this.startPoint);
-      this.startPoint.dispose();
-      this.startPoint = null;
-    }
-    if (this.tempEndPoint) {
-      this.entityManager.removeEntity(this.tempEndPoint);
-      this.tempEndPoint.dispose();
-      this.tempEndPoint = null;
-    }
-    this.isDrawing = false;
   }
 
   private finishDrawing(x?: number, y?: number): void {
@@ -109,10 +67,26 @@ export class RectangleTool implements Tool {
       // Remove the temporary end point
       if (this.tempEndPoint) {
         this.entityManager.removeEntity(this.tempEndPoint);
-        this.tempEndPoint.dispose();
         this.tempEndPoint = null;
       }
     }
     this.isDrawing = false;
+    this.startPoint = null;
+    this.currentRectangle = null;
+    this.points = [];
+  }
+
+  protected cancelDrawing(): void {
+    super.cancelDrawing();
+
+    if (this.currentRectangle) {
+      this.entityManager.removeEntity(this.currentRectangle);
+      this.currentRectangle = null;
+    }
+    if (this.tempEndPoint) {
+      this.entityManager.removeEntity(this.tempEndPoint);
+      this.tempEndPoint = null;
+    }
+    this.startPoint = null;
   }
 }
