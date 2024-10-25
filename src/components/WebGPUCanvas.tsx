@@ -33,7 +33,7 @@ const WebGPUCanvas: React.FC = () => {
 
         toolManagerRef.current = new ToolManager(
           entityManagerRef.current,
-          constraintManagerRef.current,
+          // constraintManagerRef.current,
           rendererRef.current
         );
 
@@ -62,13 +62,13 @@ const WebGPUCanvas: React.FC = () => {
   }, []);
 
   const handleMouseDown = (event: MouseEvent) => {
-    if (event.button === 0) toolManagerRef.current?.getActiveTool().onLeftclick(event);
+    if (event.button === 0) toolManagerRef.current?.getActiveTool().onLeftClick(event);
     if (event.button === 1) toolManagerRef.current?.getPanTool().onWheelClick(event);
   };
 
   const handleMouseMove = (event: MouseEvent) => {
     toolManagerRef.current?.getPanTool().onMouseMove(event);
-    toolManagerRef.current?.getActiveTool().onMouseMove(event);
+    toolManagerRef.current?.getActiveTool().onMouseMove!(event);
   };
 
   const handleMouseUp = (event: MouseEvent) => {
@@ -120,14 +120,14 @@ const WebGPUCanvas: React.FC = () => {
         break;
 
       default:
-        toolManagerRef.current.getActiveTool()?.onKeyDown(event);
+        toolManagerRef.current.getActiveTool()?.onKeyDown!(event);
         break;
     }
   };
 
   const handleWheel = (event: WheelEvent) => {
     event.preventDefault();
-    toolManagerRef.current?.getZoomTool().onWheelScroll(event);
+    toolManagerRef.current?.getZoomTool().onWheel(event);
   };
 
   return (

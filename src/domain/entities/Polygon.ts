@@ -1,6 +1,4 @@
-//TODO:
-// 1. fix issues with side input
-// 2. fix issue with vertex highlighting
+// src/domain/entities/Polygon.ts
 
 import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { PolygonShader } from '../../shaders/PolygonShader';
@@ -23,120 +21,30 @@ export class Polygon {
   private color: Float32Array;
 
   constructor(renderer: Renderer, centerX: number, centerY: number, numSides: number) {
-    this.color = new Float32Array([1.0, 0.0, 0.0, 1.0])
+    this.color = new Float32Array([1.0, 0.0, 0.0, 1.0]);
     this.renderer = renderer;
     this.device = renderer.getDevice();
-    this.pipeline = this.setupPipeline();
-    this.bindGroup = this.setupBindGroup();
     this.centerX = centerX;
     this.centerY = centerY;
     this.numSides = numSides;
+
+    this.pipeline = this.setupPipeline();
+    this.cameraBuffer = this.createCameraBuffer();
+    this.colorBuffer = this.createColorBuffer();
+    this.bindGroup = this.setupBindGroup();
+
+    // Initialize radius to a default value
+    this.radius = 1; // Or any default value
+    this.updateVertices();
   }
 
-  private setupBindGroup(): GPUBindGroup {
-    const cameraData = new Float32Array([0, 0, 1, 0]);
-    const initialColor = this.color;
-
-    this.cameraBuffer = this.device.createBuffer({
-      size: cameraData.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-
-    this.colorBuffer = this.device.createBuffer({
-      size: initialColor.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-
-    this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
-    this.device.queue.writeBuffer(this.colorBuffer, 0, initialColor);
-
-    const bindGroup = this.device.createBindGroup({
-      layout: this.pipeline.getBindGroupLayout(0),
-      entries: [
-        {
-          binding: 0,
-          resource: {
-            buffer: this.cameraBuffer,
-          },
-        },
-        {
-          binding: 1,
-          resource: {
-            buffer: this.colorBuffer,
-          },
-        },
-      ],
-    });
-
-    return bindGroup;
+  // Method to set the number of sides and update the polygon
+  public setNumSides(numSides: number): void {
+    this.numSides = numSides;
+    this.updateVertices();
   }
 
-  private setupPipeline() {
-    const polygonVertexShaderModule = this.device.createShaderModule({
-      code: PolygonShader.VERTEX,
-    });
-
-    const polygonFragmentShaderModule = this.device.createShaderModule({
-      code: PolygonShader.FRAGMENT,
-    });
-
-    const polygonPipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [this.device.createBindGroupLayout({
-        entries: [
-          {
-            binding: 0,
-            visibility: GPUShaderStage.VERTEX,
-            buffer: {
-              type: 'uniform',
-            },
-          },
-          {
-            binding: 1,
-            visibility: GPUShaderStage.FRAGMENT,
-            buffer: {
-              type: 'uniform',
-            },
-          },
-        ],
-      })],
-    });
-
-    return this.device.createRenderPipeline({
-      layout: polygonPipelineLayout,
-      vertex: {
-        module: polygonVertexShaderModule,
-        entryPoint: 'main',
-        buffers: [
-          {
-            arrayStride: 2 * 4,
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
-          },
-        ],
-      },
-      fragment: {
-        module: polygonFragmentShaderModule,
-        entryPoint: 'main',
-        targets: [
-          {
-            format: this.renderer.getFormat(),
-          },
-        ],
-      },
-      primitive: {
-        topology: 'line-strip',
-        stripIndexFormat: undefined,
-        frontFace: 'ccw',
-        cullMode: 'none',
-      },
-    });
-  }
-
+  // Method to update the radius based on a point (e.g., mouse position)
   public updateRadiusFromPoint(x: number, y: number): void {
     const dx = x - this.centerX;
     const dy = y - this.centerY;
@@ -145,6 +53,7 @@ export class Polygon {
   }
 
   private updateVertices(): void {
+    // Destroy previous vertex buffer if it exists
     if (this.vertexBuffer) {
       this.vertexBuffer.destroy();
     }
@@ -168,19 +77,122 @@ export class Polygon {
 
     this.vertices = new Float32Array(verticesArray);
 
-    if (this.vertices.length > 0) {
-      this.vertexBuffer = this.device.createBuffer({
-        size: this.vertices.byteLength,
-        usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-      });
-      this.device.queue.writeBuffer(this.vertexBuffer, 0, this.vertices);
-    }
+    // Create new vertex buffer
+    this.vertexBuffer = this.device.createBuffer({
+      size: this.vertices.byteLength,
+      usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+    });
+    this.device.queue.writeBuffer(this.vertexBuffer, 0, this.vertices);
+  }
+
+  private setupPipeline(): GPURenderPipeline {
+    const vertexShaderModule = this.device.createShaderModule({
+      code: PolygonShader.VERTEX,
+    });
+
+    const fragmentShaderModule = this.device.createShaderModule({
+      code: PolygonShader.FRAGMENT,
+    });
+
+    const bindGroupLayout = this.device.createBindGroupLayout({
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: { type: 'uniform' },
+        },
+        {
+          binding: 1,
+          visibility: GPUShaderStage.FRAGMENT,
+          buffer: { type: 'uniform' },
+        },
+      ],
+    });
+
+    const pipelineLayout = this.device.createPipelineLayout({
+      bindGroupLayouts: [bindGroupLayout],
+    });
+
+    return this.device.createRenderPipeline({
+      layout: pipelineLayout,
+      vertex: {
+        module: vertexShaderModule,
+        entryPoint: 'main',
+        buffers: [
+          {
+            arrayStride: 2 * 4,
+            attributes: [
+              {
+                shaderLocation: 0,
+                offset: 0,
+                format: 'float32x2',
+              },
+            ],
+          },
+        ],
+      },
+      fragment: {
+        module: fragmentShaderModule,
+        entryPoint: 'main',
+        targets: [
+          {
+            format: this.renderer.getFormat(),
+          },
+        ],
+      },
+      primitive: {
+        topology: 'line-strip',
+        frontFace: 'ccw',
+        cullMode: 'none',
+      },
+    });
+  }
+
+  private setupBindGroup(): GPUBindGroup {
+    return this.device.createBindGroup({
+      layout: this.pipeline.getBindGroupLayout(0),
+      entries: [
+        {
+          binding: 0,
+          resource: { buffer: this.cameraBuffer },
+        },
+        {
+          binding: 1,
+          resource: { buffer: this.colorBuffer },
+        },
+      ],
+    });
+  }
+
+  private createCameraBuffer(): GPUBuffer {
+    const cameraData = new Float32Array([0, 0, 1, 0]);
+    const buffer = this.device.createBuffer({
+      size: cameraData.byteLength,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+    this.device.queue.writeBuffer(buffer, 0, cameraData);
+    return buffer;
+  }
+
+  private createColorBuffer(): GPUBuffer {
+    const buffer = this.device.createBuffer({
+      size: this.color.byteLength,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+    this.device.queue.writeBuffer(buffer, 0, this.color);
+    return buffer;
+  }
+
+  private updateCameraBuffer(): void {
+    const { x, y } = this.renderer.getCamera().getOffset();
+    const zoom = this.renderer.getCamera().getZoom();
+    const cameraData = new Float32Array([x, y, zoom, 0]);
+    this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
   }
 
   public draw(renderPass: GPURenderPassEncoder): void {
     if (this.vertexBuffer && this.vertices.length >= 4) {
       this.updateCameraBuffer();
-      this.updateColorBuffer(this.color);
       renderPass.setPipeline(this.pipeline);
       renderPass.setBindGroup(0, this.bindGroup);
       renderPass.setVertexBuffer(0, this.vertexBuffer);
@@ -196,7 +208,7 @@ export class Polygon {
   public dispose(): void {
     if (this.vertexBuffer) {
       this.vertexBuffer.destroy();
-      this.vertexBuffer = null as any;
+      this.vertexBuffer = null;
     }
 
     // Dispose of point representations
@@ -206,20 +218,11 @@ export class Polygon {
     this.points = [];
   }
 
-  public updateCameraBuffer() {
-    const { x, y } = this.renderer.getCamera().getOffset();
-    const zoom = this.renderer.getCamera().getZoom();
-    const cameraData = new Float32Array([x, y, zoom, 0]);
-
-
-    this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
-  }
-
-  public updateColorBuffer(newColor: Float32Array) {
-    if (newColor.length !== 4) {
+  public updateColor(color: Float32Array): void {
+    if (color.length !== 4) {
       throw new Error("Color must be a Float32Array with 4 components (RGBA).");
     }
-
-    this.device.queue.writeBuffer(this.colorBuffer, 0, newColor);
+    this.color = color;
+    this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
   }
 }

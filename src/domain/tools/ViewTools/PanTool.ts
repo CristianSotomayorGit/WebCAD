@@ -1,9 +1,8 @@
 // src/domain/tools/PanTool.ts
-import { Tool } from './Tool';
-import { Camera } from '../Camera';
-import { Renderer } from '../../infrastructure/rendering/Renderer';
+import { PAN_SPEED } from "../../../constants/ToolConstants";
+import { Camera } from "../../Camera";
 
-export class PanTool implements Tool {
+export class PanTool {
   private isPanning = false;
   private lastMousePosition: { x: number; y: number } | null = null;
   private camera: Camera;
@@ -27,7 +26,7 @@ export class PanTool implements Tool {
       const deltaY = event.clientY - this.lastMousePosition.y;
       const zoom = this.camera.getZoom();
 
-      const panSpeed = 0.00125; // Adjust this value between 0 and 1 for desired panning speed
+      const panSpeed = PAN_SPEED; // Adjust this value between 0 and 1 for desired panning speed
 
       // Adjust camera offset accordingly
       const offset = this.camera.getOffset();
