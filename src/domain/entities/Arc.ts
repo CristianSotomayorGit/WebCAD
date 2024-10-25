@@ -1,137 +1,65 @@
 // src/domain/entities/Arc.ts
 
-import { Renderer } from '../../infrastructure/rendering/Renderer';
+import { RenderableEntity } from './RenderableEntity';
 import { ArcShader } from '../../shaders/ArcShader';
+import { Renderer } from '../../infrastructure/rendering/Renderer';
 
 interface PointType {
   x: number;
   y: number;
 }
 
-export class Arc {
-  private renderer: Renderer;
-  private device: GPUDevice;
-  private vertexBuffer: GPUBuffer | null = null;
-  private cameraBuffer!: GPUBuffer;
-  private colorBuffer!: GPUBuffer;
-  private bindGroup: GPUBindGroup;
-  private pipeline: GPURenderPipeline;
-  private numVertices: number = 0;
-  private color: Float32Array;
-
+export class Arc extends RenderableEntity {
   private startPoint: PointType | null = null;
   private midPoint: PointType | null = null;
   private endPoint: PointType | null = null;
+  private vertexBuffer: GPUBuffer | null = null;
+  private numVertices: number = 0;
 
   constructor(renderer: Renderer) {
-    this.renderer = renderer;
-    this.device = renderer.getDevice();
-    this.color = new Float32Array([0.0, 1.0, 0.0, 1.0]); // Green color for visibility
-
-    this.pipeline = this.setupPipeline();
-    this.bindGroup = this.setupBindGroup();
+    super(renderer, new Float32Array([0.0, 1.0, 0.0, 1.0])); // Green color
+    this.setupPipeline();
+    this.setupBindGroup();
   }
 
-  private setupBindGroup(): GPUBindGroup {
-    const cameraData = new Float32Array([0, 0, 1, 0]);
-    const initialColor = this.color;
-
-    this.cameraBuffer = this.device.createBuffer({
-      size: cameraData.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-
-    this.colorBuffer = this.device.createBuffer({
-      size: initialColor.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-
-    this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
-    this.device.queue.writeBuffer(this.colorBuffer, 0, initialColor);
-
-    const bindGroup = this.device.createBindGroup({
-      layout: this.pipeline.getBindGroupLayout(0),
-      entries: [
-        {
-          binding: 0,
-          resource: {
-            buffer: this.cameraBuffer,
-          },
-        },
-        {
-          binding: 1,
-          resource: {
-            buffer: this.colorBuffer,
-          },
-        },
-      ],
-    });
-
-    return bindGroup;
-  }
-
-  private setupPipeline(): GPURenderPipeline {
-    const arcVertexShaderModule = this.device.createShaderModule({
+  protected setupPipeline(): void {
+    const vertexShaderModule = this.device.createShaderModule({
       code: ArcShader.VERTEX,
     });
 
-    const arcFragmentShaderModule = this.device.createShaderModule({
+    const fragmentShaderModule = this.device.createShaderModule({
       code: ArcShader.FRAGMENT,
     });
 
-    const pipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [
-        this.device.createBindGroupLayout({
-          entries: [
-            {
-              binding: 0,
-              visibility: GPUShaderStage.VERTEX,
-              buffer: {
-                type: 'uniform',
-              },
-            },
-            {
-              binding: 1,
-              visibility: GPUShaderStage.FRAGMENT,
-              buffer: {
-                type: 'uniform',
-              },
-            },
-          ],
-        }),
+    const bindGroupLayout = this.device.createBindGroupLayout({
+      entries: [
+        { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } },
+        { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
       ],
     });
 
-    return this.device.createRenderPipeline({
+    const pipelineLayout = this.device.createPipelineLayout({
+      bindGroupLayouts: [bindGroupLayout],
+    });
+
+    this.pipeline = this.device.createRenderPipeline({
       layout: pipelineLayout,
       vertex: {
-        module: arcVertexShaderModule,
+        module: vertexShaderModule,
         entryPoint: 'main',
         buffers: [
           {
-            arrayStride: 8,
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
+            arrayStride: 2 * 4,
+            attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x2' }],
           },
         ],
       },
       fragment: {
-        module: arcFragmentShaderModule,
+        module: fragmentShaderModule,
         entryPoint: 'main',
-        targets: [
-          {
-            format: this.renderer.getFormat(),
-          },
-        ],
+        targets: [{ format: this.renderer.getFormat() }],
       },
-      primitive: {
-        topology: 'line-strip',
-      },
+      primitive: { topology: 'line-strip' },
     });
   }
 
@@ -310,10 +238,9 @@ export class Arc {
     return { centerX, centerY, radius };
   }
 
-  public draw(renderPass: GPURenderPassEncoder): void {
+  public override draw(renderPass: GPURenderPassEncoder): void {
     if (this.numVertices > 0 && this.vertexBuffer) {
       this.updateCameraBuffer();
-      this.updateColorBuffer(this.color);
       renderPass.setPipeline(this.pipeline);
       renderPass.setBindGroup(0, this.bindGroup);
       renderPass.setVertexBuffer(0, this.vertexBuffer);
@@ -321,21 +248,11 @@ export class Arc {
     }
   }
 
-  private updateCameraBuffer(): void {
-    const { x, y } = this.renderer.getCamera().getOffset();
-    const zoom = this.renderer.getCamera().getZoom();
-    const cameraData = new Float32Array([x, y, zoom, 0]);
-
-    this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
-  }
-
-  private updateColorBuffer(newColor: Float32Array): void {
-    if (newColor.length !== 4) {
-      throw new Error(
-        'Color must be a Float32Array with 4 components (RGBA).'
-      );
+  public override dispose(): void {
+    if (this.vertexBuffer) {
+      this.vertexBuffer.destroy();
+      this.vertexBuffer = null;
     }
-
-    this.device.queue.writeBuffer(this.colorBuffer, 0, newColor);
+    super.dispose();
   }
 }

@@ -16,10 +16,8 @@ export abstract class RenderableEntity {
     this.device = renderer.getDevice();
     this.color = color || new Float32Array([1.0, 0.0, 0.0, 1.0]); // Default color: Red
 
-    this.setupPipeline();
     this.createCameraBuffer();
     this.createColorBuffer();
-    this.setupBindGroup();
   }
 
   protected abstract setupPipeline(): void;
@@ -71,6 +69,17 @@ export abstract class RenderableEntity {
     }
     this.color = color;
     this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
+  }
+
+  public dispose(): void {
+    if (this.cameraBuffer) {
+      this.cameraBuffer.destroy();
+      this.cameraBuffer = null as any;
+    }
+    if (this.colorBuffer) {
+      this.colorBuffer.destroy();
+      this.colorBuffer = null as any;
+    }
   }
 
   public abstract draw(renderPass: GPURenderPassEncoder): void;
