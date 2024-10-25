@@ -15,6 +15,7 @@ import { PolygonTool } from '../tools/DrawingTools/PolygonTool';
 // import { ConstraintManager } from './ConstraintManager'; // Remove if not used
 import { ArcTool } from '../tools/DrawingTools/ArcTool';
 import { Camera } from '../Camera';
+import { EllipseTool } from '../tools/DrawingTools/EllipseTool';
 
 export class ToolManager {
   private activeTool: DrawingTool;
@@ -33,6 +34,8 @@ export class ToolManager {
     this.tools['Rectangle'] = new RectangleTool(entityManager, renderer);
     this.tools['Polygon'] = new PolygonTool(entityManager, renderer);
     this.tools['Arc'] = new ArcTool(entityManager, renderer);
+    this.tools['Ellipse'] = new EllipseTool(entityManager, renderer);
+
 
     // Set default active tool
     this.activeTool = this.tools['Point'];
