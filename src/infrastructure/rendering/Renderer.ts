@@ -16,7 +16,7 @@ export class Renderer {
   private cameraBuffer!: GPUBuffer;
   private colorBuffer!: GPUBuffer;
   private camera: Camera;
-  // private grid!: Grid;
+  private grid!: Grid;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -61,7 +61,7 @@ export class Renderer {
     this.setupPipelines();
     this.setupBuffers();
 
-    // this.grid = new Grid(this); // Initialize grid after device is ready
+    this.grid = new Grid(this); // Initialize grid after device is ready
   }
 
   public resizeCanvas() {
@@ -355,9 +355,9 @@ export class Renderer {
 
 
     // Draw Grid
-    // renderPass.setPipeline(this.gridPipeline);
-    // renderPass.setBindGroup(0, this.bindGroup);
-    // this.grid.draw(renderPass);
+    renderPass.setPipeline(this.gridPipeline);
+    renderPass.setBindGroup(0, this.bindGroup);
+    this.grid.draw(renderPass);
 
 
     const entities = this.entityManager.getEntities();
