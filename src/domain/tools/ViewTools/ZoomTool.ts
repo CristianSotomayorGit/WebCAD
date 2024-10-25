@@ -1,11 +1,11 @@
 // src/domain/tools/ZoomTool.ts
 
-import { Tool } from '../DrawingTools/DrawingTool';
+import { ZOOM_FACTOR } from '../../../constants/ToolConstants';
 import { Camera } from '../../Camera';
 
-export class ZoomTool implements Tool {
+export class ZoomTool  {
   private camera: Camera;
-  private ZOOM_FACTOR = 1.1;
+  private ZOOM_FACTOR = ZOOM_FACTOR;
 
   constructor(camera: Camera) {
     this.camera = camera;

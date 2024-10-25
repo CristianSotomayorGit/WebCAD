@@ -1,11 +1,11 @@
 // src/domain/tools/AbstractDrawingTool.ts
 
-import { Tool } from './DrawingTool';
+import { DrawingTool } from './DrawingTool';
 import { Renderer } from '../../../infrastructure/rendering/Renderer';
 import { EntityManager } from '../../managers/EntityManager';
 import { Point } from '../../entities/Point';
 
-export abstract class AbstractDrawingTool implements Tool {
+export abstract class AbstractDrawingTool implements DrawingTool {
     protected renderer: Renderer;
     protected entityManager: EntityManager;
     protected isDrawing: boolean = false;

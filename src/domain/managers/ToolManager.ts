@@ -1,6 +1,6 @@
 // src/domain/managers/ToolManager.ts
 
-import { Tool } from '../tools/DrawingTools/DrawingTool';
+import { DrawingTool } from '../tools/DrawingTools/DrawingTool';
 import { LineTool } from '../tools/DrawingTools/LineTool';
 import { PanTool } from '../tools/ViewTools/PanTool';
 import { EntityManager } from './EntityManager';
@@ -8,8 +8,7 @@ import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { ZoomTool } from '../tools/ViewTools/ZoomTool';
 import { PointTool } from '../tools/DrawingTools/PointTool';
 import { PolylineTool } from '../tools/DrawingTools/PolylineTool';
-// Assuming CircleTool is available and refactored
-// import { CircleTool } from '../tools/CircleTool';
+import { CircleTool } from '../tools/DrawingTools/CircleTool';
 import { SplineTool } from '../tools/DrawingTools/SplineTool';
 import { RectangleTool } from '../tools/DrawingTools/RectangleTool';
 import { PolygonTool } from '../tools/DrawingTools/PolygonTool';
@@ -18,10 +17,10 @@ import { ArcTool } from '../tools/DrawingTools/ArcTool';
 import { Camera } from '../Camera';
 
 export class ToolManager {
-  private activeTool: Tool;
+  private activeTool: DrawingTool;
   private panTool: PanTool;
   private zoomTool: ZoomTool;
-  private tools: { [key: string]: Tool } = {};
+  private tools: { [key: string]: DrawingTool } = {};
   private activeToolName: string = 'Point';
 
   constructor(entityManager: EntityManager, renderer: Renderer) {
@@ -29,8 +28,7 @@ export class ToolManager {
     this.tools['Line'] = new LineTool(entityManager, renderer);
     this.tools['Point'] = new PointTool(entityManager, renderer);
     this.tools['Polyline'] = new PolylineTool(entityManager, renderer);
-    // // Uncomment if CircleTool is available
-    // // this.tools['Circle'] = new CircleTool(entityManager, renderer);
+    this.tools['Circle'] = new CircleTool(entityManager, renderer);
     this.tools['Spline'] = new SplineTool(entityManager, renderer);
     this.tools['Rectangle'] = new RectangleTool(entityManager, renderer);
     this.tools['Polygon'] = new PolygonTool(entityManager, renderer);
@@ -53,7 +51,7 @@ export class ToolManager {
     }
   }
 
-  public getActiveTool(): Tool {
+  public getActiveTool(): DrawingTool {
     return this.activeTool;
   }
 

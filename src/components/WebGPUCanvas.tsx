@@ -127,7 +127,7 @@ const WebGPUCanvas: React.FC = () => {
 
   const handleWheel = (event: WheelEvent) => {
     event.preventDefault();
-    toolManagerRef.current?.getZoomTool().onWheelScroll(event);
+    toolManagerRef.current?.getZoomTool().onWheel(event);
   };
 
   return (

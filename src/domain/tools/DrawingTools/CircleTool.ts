@@ -1,151 +1,90 @@
-// src/domain/tools/ArcTool.ts
+// src/domain/tools/CircleTool.ts
 
-import { Tool } from './DrawingTool';
-import { EntityManager } from '../../managers/EntityManager';
-import { Renderer } from '../../../infrastructure/rendering/Renderer';
-import { Arc } from '../../entities/Arc';
+import { AbstractDrawingTool } from './AbstractDrawingTool';
+import { Circle } from '../../entities/Circle';
 import { Point } from '../../entities/Point';
 
-interface PointType {
-    x: number;
-    y: number;
-}
+export class CircleTool extends AbstractDrawingTool {
+    private currentCircle: Circle | null = null;
+    private centerPoint: Point | null = null;
+    private tempPoint: Point | null = null;
 
-export class ArcTool implements Tool {
-    private renderer: Renderer;
-    private entityManager: EntityManager;
+    public onLeftClick(event: MouseEvent): void {
+        const { x, y } = this.getWorldPosition(event);
 
-    private clickCount: number = 0;
-    private startPoint: PointType | null = null;
-    private midPoint: PointType | null = null;
-    private endPoint: PointType | null = null;
-    private temporaryArc: Arc | null = null;
+        if (!this.isDrawing) {
+            // First click: set the center of the circle
+            this.centerPoint = this.createAndAddPoint(x, y);
+            this.isDrawing = true;
 
-    // Point entities for rendering
-    private startPointEntity: Point | null = null;
-    private midPointEntity: Point | null = null;
-    private endPointEntity: Point | null = null;
-
-    constructor(entityManager: EntityManager, renderer: Renderer) {
-        this.renderer = renderer;
-        this.entityManager = entityManager;
-    }
-
-    public onLeftclick(event: MouseEvent): void {
-        const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-        const x = event.clientX - canvasRect.left;
-        const y = event.clientY - canvasRect.top;
-        const worldPosition = this.renderer.screenToWorld(x, y);
-
-        if (!worldPosition) return;
-
-        const point: PointType = { x: worldPosition.x, y: worldPosition.y };
-
-        if (this.clickCount === 0) {
-            // First click: set start point
-            this.startPoint = point;
-            this.clickCount = 1;
-
-            // Create and add the start point entity
-            this.startPointEntity = new Point(point.x, point.y, this.renderer);
-            this.entityManager.addEntity(this.startPointEntity);
-
-            // Initialize temporary arc
-            this.temporaryArc = new Arc(this.renderer);
-            this.temporaryArc.setStartPoint(this.startPoint);
-            this.entityManager.addTemporaryEntity(this.temporaryArc);
-        } else if (this.clickCount === 1) {
-            // Second click: set mid point
-            this.midPoint = point;
-            this.clickCount = 2;
-
-            // Create and add the mid point entity
-            this.midPointEntity = new Point(point.x, point.y, this.renderer);
-            this.entityManager.addEntity(this.midPointEntity);
-
-            // Update temporary arc with mid point
-            if (this.temporaryArc) {
-                this.temporaryArc.setMidPoint(this.midPoint);
-            }
-        } else if (this.clickCount === 2) {
-            // Third click: set end point
-            this.endPoint = point;
-            this.clickCount = 0;
-
-            // Create and add the end point entity
-            this.endPointEntity = new Point(point.x, point.y, this.renderer);
-            this.entityManager.addEntity(this.endPointEntity);
-
-            // Finalize the arc
-            if (this.temporaryArc) {
-                this.temporaryArc.setEndPoint(this.endPoint);
-                // Remove temporary arc and add it as a permanent entity
-                this.entityManager.removeTemporaryEntity(this.temporaryArc);
-                this.entityManager.addEntity(this.temporaryArc);
-                this.temporaryArc = null;
-            }
-
-            // Reset points
-            this.startPoint = null;
-            this.midPoint = null;
-            this.endPoint = null;
-
-            // Reset point entities
-            this.startPointEntity = null;
-            this.midPointEntity = null;
-            this.endPointEntity = null;
+            // Create the circle with zero radius
+            this.currentCircle = new Circle(this.renderer, x, y, 0);
+            this.entityManager.addEntity(this.currentCircle);
+        } else if (this.isDrawing) {
+            // Second click: finalize the circle
+            this.finishDrawing();
         }
     }
 
     public onMouseMove(event: MouseEvent): void {
-        if (this.clickCount === 0) return;
+        if (this.isDrawing && this.currentCircle) {
+            const { x, y } = this.getWorldPosition(event);
 
-        const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-        const x = event.clientX - canvasRect.left;
-        const y = event.clientY - canvasRect.top;
-        const worldPosition = this.renderer.screenToWorld(x, y);
+            // Update the radius of the circle based on the distance from the center
+            const dx = x - this.centerPoint!.getX();
+            const dy = y - this.centerPoint!.getY();
+            const radius = Math.sqrt(dx * dx + dy * dy);
 
-        if (!worldPosition) return;
+            this.currentCircle.setRadius(radius);
 
-        const point: PointType = { x: worldPosition.x, y: worldPosition.y };
-
-        if (this.clickCount === 1 && this.temporaryArc) {
-            // Update mid point of temporary arc
-            this.temporaryArc.setMidPoint(point);
-        } else if (this.clickCount === 2 && this.temporaryArc) {
-            // Update end point of temporary arc
-            this.temporaryArc.setEndPoint(point);
+            // Update the temporary point position
+            if (this.tempPoint) {
+                this.tempPoint.setX(x);
+                this.tempPoint.setY(y);
+            } else {
+                // Create a temporary point at the current mouse position
+                this.tempPoint = this.createAndAddPoint(x, y);
+            }
         }
-    }
-
-    public onMouseUp(event: MouseEvent): void {
-        // No action needed on mouse up
     }
 
     public onKeyDown(event: KeyboardEvent): void {
-        if (event.key === 'Escape') {
-            // Cancel arc drawing
-            if (this.temporaryArc) {
-                this.entityManager.removeTemporaryEntity(this.temporaryArc);
-                this.temporaryArc = null;
-            }
-            if (this.startPointEntity) {
-                this.entityManager.removeEntity(this.startPointEntity);
-                this.startPointEntity = null;
-            }
-            if (this.midPointEntity) {
-                this.entityManager.removeEntity(this.midPointEntity);
-                this.midPointEntity = null;
-            }
-            if (this.endPointEntity) {
-                this.entityManager.removeEntity(this.endPointEntity);
-                this.endPointEntity = null;
-            }
+        super.onKeyDown(event);
 
-            this.clickCount = 0;
-            this.startPoint = null;
-            this.midPoint = null;
-            this.endPoint = null;
+        if (this.isDrawing) {
+            if (event.key === 'Enter' || event.key === 'Return' || event.key === ' ') {
+                // Finish drawing the circle
+                this.finishDrawing();
+            }
         }
+    }
+
+    protected cancelDrawing(): void {
+        super.cancelDrawing();
+
+        if (this.currentCircle) {
+            this.entityManager.removeEntity(this.currentCircle);
+            this.currentCircle = null;
+        }
+        if (this.tempPoint) {
+            this.entityManager.removeEntity(this.tempPoint);
+            this.tempPoint = null;
+        }
+        if (this.centerPoint) {
+            this.entityManager.removeEntity(this.centerPoint);
+            this.centerPoint = null;
+        }
+    }
+
+    private finishDrawing(): void {
+        if (this.currentCircle && this.tempPoint) {
+            // Remove the temporary point
+            this.entityManager.removeEntity(this.tempPoint);
+            this.tempPoint = null;
+        }
+        this.isDrawing = false;
+        this.currentCircle = null;
+        this.centerPoint = null;
+        this.points = [];
     }
 }
