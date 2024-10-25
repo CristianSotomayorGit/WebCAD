@@ -6,7 +6,7 @@ import { Point } from '../../entities/Point';
 
 export class PolylineTool extends AbstractDrawingTool {
   private currentPolyline: Polyline | null = null;
-  private tempPoint: Point | null = null; // Temporary point for dynamic feedback
+  private tempPoint: Point | null = null;
   private isOrthoConstraintActive = false;
 
   public onLeftClick(event: MouseEvent): void {
@@ -27,22 +27,21 @@ export class PolylineTool extends AbstractDrawingTool {
       this.isDrawing = true;
 
       this.currentPolyline = new Polyline(this.renderer);
-      this.currentPolyline.addPoint(newPoint);
       this.entityManager.addEntity(this.currentPolyline);
 
-      // Create a temporary point for dynamic feedback
+      this.currentPolyline.addPoint(newPoint);
+
       this.tempPoint = this.createAndAddPoint(adjustedPosition.x, adjustedPosition.y);
       this.currentPolyline.addPoint(this.tempPoint);
     } else {
       if (this.currentPolyline && this.tempPoint) {
-        // Replace the temporary point with the new fixed point
         this.currentPolyline.removePoint(this.tempPoint);
         this.entityManager.removeEntity(this.tempPoint);
+        this.tempPoint.dispose();
         this.tempPoint = null;
 
         this.currentPolyline.addPoint(newPoint);
 
-        // Create a new temporary point for the next segment
         this.tempPoint = this.createAndAddPoint(adjustedPosition.x, adjustedPosition.y);
         this.currentPolyline.addPoint(this.tempPoint);
       }
@@ -62,13 +61,10 @@ export class PolylineTool extends AbstractDrawingTool {
         });
       }
 
-      // Update the position of the temporary point
       this.tempPoint.setX(adjustedPosition.x);
       this.tempPoint.setY(adjustedPosition.y);
 
-      // Update the last line's vertex buffer
-      const lastLine = this.currentPolyline['lines'][this.currentPolyline['lines'].length - 1];
-      lastLine.updateVertexBuffer();
+      this.currentPolyline.updateVertexBuffer();
     }
   }
 
@@ -79,7 +75,6 @@ export class PolylineTool extends AbstractDrawingTool {
       if (event.key === 'Enter' || event.key === 'Return' || event.key === ' ') {
         this.finishDrawing();
       } else if (event.key === 'Shift') {
-        // Toggle orthogonal constraint
         this.isOrthoConstraintActive = !this.isOrthoConstraintActive;
       }
     }
@@ -90,15 +85,13 @@ export class PolylineTool extends AbstractDrawingTool {
 
     if (this.currentPolyline) {
       this.entityManager.removeEntity(this.currentPolyline);
-      // Remove associated points
-      for (const point of this.currentPolyline.getPoints()) {
-        this.entityManager.removeEntity(point);
-      }
+      this.currentPolyline.dispose();
       this.currentPolyline = null;
     }
 
     if (this.tempPoint) {
       this.entityManager.removeEntity(this.tempPoint);
+      this.tempPoint.dispose();
       this.tempPoint = null;
     }
 
@@ -108,16 +101,15 @@ export class PolylineTool extends AbstractDrawingTool {
   private finishDrawing(): void {
     if (this.currentPolyline) {
       if (this.tempPoint) {
-        // Remove the temporary point from the polyline
         this.currentPolyline.removePoint(this.tempPoint);
         this.entityManager.removeEntity(this.tempPoint);
+        this.tempPoint.dispose();
         this.tempPoint = null;
       }
       this.currentPolyline = null;
     }
     this.isDrawing = false;
     this.isOrthoConstraintActive = false;
-    this.points = [];
   }
 
   private applyOrthogonalConstraint(
@@ -128,10 +120,8 @@ export class PolylineTool extends AbstractDrawingTool {
     const deltaY = Math.abs(currentPoint.y - referencePoint.y);
 
     if (deltaX > deltaY) {
-      // Constrain to horizontal line
       return { x: currentPoint.x, y: referencePoint.y };
     } else {
-      // Constrain to vertical line
       return { x: referencePoint.x, y: currentPoint.y };
     }
   }

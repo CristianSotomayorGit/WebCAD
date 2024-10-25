@@ -82,7 +82,7 @@ export class Spline extends RenderableEntity {
     }
   }
 
-  private updateVertexBuffer(): void {
+  public updateVertexBuffer(): void {
     const vertices: number[] = [];
     const numSegments = 20; // Adjust for curve smoothness per segment
 
