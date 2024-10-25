@@ -1,8 +1,8 @@
 // src/domain/entities/Arc.ts
 
 import { RenderableEntity } from './RenderableEntity';
-import { ArcShader } from '../../shaders/ArcShader';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
+import { ArcShader } from '../../shaders/ArcShader';
 
 interface PointType {
   x: number;
@@ -18,8 +18,6 @@ export class Arc extends RenderableEntity {
 
   constructor(renderer: Renderer) {
     super(renderer, new Float32Array([0.0, 1.0, 0.0, 1.0])); // Green color
-    this.setupPipeline();
-    this.setupBindGroup();
   }
 
   protected setupPipeline(): void {
