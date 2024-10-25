@@ -11,7 +11,7 @@ Additional Drawing Tools
 
 2. Arc and Ellipse Tools
 
-    Arc Tool: Provides the ability to draw arcs by specifying start point, end point, and radius or angle.
+    *Arc Tool: Provides the ability to draw arcs by specifying start point, end point, and radius or angle.
     Ellipse Tool: Allows drawing ellipses by specifying the major and minor axes.
 
 3. Text and Annotation Tools
@@ -103,8 +103,8 @@ Measurement and Inquiry Tools
 Utility and Navigation Tools
 1. Zoom and Pan
 
-    Zoom: Allows users to zoom in/out for detailed work.
-    Pan: Moves the view without changing the zoom level.
+    *Zoom: Allows users to zoom in/out for detailed work.
+    *Pan: Moves the view without changing the zoom level.
 
 2. View Management
 
@@ -117,10 +117,10 @@ Advanced Features to Consider
     Geometric Constraints: Applies relationships like parallelism, perpendicularity, and concentricity.
     Dimensional Constraints: Controls object dimensions with parameters.
 
-2. Script and Macro Support
+2. ?Script and Macro Support
 
-    Scripting: Allows running sequences of commands for automation.
-    Custom Macros: Enables users to create custom commands.
+    ?Scripting: Allows running sequences of commands for automation.
+    ?Custom Macros: Enables users to create custom commands.
 
 3. Import/Export Capabilities
 
