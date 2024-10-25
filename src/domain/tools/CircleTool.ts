@@ -18,8 +18,6 @@ export class CircleTool implements Tool {
   ) { }
 
   public onLeftclick(event: MouseEvent): void {
-
-    console.log('niggaszzzzzzzzz')
     const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
     const x = event.clientX - canvasRect.left;
     const y = event.clientY - canvasRect.top;

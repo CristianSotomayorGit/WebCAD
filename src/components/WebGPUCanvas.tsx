@@ -4,10 +4,9 @@ import { EntityManager } from '../domain/managers/EntityManager';
 import { ToolManager } from '../domain/managers/ToolManager';
 import CommandToolbar from './CommandToolbar';
 import ButtonToolbar from './ButtonToolbar';
-import ScaleButton from './ScaleButton';
 import { ConstraintType } from '../domain/constraints/ConstraintTypes';
-// import { Point } from '../domain/entities/Point';
 import { ConstraintManager } from '../domain/managers/ConstraintManager';
+import ConstraintToolbar from './ConstraintToolbar';
 
 const WebGPUCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -17,12 +16,11 @@ const WebGPUCanvas: React.FC = () => {
   const constraintManagerRef = useRef<ConstraintManager>();
 
   const [activeToolName, setActiveToolName] = useState('Select');
-  const [isSnapping, setSnap] = useState(false);
-  const isSnappingRef = useRef(isSnapping);
+  const [isSnapChecked, setIsSnapChecked] = useState(false);
+  const [isOrthoChecked, setIsOrthoChecked] = useState(false);
 
   useEffect(() => {
     const initRenderer = async () => {
-
       if (canvasRef.current) {
         rendererRef.current = new Renderer(
           canvasRef.current,
@@ -31,7 +29,7 @@ const WebGPUCanvas: React.FC = () => {
 
         await rendererRef.current.initialize();
 
-        constraintManagerRef.current = new ConstraintManager(entityManagerRef.current, rendererRef.current)
+        constraintManagerRef.current = new ConstraintManager(entityManagerRef.current, rendererRef.current);
 
         toolManagerRef.current = new ToolManager(
           entityManagerRef.current,
@@ -68,73 +66,13 @@ const WebGPUCanvas: React.FC = () => {
     if (event.button === 1) toolManagerRef.current?.getPanTool().onWheelClick(event);
   };
 
-  // const calculateDistance = (mouseX: number, mouseY: number, pointX: number, pointY: number): number => {
-  //   const dx = pointX - mouseX;
-  //   const dy = pointY - mouseY;
-  //   return Math.sqrt(dx * dx + dy * dy);
-  // }
-
   const handleMouseMove = (event: MouseEvent) => {
     toolManagerRef.current?.getPanTool().onMouseMove(event);
     toolManagerRef.current?.getActiveTool().onMouseMove(event);
-
-    // if (isSnappingRef.current) {
-    //   // console.log('screen', event.clientX, event.clientY);
-    //   // console.log('world', rendererRef.current?.screenToWorld(event.clientX, event.clientY));
-
-    //   let nearest: Point | null = null;
-    //   let minDist = Infinity;
-
-    //   for (const entity of entityManagerRef.current?.getEntities()) {
-    //     // console.log('screen', event.clientX, event.clientY);
-    //     // console.log('world', rendererRef.current?.screenToWorld(event.clientX, event.clientY));
-
-    //     const canvasRect = rendererRef.current?.getCanvas().getBoundingClientRect();
-
-
-    //     if (!canvasRect) throw new Error('error canvasRect')
-    //     const x = event.clientX - canvasRect.left;
-    //     const y = event.clientY - canvasRect.top;
-
-    //     const mouse = rendererRef.current?.screenToWorld(x, y);
-
-    //     if (!mouse) throw new Error('mouse error')
-    //     if (entity instanceof Point) {
-    //       const dist = calculateDistance(mouse.x, mouse.y, entity.getX(), entity.getY());
-    //       // console.log(mouse.x,        // console.log('screen', event.clientX, event.clientY);
-    // console.log('world', rendererRef.current?.screenToWorld(event.clientX, event.clientY));
-
-    // const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-
-    // if (!canvasRect) throw new Error('error canvasRect')
-    // const x = event.clientX - canvasRect.left;
-    // const y = event.clientY - canvasRect.top;mouse.y, entity.getX(), entity.getY());
-    //       if (dist < this.nearestPoint ? this.nearestPoint : Dist && dist <= 0.02) {
-    //         minDist = dist;
-    //         nearest = entity;
-
-    //         console.log('NEAR');
-
-    //         nearest.setColor(new Float32Array([1.0, 1.0, 1.0, 1.0]));
-    //       }
-
-    //       else {
-    //         entity.setColor(new Float32Array([0.5, 0.5, 0.5, 1.0]));
-
-    //       }
-    //     }
-    //   }
-    // }
   };
-
-  useEffect(() => {
-    isSnappingRef.current = isSnapping;
-  }, [isSnapping]);
-
 
   const handleMouseUp = (event: MouseEvent) => {
     toolManagerRef.current?.getPanTool().onMouseUp(event);
-    // toolManagerRef.current?.getActiveTool().onMouseUp(event);
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -171,14 +109,14 @@ const WebGPUCanvas: React.FC = () => {
         toolManagerRef.current.setActiveTool('Rectangle'); // Update tool manager
         break;
 
-      case 'f3':
-        constraintManagerRef.current.toggleConstraint(ConstraintType.Snap, 'end');
-        console.log('Snap Constraint Toggled');
+      case 'shift' && 'z':
+        setIsOrthoChecked((prev) => !prev); // Toggle Ortho checkbox state
+        constraintManagerRef.current.toggleConstraint(ConstraintType.Orthogonal, 'both');
         break;
 
-      case 'shift':
-        constraintManagerRef.current.toggleConstraint(ConstraintType.Orthogonal, 'end');
-        console.log('Orthogonal Constraint Toggled');
+      case 'f3' && 'x':
+        setIsSnapChecked((prev) => !prev); // Toggle Snap checkbox state
+        constraintManagerRef.current.toggleConstraint(ConstraintType.Snap, 'both');
         break;
 
       default:
@@ -187,24 +125,27 @@ const WebGPUCanvas: React.FC = () => {
     }
   };
 
-
-
   const handleWheel = (event: WheelEvent) => {
+    event.preventDefault();
     toolManagerRef.current?.getZoomTool().onWheelScroll(event);
   };
 
   return (
-
     <>
       <CommandToolbar activeTool={activeToolName} />
       <ButtonToolbar
         toolManagerRef={toolManagerRef}
         setActiveToolName={setActiveToolName}
       />
-      <ScaleButton
-        toolManagerRef={toolManagerRef} />
-      <canvas ref={canvasRef} style={{ display: 'block' }} />
-    </>
+      <ConstraintToolbar
+        constraintToolbarRef={constraintManagerRef}
+        isSnapChecked={isSnapChecked}
+        setIsSnapChecked={setIsSnapChecked}
+        isOrthoChecked={isOrthoChecked}
+        setIsOrthoChecked={setIsOrthoChecked}
+      />
+<canvas ref={canvasRef} style={{ display: 'block', overflow: 'hidden' }} />
+</>
   );
 };
 

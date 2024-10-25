@@ -20,7 +20,6 @@ export class ZoomTool implements Tool {
         if (this.camera) {
             const newZoom = this.camera.getZoom() * (1 + delta);
             this.camera.setZoom(newZoom);
-            console.log(newZoom)
         }
     }
 

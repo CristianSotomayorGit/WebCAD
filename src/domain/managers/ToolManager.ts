@@ -12,9 +12,9 @@ import { PolylineTool } from '../tools/PolylineTool';
 import { CircleTool } from '../tools/CircleTool';
 import { SplineTool } from '../tools/SplineTool';
 import { RectangleTool } from '../tools/RectangleTool';
-import { Polygon } from '../entities/Polygon';
 import { PolygonTool } from '../tools/PolygonTool';
 import { ConstraintManager } from './ConstraintManager';
+import { ArcTool } from '../tools/ArcTool';
 
 export class ToolManager {
   private activeTool: Tool;
@@ -32,6 +32,8 @@ export class ToolManager {
     this.tools['Spline'] = new SplineTool(entityManager, renderer);
     this.tools['Rectangle'] = new RectangleTool(entityManager, renderer);
     this.tools['Polygon'] = new PolygonTool(entityManager, renderer)
+    this.tools['Arc'] = new ArcTool(entityManager, renderer)
+
 
     this.activeTool = this.tools['Select'];
 

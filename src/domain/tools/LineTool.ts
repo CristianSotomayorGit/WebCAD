@@ -1,4 +1,4 @@
-// tools/LineTool.ts
+// LineTool.ts
 
 import { Tool } from './Tool';
 import { EntityManager } from '../managers/EntityManager';
@@ -6,9 +6,6 @@ import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { Line } from '../entities/Line';
 import { Point } from '../entities/Point';
 import { ConstraintManager } from '../managers/ConstraintManager';
-import { ConstraintType } from '../constraints/ConstraintTypes';
-import { OrthogonalConstraint } from '../constraints/OrthogonalConstraint';
-import { PointSnapConstraint } from '../constraints/PointSnapConstraint';
 
 export class LineTool implements Tool {
   private isDrawing = false;
@@ -49,53 +46,58 @@ export class LineTool implements Tool {
 
     if (!this.isDrawing) {
       // Start drawing
-      this.startVertex = this.findNearestPoint(worldPosition) || new Point(worldPosition.x, worldPosition.y, this.renderer);
-      this.isDrawing = true;
+      // Create a new point for the start vertex
+      const startPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
 
       // Apply constraints to the start vertex if applicable
-      if (this.constraintManager.hasActiveConstraints()) {
-        this.startVertex = this.constraintManager.applyConstraints(
-          this.startVertex,
-          this.startVertex, // Reference point can be itself or another logic
-          'start'
-        );
-      }
+      const constrainedStartPoint = this.constraintManager.applyConstraints(
+        startPoint,
+        startPoint, // Reference point can be itself or another logic
+        'start'
+      );
 
+      this.startVertex = constrainedStartPoint ? constrainedStartPoint : startPoint;
+      this.isDrawing = true;
+
+      // Create endPoint and apply constraints
       const endPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
-
-      // Apply constraints to the end point if applicable
       const constrainedEndPoint = this.constraintManager.applyConstraints(
         endPoint,
         this.startVertex,
         'end'
-      );
+      ) ;
 
-      const line = new Line(this.startVertex, constrainedEndPoint, this.renderer);
+      // Create the line with constrained points
+      const line = new Line(this.startVertex, constrainedEndPoint ? constrainedEndPoint : endPoint, this.renderer);
 
+      // Add entities to the manager
       this.entityManager.addEntity(line);
-      this.entityManager.addEntity(this.startVertex);
-      this.entityManager.addEntity(constrainedEndPoint);
+      if (!constrainedStartPoint) this.entityManager.addEntity(this.startVertex);
+      else this.entityManager.addEntity(constrainedStartPoint);
+
+      if (!constrainedEndPoint) this.entityManager.addEntity(endPoint);
+      else this.entityManager.addEntity(constrainedEndPoint);
 
       this.currentLine = line;
-      this.temporaryEndPoint = constrainedEndPoint;
+      this.temporaryEndPoint = constrainedEndPoint ? constrainedEndPoint: endPoint;
     } else {
       // Finish drawing
       if (this.currentLine && this.startVertex) {
-        let endPointPosition = { x: worldPosition.x, y: worldPosition.y };
+        // Create a new end point based on mouse position
+        const endPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
 
         // Apply constraints to the end point
-        const tempPoint = new Point(endPointPosition.x, endPointPosition.y, this.renderer);
-        let endPointConstrainedPosition = this.constraintManager.applyConstraints(
-          tempPoint,
+        const constrainedEndPoint = this.constraintManager.applyConstraints(
+          endPoint,
           this.startVertex,
           'end'
         );
 
-        endPointPosition = { x: endPointConstrainedPosition.getX(), y: endPointConstrainedPosition.getY() }
+        // Set the constrained end point to the current line
+        this.currentLine.setEndPoint(constrainedEndPoint ? constrainedEndPoint : endPoint);
 
-        const endpoint = this.findNearestPoint(endPointPosition) || new Point(endPointPosition.x, endPointPosition.y, this.renderer);
-
-        this.currentLine.setEndPoint(endpoint);
+        // Add the constrained end point as a permanent entity
+        if (!constrainedEndPoint) this.entityManager.addEntity(endPoint);
 
         // Clean up temporary endpoint
         if (this.temporaryEndPoint) {
@@ -103,10 +105,10 @@ export class LineTool implements Tool {
           this.temporaryEndPoint = null;
         }
 
-        this.entityManager.addEntity(endpoint);
         this.currentLine = null;
       }
 
+      // Reset drawing state
       this.isDrawing = false;
       this.startVertex = null;
     }
@@ -148,47 +150,27 @@ export class LineTool implements Tool {
     }
   }
 
-  private findNearestPoint(mouseWorldPosition: { x: number; y: number }): Point | null {
-    let nearest: Point | null = null;
-    let minDist = Infinity;
-    const threshold = 0.02; // Adjust as needed
-
-    for (const entity of this.entityManager.getEntities()) {
-      if (entity instanceof Point) {
-        const dx = entity.getX() - mouseWorldPosition.x;
-        const dy = entity.getY() - mouseWorldPosition.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < minDist && dist <= threshold) {
-          minDist = dist;
-          nearest = entity;
-
-          entity.setColor(new Float32Array([1.0, 1.0, 0.0, 1.0])); // Highlight nearest point
-          console.log('NEAR');
-        } else {
-          entity.setColor(new Float32Array([0.5, 0.5, 0.5, 1.0])); // Reset color
-        }
-      }
-    }
-
-    return nearest;
-  }
-
   public onMouseMove(event: MouseEvent): void {
+
+    const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
+    const x = event.clientX - canvasRect.left;
+    const y = event.clientY - canvasRect.top;
+    const worldPosition = this.renderer.screenToWorld(x, y);
+
+
     if (this.isDrawing && this.currentLine) {
-      const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-      const x = event.clientX - canvasRect.left;
-      const y = event.clientY - canvasRect.top;
-      const worldPosition = this.renderer.screenToWorld(x, y);
+
 
       if (!worldPosition || !this.startVertex) return;
 
+      // Create a new end point based on mouse position
       let endPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
 
       // Apply constraints to the end point
-      endPoint = this.constraintManager.applyConstraints(endPoint, this.startVertex, 'end');
+      let constrainedEndPoint = this.constraintManager.applyConstraints(endPoint, this.startVertex, 'both');
 
-      this.currentLine.setEndPoint(endPoint);
+      // Update the current line with the constrained end point
+      this.currentLine.setEndPoint(constrainedEndPoint ? constrainedEndPoint : endPoint);
 
       // Manage temporary endpoint
       if (this.temporaryEndPoint) {
@@ -197,6 +179,11 @@ export class LineTool implements Tool {
 
       this.temporaryEndPoint = endPoint;
       this.entityManager.addTemporaryEntity(this.temporaryEndPoint);
+    }
+
+    if (!this.isDrawing) {
+      let mouseLocationPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
+      this.constraintManager.applyConstraints(mouseLocationPoint,mouseLocationPoint,'start')
     }
   }
 

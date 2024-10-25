@@ -39,7 +39,6 @@ export class ConstraintManager {
     }
 
     this.constraints.push(constraint);
-    console.log(`Constraint added: ${type} targeting ${target}`);
   }
 
   removeActiveConstraint(type: ConstraintType, target: ConstraintTarget = 'end') {
@@ -48,7 +47,6 @@ export class ConstraintManager {
     );
     if (index !== -1) {
       this.constraints.splice(index, 1);
-      console.log(`Constraint removed: ${type} targeting ${target}`);
     }
   }
 
@@ -75,12 +73,14 @@ export class ConstraintManager {
     point: Point,
     referencePoint: Point,
     target: ConstraintTarget
-  ): Point {
-    let constrainedPoint = point;
+  ): Point | null{
+    let constrainedPoint: Point | null = point;
     // Apply constraints in the order they were added
     for (const constraint of this.constraints) {
+      constrainedPoint = constrainedPoint ? constrainedPoint : point;
+
       if (constraint.target === target || constraint.target === 'both') {
-        constrainedPoint = constraint.apply(constrainedPoint, referencePoint);
+        constrainedPoint = constraint.apply(constrainedPoint!, referencePoint);
       }
     }
     return constrainedPoint;
@@ -88,6 +88,5 @@ export class ConstraintManager {
 
   clearConstraints() {
     this.constraints = [];
-    console.log('All constraints cleared.');
   }
 }

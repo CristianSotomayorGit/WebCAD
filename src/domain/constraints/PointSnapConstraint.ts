@@ -12,9 +12,11 @@ export class PointSnapConstraint implements Constraint {
   private entityManager: EntityManager;
   private renderer: Renderer;
   private threshold: number;
+  // private nearest: Point | null = null;
+
 
   constructor(
-    target: ConstraintTarget = 'end',
+    target: ConstraintTarget = 'both',
     entityManager: EntityManager,
     renderer: Renderer,
     threshold: number = 0.02
@@ -25,10 +27,11 @@ export class PointSnapConstraint implements Constraint {
     this.threshold = threshold;
   }
 
-  apply(point: Point, referencePoint?: Point): Point {
+  apply(point: Point, referencePoint?: Point): Point | null {
     const mouse = { x: point.getX(), y: point.getY() };
-    let nearest: Point | null = null;
     let minDist = Infinity;
+    // let nearest: Point | null = null;
+    // this.nearest = null;
 
     for (const entity of this.entityManager.getEntities()) {
       if (entity instanceof Point) {
@@ -38,19 +41,21 @@ export class PointSnapConstraint implements Constraint {
 
         if (dist < minDist && dist <= this.threshold) {
           minDist = dist;
-          nearest = entity;
+          entity.setColor(new Float32Array([1.0, 1.0, 0.0, 1.0])); // Highlighted color
+
+          return new Point(entity.getX(), entity.getY(), this.renderer);
         }
+
+        else entity.resetColor();
       }
     }
 
-    if (nearest) {
-      // Optional: Provide visual feedback by changing colors
-      nearest.setColor(new Float32Array([1.0, 1.0, 0.0, 1.0])); // Highlighted color
-      point.setColor(new Float32Array([0.5, 0.5, 0.5, 1.0])); // Dimmed color
-
-      return new Point(nearest.getX(), nearest.getY(), this.renderer);
-    }
-
-    return point;
+    // if (this.nearest) {
+    //   // Optional: Provide visual feedback by changing colors
+    //   this.nearest.setColor(new Float32Array([1.0, 1.0, 0.0, 1.0])); // Highlighted color
+    //   // nearest.setColor(new Float32Array([0.5, 0.5, 0.5, 1.0])); // Dimmed color      
+    //   return this.nearest;
+    // }
+    return null;
   }
 }

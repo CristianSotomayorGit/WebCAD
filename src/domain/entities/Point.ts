@@ -25,14 +25,6 @@ export class Point {
     this.createBuffers();
   }
 
-  // const pointVertexShaderModule = this.device.createShaderModule({
-  //   code: PointShader.VERTEX,
-  // });
-
-  // const pointFragmentShaderModule = this.device.createShaderModule({
-  //   code: PointShader.FRAGMENT,
-  // });
-
   private setupPipeline(): GPURenderPipeline {
     return this.device.createRenderPipeline({
       layout: this.device.createPipelineLayout({
@@ -85,15 +77,15 @@ export class Point {
         ],
       },
       primitive: {
-        topology: 'triangle-list',
+        topology: 'line-list', // **Changed from 'triangle-list' to 'line-list'**
       },
     })
   }
 
   private setupBindGroup(): GPUBindGroup {
-    const cameraData = new Float32Array([0, 0, 1, 0]);//-4 1 1 
+    const cameraData = new Float32Array([0, 0, 1, 0]); // Camera uniform data
     const initialColor = this.color;
-    // const cameraData = new Float32Array([-1,1, 1, 0]);//-4 1 1 
+    // const cameraData = new Float32Array([-1,1, 1, 0]); // Alternative camera data
 
     this.cameraBuffer = this.device.createBuffer({
       size: cameraData.byteLength,
@@ -130,21 +122,28 @@ export class Point {
   }
 
   private createBuffers() {
-    // Create a square centered at (x, y)
+    // Create a square outline centered at (x, y)
     const size = 0.015; // Adjust size as needed
 
     const halfSize = size / 2;
     const vertices = new Float32Array([
-      this.x - halfSize, this.y - halfSize, // Bottom-left
-      this.x + halfSize, this.y - halfSize, // Bottom-right
-      this.x + halfSize, this.y + halfSize, // Top-right
-      this.x - halfSize, this.y + halfSize, // Top-left
+      this.x - halfSize, this.y - halfSize, // Bottom-left (0)
+      this.x + halfSize, this.y - halfSize, // Bottom-right (1)
+      this.x + halfSize, this.y + halfSize, // Top-right (2)
+      this.x - halfSize, this.y + halfSize, // Top-left (3)
     ]);
 
+    // **Modify indices to represent a square outline using lines**
+    // Each pair represents a line segment
     const indices = new Uint16Array([
-      0, 1, 2, // First triangle
-      0, 2, 3, // Second triangle
+      0, 1, // Bottom edge
+      1, 2, // Right edge
+      2, 3, // Top edge
+      3, 0, // Left edge
     ]);
+
+    // **Update vertexCount to match the number of indices for line-list**
+    this.vertexCount = indices.length;
 
     // Create vertex buffer
     this.vertexBuffer = this.device.createBuffer({
@@ -163,8 +162,6 @@ export class Point {
     });
     new Uint16Array(this.indexBuffer.getMappedRange()).set(indices);
     this.indexBuffer.unmap();
-
-    this.vertexCount = indices.length;
   }
 
   public draw(renderPass: GPURenderPassEncoder) {
@@ -223,11 +220,13 @@ export class Point {
     this.color = newColor;
   }
 
+  public resetColor(){
+    this.color = new Float32Array([0.5, 0.5, 0.5, 1.0])
+  }
   public updateCameraBuffer() {
     const { x, y } = this.renderer.getCamera().getOffset();
     const zoom = this.renderer.getCamera().getZoom();
     const cameraData = new Float32Array([x, y, zoom, 0]);
-
 
     this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
   }
