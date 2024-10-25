@@ -25,6 +25,7 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
       <button style={buttonStyle} onClick={() => handleToolChange('Spline')}>Spline</button>
       <button style={buttonStyle} onClick={() => handleToolChange('Rectangle')}>Rectangle</button>
       <button style={buttonStyle} onClick={() => handleToolChange('Polygon')}>Polygon</button>
+      <button style={buttonStyle} onClick={() => handleToolChange('Ellipse')}>Ellipse</button>
     </div>
   );
 };

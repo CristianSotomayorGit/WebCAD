@@ -109,6 +109,11 @@ const WebGPUCanvas: React.FC = () => {
         toolManagerRef.current.setActiveTool('Rectangle'); // Update tool manager
         break;
 
+      case 'e':
+        setActiveToolName('Ellipse'); // Update UI state
+        toolManagerRef.current.setActiveTool('Ellipse'); // Update tool manager
+        break;
+
       case 'shift' && 'z':
         setIsOrthoChecked((prev) => !prev); // Toggle Ortho checkbox state
         constraintManagerRef.current.toggleConstraint(ConstraintType.Orthogonal, 'both');
@@ -144,8 +149,8 @@ const WebGPUCanvas: React.FC = () => {
         isOrthoChecked={isOrthoChecked}
         setIsOrthoChecked={setIsOrthoChecked}
       />
-<canvas ref={canvasRef} style={{ display: 'block', overflow: 'hidden' }} />
-</>
+      <canvas ref={canvasRef} style={{ display: 'block', overflow: 'hidden' }} />
+    </>
   );
 };
 
