@@ -1,108 +1,123 @@
-import { Tool } from './Tool';
-import { EntityManager } from '../managers/EntityManager';
-import { Renderer } from '../../infrastructure/rendering/Renderer';
+// src/domain/tools/PolylineTool.ts
+
+import { AbstractDrawingTool } from './AbstractDrawingTool';
 import { Polyline } from '../entities/Polyline';
 import { Point } from '../entities/Point';
-import { ConstraintManager } from '../managers/ConstraintManager';
-import { OrthogonalConstraint } from '../constraints/OrthogonalConstraint';
 
-export class PolylineTool implements Tool {
-  private isDrawing = false;
+export class PolylineTool extends AbstractDrawingTool {
   private currentPolyline: Polyline | null = null;
-  private constraintManager: ConstraintManager;
+  private tempPoint: Point | null = null; // Temporary point for dynamic feedback
   private isOrthoConstraintActive = false;
-  private tempLastPointPosition!: { x: number, y: number };
 
-  constructor(
-    private entityManager: EntityManager,
-    private renderer: Renderer
+  public onLeftClick(event: MouseEvent): void {
+    const worldPosition = this.getWorldPosition(event);
 
-  ) {
-    this.constraintManager = new ConstraintManager();
-  }
-
-  public onLeftclick(event: MouseEvent): void {
-    const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-    const x = event.clientX - canvasRect.left;
-    const y = event.clientY - canvasRect.top;
-
-    let worldPosition = this.renderer.screenToWorld(x, y);
-
-    if (this.constraintManager.hasConstraints() && this.isDrawing && this.currentPolyline) {
-      worldPosition = this.applyOrthogonalConstraint(worldPosition, this.tempLastPointPosition);
+    let adjustedPosition = worldPosition;
+    if (this.isOrthoConstraintActive && this.isDrawing && this.tempPoint) {
+      const referencePoint = this.tempPoint;
+      adjustedPosition = this.applyOrthogonalConstraint(worldPosition, {
+        x: referencePoint.getX(),
+        y: referencePoint.getY(),
+      });
     }
 
-
-    const newPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
-    this.entityManager.addEntity(newPoint);
+    const newPoint = this.createAndAddPoint(adjustedPosition.x, adjustedPosition.y);
 
     if (!this.isDrawing) {
       this.isDrawing = true;
 
-      const polyline = new Polyline(this.renderer);
-      polyline.addPoint(newPoint);
-
-      this.entityManager.addEntity(polyline);
-
-      this.currentPolyline = polyline;
-    } else {
-      if (!this.currentPolyline) throw new Error('Current Polyline is null')
+      this.currentPolyline = new Polyline(this.renderer);
       this.currentPolyline.addPoint(newPoint);
-    }
+      this.entityManager.addEntity(this.currentPolyline);
 
-    this.tempLastPointPosition = worldPosition;
+      // Create a temporary point for dynamic feedback
+      this.tempPoint = this.createAndAddPoint(adjustedPosition.x, adjustedPosition.y);
+      this.currentPolyline.addPoint(this.tempPoint);
+    } else {
+      if (this.currentPolyline && this.tempPoint) {
+        // Replace the temporary point with the new fixed point
+        this.currentPolyline.removePoint(this.tempPoint);
+        this.entityManager.removeEntity(this.tempPoint);
+        this.tempPoint = null;
+
+        this.currentPolyline.addPoint(newPoint);
+
+        // Create a new temporary point for the next segment
+        this.tempPoint = this.createAndAddPoint(adjustedPosition.x, adjustedPosition.y);
+        this.currentPolyline.addPoint(this.tempPoint);
+      }
+    }
   }
 
   public onMouseMove(event: MouseEvent): void {
-    if (this.isDrawing && this.currentPolyline) {
-      const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-      const x = event.clientX - canvasRect.left;
-      const y = event.clientY - canvasRect.top;
+    if (this.isDrawing && this.currentPolyline && this.tempPoint) {
+      const worldPosition = this.getWorldPosition(event);
 
-      let worldPosition = this.renderer.screenToWorld(x, y);
-
-      if (this.isOrthoConstraintActive) {
-        // const lastPointPosition = this.getLastPointPosition();
-        worldPosition = this.applyOrthogonalConstraint(worldPosition, this.tempLastPointPosition);
+      let adjustedPosition = worldPosition;
+      if (this.isOrthoConstraintActive && this.currentPolyline.getPoints().length > 1) {
+        const lastFixedPoint = this.currentPolyline.getPoints()[this.currentPolyline.getPoints().length - 2];
+        adjustedPosition = this.applyOrthogonalConstraint(worldPosition, {
+          x: lastFixedPoint.getX(),
+          y: lastFixedPoint.getY(),
+        });
       }
 
-      this.currentPolyline.updateLastPoint(worldPosition.x, worldPosition.y);
-    }
-  }
+      // Update the position of the temporary point
+      this.tempPoint.setX(adjustedPosition.x);
+      this.tempPoint.setY(adjustedPosition.y);
 
-  public onMouseUp(event: MouseEvent): void {
-    // No action needed on mouse up for this tool
+      // Update the last line's vertex buffer
+      const lastLine = this.currentPolyline['lines'][this.currentPolyline['lines'].length - 1];
+      lastLine.updateVertexBuffer();
+    }
   }
 
   public onKeyDown(event: KeyboardEvent): void {
+    super.onKeyDown(event);
+
     if (this.isDrawing) {
-      if (event.key === 'Escape') {
-        if (this.currentPolyline) {
-          this.entityManager.removeEntity(this.currentPolyline);
-          for (const point of this.currentPolyline.getPoints()) {
-            this.entityManager.removeEntity(point);
-          }
-          this.currentPolyline = null;
-        }
-        this.isDrawing = false;
-      } else if (event.key === 'Enter' || event.key === 'Return' || event.key === ' ') {
-        this.currentPolyline?.removeLastLine();
-        this.isDrawing = false;
-        this.currentPolyline = null;
-      }
-      else if (event.key === 'Shift') {
+      if (event.key === 'Enter' || event.key === 'Return' || event.key === ' ') {
+        this.finishDrawing();
+      } else if (event.key === 'Shift') {
         // Toggle orthogonal constraint
         this.isOrthoConstraintActive = !this.isOrthoConstraintActive;
-
-        if (this.isOrthoConstraintActive) {
-          // Activate orthogonal constraint
-          this.constraintManager.addConstraint(new OrthogonalConstraint());
-        } else {
-          // Deactivate orthogonal constraint
-          this.constraintManager.clearConstraints();
-        }
       }
     }
+  }
+
+  protected cancelDrawing(): void {
+    super.cancelDrawing();
+
+    if (this.currentPolyline) {
+      this.entityManager.removeEntity(this.currentPolyline);
+      // Remove associated points
+      for (const point of this.currentPolyline.getPoints()) {
+        this.entityManager.removeEntity(point);
+      }
+      this.currentPolyline = null;
+    }
+
+    if (this.tempPoint) {
+      this.entityManager.removeEntity(this.tempPoint);
+      this.tempPoint = null;
+    }
+
+    this.isOrthoConstraintActive = false;
+  }
+
+  private finishDrawing(): void {
+    if (this.currentPolyline) {
+      if (this.tempPoint) {
+        // Remove the temporary point from the polyline
+        this.currentPolyline.removePoint(this.tempPoint);
+        this.entityManager.removeEntity(this.tempPoint);
+        this.tempPoint = null;
+      }
+      this.currentPolyline = null;
+    }
+    this.isDrawing = false;
+    this.isOrthoConstraintActive = false;
+    this.points = [];
   }
 
   private applyOrthogonalConstraint(
@@ -119,11 +134,5 @@ export class PolylineTool implements Tool {
       // Constrain to vertical line
       return { x: referencePoint.x, y: currentPoint.y };
     }
-  }
-
-  private getLastPointPosition(): { x: number; y: number } {
-    const points = this.currentPolyline!.getPoints();
-    const lastPoint = points[points.length - 1];
-    return { x: lastPoint.getX(), y: lastPoint.getY() };
   }
 }
