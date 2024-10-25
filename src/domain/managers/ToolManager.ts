@@ -27,7 +27,7 @@ export class ToolManager {
   constructor(entityManager: EntityManager, renderer: Renderer) {
     // Initialize tools
     this.tools['Line'] = new LineTool(entityManager, renderer);
-    // this.tools['Point'] = new PointTool(entityManager, renderer);
+    this.tools['Point'] = new PointTool(entityManager, renderer);
     // this.tools['Polyline'] = new PolylineTool(entityManager, renderer);
     // // Uncomment if CircleTool is available
     // // this.tools['Circle'] = new CircleTool(entityManager, renderer);
