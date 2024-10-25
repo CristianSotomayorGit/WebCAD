@@ -1,10 +1,10 @@
 // src/domain/tools/ArcTool.ts
 
-import { Tool } from './Tool';
-import { EntityManager } from '../managers/EntityManager';
-import { Renderer } from '../../infrastructure/rendering/Renderer';
-import { Arc } from '../entities/Arc';
-import { Point } from '../entities/Point';
+import { Tool } from './DrawingTool';
+import { EntityManager } from '../../managers/EntityManager';
+import { Renderer } from '../../../infrastructure/rendering/Renderer';
+import { Arc } from '../../entities/Arc';
+import { Point } from '../../entities/Point';
 
 interface PointType {
     x: number;

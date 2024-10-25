@@ -1,8 +1,8 @@
 // src/domain/tools/PolylineTool.ts
 
 import { AbstractDrawingTool } from './AbstractDrawingTool';
-import { Polyline } from '../entities/Polyline';
-import { Point } from '../entities/Point';
+import { Polyline } from '../../entities/Polyline';
+import { Point } from '../../entities/Point';
 
 export class PolylineTool extends AbstractDrawingTool {
   private currentPolyline: Polyline | null = null;

@@ -1,9 +1,9 @@
 // src/domain/tools/AbstractDrawingTool.ts
 
-import { Tool } from './Tool';
-import { Renderer } from '../../infrastructure/rendering/Renderer';
-import { EntityManager } from '../managers/EntityManager';
-import { Point } from '../entities/Point';
+import { Tool } from './DrawingTool';
+import { Renderer } from '../../../infrastructure/rendering/Renderer';
+import { EntityManager } from '../../managers/EntityManager';
+import { Point } from '../../entities/Point';
 
 export abstract class AbstractDrawingTool implements Tool {
     protected renderer: Renderer;

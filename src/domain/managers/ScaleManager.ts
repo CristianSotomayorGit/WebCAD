@@ -1,4 +1,4 @@
-import { ZoomTool } from "../tools/ZoomTool";
+import { ZoomTool } from "../tools/ViewTools/ZoomTool";
 
 export class ScaleManager {
 

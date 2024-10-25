@@ -1,8 +1,8 @@
 // src/domain/tools/LineTool.ts
 
 import { AbstractDrawingTool } from './AbstractDrawingTool';
-import { Line } from '../entities/Line';
-import { Point } from '../entities/Point';
+import { Line } from '../../entities/Line';
+import { Point } from '../../entities/Point';
 
 export class LineTool extends AbstractDrawingTool {
   private startPoint: Point | null = null;

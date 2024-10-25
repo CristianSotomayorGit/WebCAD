@@ -1,20 +1,20 @@
 // src/domain/managers/ToolManager.ts
 
-import { Tool } from '../tools/Tool';
-import { LineTool } from '../tools/LineTool';
-import { PanTool } from '../tools/PanTool';
+import { Tool } from '../tools/DrawingTools/DrawingTool';
+import { LineTool } from '../tools/DrawingTools/LineTool';
+import { PanTool } from '../tools/ViewTools/PanTool';
 import { EntityManager } from './EntityManager';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
-import { ZoomTool } from '../tools/ZoomTool';
-import { PointTool } from '../tools/PointTool';
-import { PolylineTool } from '../tools/PolylineTool';
+import { ZoomTool } from '../tools/ViewTools/ZoomTool';
+import { PointTool } from '../tools/DrawingTools/PointTool';
+import { PolylineTool } from '../tools/DrawingTools/PolylineTool';
 // Assuming CircleTool is available and refactored
 // import { CircleTool } from '../tools/CircleTool';
-import { SplineTool } from '../tools/SplineTool';
-import { RectangleTool } from '../tools/RectangleTool';
-import { PolygonTool } from '../tools/PolygonTool';
+import { SplineTool } from '../tools/DrawingTools/SplineTool';
+import { RectangleTool } from '../tools/DrawingTools/RectangleTool';
+import { PolygonTool } from '../tools/DrawingTools/PolygonTool';
 // import { ConstraintManager } from './ConstraintManager'; // Remove if not used
-import { ArcTool } from '../tools/ArcTool';
+import { ArcTool } from '../tools/DrawingTools/ArcTool';
 import { Camera } from '../Camera';
 
 export class ToolManager {

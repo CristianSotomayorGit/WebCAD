@@ -1,10 +1,10 @@
 // src/domain/tools/RectangleTool.ts
 
-import { Tool } from './Tool';
-import { EntityManager } from '../managers/EntityManager';
-import { Renderer } from '../../infrastructure/rendering/Renderer';
-import { Rectangle } from '../entities/Rectangle';
-import { Point } from '../entities/Point';
+import { Tool } from './DrawingTool';
+import { EntityManager } from '../../managers/EntityManager';
+import { Renderer } from '../../../infrastructure/rendering/Renderer';
+import { Rectangle } from '../../entities/Rectangle';
+import { Point } from '../../entities/Point';
 
 export class RectangleTool implements Tool {
   private isDrawing = false;

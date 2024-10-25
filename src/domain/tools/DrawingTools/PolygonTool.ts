@@ -1,8 +1,8 @@
 // src/domain/tools/PolygonTool.ts
 
 import { AbstractDrawingTool } from './AbstractDrawingTool';
-import { Polygon } from '../entities/Polygon';
-import { Point } from '../entities/Point';
+import { Polygon } from '../../entities/Polygon';
+import { Point } from '../../entities/Point';
 
 export class PolygonTool extends AbstractDrawingTool {
   private currentPolygon: Polygon | null = null;

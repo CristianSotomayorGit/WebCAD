@@ -1,8 +1,8 @@
 // src/domain/tools/SplineTool.ts
 
 import { AbstractDrawingTool } from './AbstractDrawingTool';
-import { Spline } from '../entities/Spline';
-import { Point } from '../entities/Point';
+import { Spline } from '../../entities/Spline';
+import { Point } from '../../entities/Point';
 
 export class SplineTool extends AbstractDrawingTool {
   private currentSpline: Spline | null = null;

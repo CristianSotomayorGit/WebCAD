@@ -1,5 +1,5 @@
 // src/domain/tools/PanTool.ts
-import { Tool } from './Tool';
+import { Tool } from './DrawingTools/DrawingTool';
 import { Camera } from '../Camera';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
 
