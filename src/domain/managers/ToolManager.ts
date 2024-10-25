@@ -33,7 +33,7 @@ export class ToolManager {
     // // this.tools['Circle'] = new CircleTool(entityManager, renderer);
     this.tools['Spline'] = new SplineTool(entityManager, renderer);
     // this.tools['Rectangle'] = new RectangleTool(entityManager, renderer);
-    // this.tools['Polygon'] = new PolygonTool(entityManager, renderer);
+    this.tools['Polygon'] = new PolygonTool(entityManager, renderer);
     // this.tools['Arc'] = new ArcTool(entityManager, renderer);
 
     // Set default active tool

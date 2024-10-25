@@ -1,27 +1,17 @@
 // src/domain/tools/PolygonTool.ts
 
-import { Tool } from './Tool';
-import { EntityManager } from '../managers/EntityManager';
-import { Renderer } from '../../infrastructure/rendering/Renderer';
+import { AbstractDrawingTool } from './AbstractDrawingTool';
 import { Polygon } from '../entities/Polygon';
 import { Point } from '../entities/Point';
 
-export class PolygonTool implements Tool {
-  private isDrawing = false;
+export class PolygonTool extends AbstractDrawingTool {
   private currentPolygon: Polygon | null = null;
-  private renderer: Renderer;
-  private entityManager: EntityManager;
-  private numSides: number = 0;
+  private numSides: number = 3; // Default value is 3
   private centerX: number = 0;
   private centerY: number = 0;
   private inputElement: HTMLInputElement | null = null;
 
-  constructor(entityManager: EntityManager, renderer: Renderer) {
-    this.entityManager = entityManager;
-    this.renderer = renderer;
-  }
-
-  public onLeftclick(event: MouseEvent): void {
+  public onLeftClick(event: MouseEvent): void {
     const { x, y } = this.getWorldPosition(event);
 
     if (!this.isDrawing) {
@@ -30,47 +20,38 @@ export class PolygonTool implements Tool {
       this.centerY = y;
       this.isDrawing = true;
 
-      let centerPoint = new Point(this.centerX, this.centerY, this.renderer)
-      this.entityManager.addEntity(centerPoint)
+      this.createAndAddPoint(x, y); // Center point
+
+      // Create the Polygon entity with default sides (3)
+      this.currentPolygon = new Polygon(this.renderer, this.centerX, this.centerY, this.numSides);
+      this.entityManager.addEntity(this.currentPolygon);
 
       // Display the input box
       this.showInputBox(event.clientX, event.clientY);
-
-    } else if (this.isDrawing && this.numSides >= 3 && event.button === 0 && this.currentPolygon) {
+    } else if (this.isDrawing && this.currentPolygon) {
       // Second click: finalize the polygon
       this.finishDrawing();
     }
   }
 
   public onMouseMove(event: MouseEvent): void {
-    if (this.isDrawing) {
+    if (this.isDrawing && this.currentPolygon) {
       const { x, y } = this.getWorldPosition(event);
 
-      if (this.currentPolygon) {
-        this.currentPolygon.updateRadiusFromPoint(x, y);
-      }
-      else {
-        this.updateInputBoxLocation(event.clientX, event.clientY);
-      }
+      // Update the radius of the polygon based on mouse position
+      this.currentPolygon.updateRadiusFromPoint(x, y);
+
+      // Optionally, update the position of the input box to follow the mouse
+      this.updateInputBoxLocation(event.clientX, event.clientY);
     }
   }
 
-  public onMouseUp(event: MouseEvent): void {
-    // No action needed on mouse up
-  }
-
   public onKeyDown(event: KeyboardEvent): void {
+    super.onKeyDown(event);
+
     if (this.isDrawing) {
-      if (event.key === 'Escape') {
-        this.cancelDrawing();
-      } else if (event.key === 'Enter' || event.key === 'Return') {
-        if (this.inputElement) {
-          // If input box is open, process input
-          this.processInput();
-        } else if (this.currentPolygon) {
-          // Finalize the polygon
-          this.finishDrawing();
-        }
+      if (event.key === 'Enter' || event.key === 'Return') {
+        this.finishDrawing();
       }
     }
   }
@@ -79,7 +60,7 @@ export class PolygonTool implements Tool {
     this.inputElement = document.createElement('input');
     this.inputElement.type = 'number';
     this.inputElement.min = '3';
-    this.inputElement.value = '5';
+    this.inputElement.value = '3'; // Default value is 3
     this.inputElement.style.position = 'absolute';
     this.inputElement.style.left = `${clientX}px`;
     this.inputElement.style.top = `${clientY}px`;
@@ -90,65 +71,59 @@ export class PolygonTool implements Tool {
     this.inputElement.focus();
 
     // Handle input events
+    this.inputElement.addEventListener('input', () => {
+      this.updatePolygonSides();
+    });
+
     this.inputElement.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        this.processInput();
+        this.finishDrawing();
       } else if (e.key === 'Escape') {
         this.cancelDrawing();
       }
     });
   }
 
-  private updateInputBoxLocation(clientX: number, clientY: number) {
+  private updateInputBoxLocation(clientX: number, clientY: number): void {
     if (this.inputElement) {
       this.inputElement.style.left = `${clientX + 20}px`;
       this.inputElement.style.top = `${clientY + 20}px`;
-
     }
   }
 
-  private processInput(): void {
-    if (this.inputElement) {
+  private updatePolygonSides(): void {
+    if (this.inputElement && this.currentPolygon) {
       const value = parseInt(this.inputElement.value, 10);
-      if (isNaN(value) || value < 3) {
-        alert('Please enter a valid number greater than or equal to 3.');
-        return;
+      if (!isNaN(value) && value >= 3) {
+        this.numSides = value;
+        // Update the polygon with the new number of sides
+        this.currentPolygon.setNumSides(this.numSides);
       }
-      this.numSides = value;
-      // Remove the input box
-      document.body.removeChild(this.inputElement);
-      this.inputElement = null;
-
-      // Create the RegularPolygon entity
-      this.currentPolygon = new Polygon(this.renderer, this.centerX, this.centerY, this.numSides);
-      this.entityManager.addEntity(this.currentPolygon);
     }
   }
 
-  private getWorldPosition(event: MouseEvent): { x: number; y: number } {
-    const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
-    const screenX = event.clientX - canvasRect.left;
-    const screenY = event.clientY - canvasRect.top;
-    return this.renderer.screenToWorld(screenX, screenY);
-  }
+  protected cancelDrawing(): void {
+    super.cancelDrawing();
 
-  private cancelDrawing(): void {
     if (this.inputElement) {
       document.body.removeChild(this.inputElement);
       this.inputElement = null;
     }
     if (this.currentPolygon) {
       this.entityManager.removeEntity(this.currentPolygon);
-      this.currentPolygon.dispose();
       this.currentPolygon = null;
     }
-    this.isDrawing = false;
-    this.numSides = 0;
+    this.numSides = 3; // Reset to default value
   }
 
   private finishDrawing(): void {
+    if (this.inputElement) {
+      document.body.removeChild(this.inputElement);
+      this.inputElement = null;
+    }
     this.currentPolygon = null;
     this.isDrawing = false;
-    this.numSides = 0;
+    this.numSides = 3; // Reset to default value
+    this.points = [];
   }
 }
