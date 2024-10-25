@@ -1,132 +1,99 @@
-// // src/domain/entities/Grid.ts
-// // import { GPURenderPassEncoder, GPUDevice, GPUBufferUsage } from 'gpu-web';
-
-// export class Grid {
-//   private vertexBuffer!: GPUBuffer;
-//   private vertexCount!: number;
-
-//   constructor(private device: GPUDevice) {
-//     this.createVertexBuffer();
-//   }
-
-//   private createVertexBuffer() {
-//     const gridSize = 10;
-//     const gridSpacing = 0.1;
-//     const numLines = 2 * gridSize + 1;
-//     const vertices = new Float32Array(numLines * 4 * 2);
-//     let vertexIndex = 0;
-
-//     for (let i = -gridSize; i <= gridSize; i++) {
-//       // Vertical lines
-//       vertices[vertexIndex++] = i * gridSpacing;
-//       vertices[vertexIndex++] = -gridSize * gridSpacing;
-//       vertices[vertexIndex++] = i * gridSpacing;
-//       vertices[vertexIndex++] = gridSize * gridSpacing;
-
-//       // Horizontal lines
-//       vertices[vertexIndex++] = -gridSize * gridSpacing;
-//       vertices[vertexIndex++] = i * gridSpacing;
-//       vertices[vertexIndex++] = gridSize * gridSpacing;
-//       vertices[vertexIndex++] = i * gridSpacing;
-//     }
-
-//     this.vertexCount = vertices.length / 2;
-
-//     this.vertexBuffer = this.device.createBuffer({
-//       size: vertices.byteLength,
-//       usage: GPUBufferUsage.VERTEX,
-//       mappedAtCreation: true,
-//     });
-
-//     new Float32Array(this.vertexBuffer.getMappedRange()).set(vertices);
-//     this.vertexBuffer.unmap();
-//   }
-
-//   public draw(renderPass: GPURenderPassEncoder) {
-//     renderPass.setVertexBuffer(0, this.vertexBuffer);
-//     renderPass.draw(this.vertexCount);
-//   }
-// }
-
-
 // src/domain/entities/Grid.ts
-// import { GPURenderPassEncoder, GPUDevice, GPUBufferUsage } from 'gpu-web';
-import { Renderer } from "../../infrastructure/rendering/Renderer";
 
-export class Grid {
+import { RenderableEntity } from './RenderableEntity';
+import { Renderer } from '../../infrastructure/rendering/Renderer';
+import { GridShader } from '../../shaders/GridShader'; // Ensure you have GridShader implemented
+
+export class Grid extends RenderableEntity {
   private vertexBuffer!: GPUBuffer;
-  private pipeline!: GPURenderPipeline;
-  private bindGroup!: GPUBindGroup;
-  private device!: GPUDevice;
   private vertexCount!: number;
 
   constructor(renderer: Renderer) {
-    this.device = renderer.getDevice();
-    this.pipeline = renderer.getGridPipeline();
-    this.bindGroup = renderer.getBindGroup();
-
+    super(renderer);
     this.createFullscreenQuad();
-    // this.createVertexBuffer();
   }
 
-  private createFullscreenQuad() {
+  protected setupPipeline(): void {
+    const vertexShaderModule = this.device.createShaderModule({
+      code: GridShader.VERTEX,
+    });
+
+    const fragmentShaderModule = this.device.createShaderModule({
+      code: GridShader.FRAGMENT,
+    });
+
+    const bindGroupLayout = this.device.createBindGroupLayout({
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: { type: 'uniform' },
+        },
+        {
+          binding: 1,
+          visibility: GPUShaderStage.FRAGMENT,
+          buffer: { type: 'uniform' },
+        },
+      ],
+    });
+
+    const pipelineLayout = this.device.createPipelineLayout({
+      bindGroupLayouts: [bindGroupLayout],
+    });
+
+    this.pipeline = this.device.createRenderPipeline({
+      layout: pipelineLayout,
+      vertex: {
+        module: vertexShaderModule,
+        entryPoint: 'main',
+        buffers: [
+          {
+            arrayStride: 2 * 4,
+            attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x2' }],
+          },
+        ],
+      },
+      fragment: {
+        module: fragmentShaderModule,
+        entryPoint: 'main',
+        targets: [{ format: this.renderer.getFormat() }],
+      },
+      primitive: { topology: 'triangle-list' },
+    });
+  }
+
+  private createFullscreenQuad(): void {
     const vertices = new Float32Array([
       -1.0, -1.0,
-       1.0, -1.0,
-      -1.0,  1.0,
-      -1.0,  1.0,
-       1.0, -1.0,
-       1.0,  1.0,
+      1.0, -1.0,
+      -1.0, 1.0,
+      -1.0, 1.0,
+      1.0, -1.0,
+      1.0, 1.0,
     ]);
     this.vertexCount = vertices.length / 2;
 
     this.vertexBuffer = this.device.createBuffer({
       size: vertices.byteLength,
-      usage: GPUBufferUsage.VERTEX,
-      mappedAtCreation: true,
+      usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
     });
 
-    new Float32Array(this.vertexBuffer.getMappedRange()).set(vertices);
-    this.vertexBuffer.unmap();
+    this.device.queue.writeBuffer(this.vertexBuffer, 0, vertices);
   }
 
-  // private createVertexBuffer() {
-  //   const gridSize = 10;
-  //   const gridSpacing = 0.1;
-  //   const numLines = 2 * gridSize + 1;
-  //   const vertices = new Float32Array(numLines * 4 * 2);
-  //   let vertexIndex = 0;
-
-  //   for (let i = -gridSize; i <= gridSize; i++) {
-  //     // Vertical lines
-  //     vertices[vertexIndex++] = i * gridSpacing;
-  //     vertices[vertexIndex++] = -gridSize * gridSpacing;
-  //     vertices[vertexIndex++] = i * gridSpacing;
-  //     vertices[vertexIndex++] = gridSize * gridSpacing;
-
-  //     // Horizontal lines
-  //     vertices[vertexIndex++] = -gridSize * gridSpacing;
-  //     vertices[vertexIndex++] = i * gridSpacing;
-  //     vertices[vertexIndex++] = gridSize * gridSpacing;
-  //     vertices[vertexIndex++] = i * gridSpacing;
-  //   }
-
-  //   this.vertexCount = vertices.length / 2;
-
-  //   this.vertexBuffer = this.device.createBuffer({
-  //     size: vertices.byteLength,
-  //     usage: GPUBufferUsage.VERTEX,
-  //     mappedAtCreation: true,
-  //   });
-
-  //   new Float32Array(this.vertexBuffer.getMappedRange()).set(vertices);
-  //   this.vertexBuffer.unmap();
-  // }
-
-  public draw(renderPass: GPURenderPassEncoder) {
+  public override draw(renderPass: GPURenderPassEncoder): void {
+    this.updateCameraBuffer();
     renderPass.setPipeline(this.pipeline);
     renderPass.setBindGroup(0, this.bindGroup);
     renderPass.setVertexBuffer(0, this.vertexBuffer);
     renderPass.draw(this.vertexCount);
+  }
+
+  public override dispose(): void {
+    if (this.vertexBuffer) {
+      this.vertexBuffer.destroy();
+      this.vertexBuffer = null as any;
+    }
+    super.dispose();
   }
 }

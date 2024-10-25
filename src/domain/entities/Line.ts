@@ -1,61 +1,36 @@
 // src/domain/entities/Line.ts
 
-import { Renderer } from '../../infrastructure/rendering/Renderer';
+import { RenderableEntity } from './RenderableEntity';
 import { LineShader } from '../../shaders/LineShader';
+import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { Point } from './Point';
 
-export class Line {
-  private vertexBuffer: GPUBuffer;
-  private cameraBuffer: GPUBuffer;
-  private colorBuffer: GPUBuffer;
-  private pipeline: GPURenderPipeline;
-  private bindGroup: GPUBindGroup;
-  private device: GPUDevice;
-  private renderer: Renderer;
+export class Line extends RenderableEntity {
   private startPoint: Point;
   private endPoint: Point;
-  private color: Float32Array;
+  private vertexBuffer: GPUBuffer;
 
-  constructor(
-    startPoint: Point,
-    endPoint: Point,
-    renderer: Renderer
-  ) {
-    this.color = new Float32Array([1.0, 0.0, 0.0, 1.0]); // Default color: Red
-    this.device = renderer.getDevice();
-    this.renderer = renderer;
+  constructor(startPoint: Point, endPoint: Point, renderer: Renderer) {
+    super(renderer);
     this.startPoint = startPoint;
     this.endPoint = endPoint;
 
-    this.pipeline = this.setupPipeline();
-    this.cameraBuffer = this.createCameraBuffer();
-    this.colorBuffer = this.createColorBuffer();
     this.vertexBuffer = this.createVertexBuffer();
-
-    this.bindGroup = this.setupBindGroup();
   }
 
-  private setupPipeline(): GPURenderPipeline {
-    const lineVertexShaderModule = this.device.createShaderModule({
+  protected setupPipeline(): void {
+    const vertexShaderModule = this.device.createShaderModule({
       code: LineShader.VERTEX,
     });
 
-    const lineFragmentShaderModule = this.device.createShaderModule({
+    const fragmentShaderModule = this.device.createShaderModule({
       code: LineShader.FRAGMENT,
     });
 
     const bindGroupLayout = this.device.createBindGroupLayout({
       entries: [
-        {
-          binding: 0,
-          visibility: GPUShaderStage.VERTEX,
-          buffer: { type: 'uniform' },
-        },
-        {
-          binding: 1,
-          visibility: GPUShaderStage.FRAGMENT,
-          buffer: { type: 'uniform' },
-        },
+        { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } },
+        { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
       ],
     });
 
@@ -63,56 +38,25 @@ export class Line {
       bindGroupLayouts: [bindGroupLayout],
     });
 
-    return this.device.createRenderPipeline({
+    this.pipeline = this.device.createRenderPipeline({
       layout: pipelineLayout,
       vertex: {
-        module: lineVertexShaderModule,
+        module: vertexShaderModule,
         entryPoint: 'main',
         buffers: [
           {
             arrayStride: 2 * 4,
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
+            attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x2' }],
           },
         ],
       },
       fragment: {
-        module: lineFragmentShaderModule,
+        module: fragmentShaderModule,
         entryPoint: 'main',
-        targets: [
-          {
-            format: this.renderer.getFormat(),
-          },
-        ],
+        targets: [{ format: this.renderer.getFormat() }],
       },
-      primitive: {
-        topology: 'line-list',
-      },
+      primitive: { topology: 'line-list' },
     });
-  }
-
-  private createCameraBuffer(): GPUBuffer {
-    const cameraData = new Float32Array([0, 0, 1, 0]);
-    const buffer = this.device.createBuffer({
-      size: cameraData.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-    this.device.queue.writeBuffer(buffer, 0, cameraData);
-    return buffer;
-  }
-
-  private createColorBuffer(): GPUBuffer {
-    const buffer = this.device.createBuffer({
-      size: this.color.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-    this.device.queue.writeBuffer(buffer, 0, this.color);
-    return buffer;
   }
 
   private createVertexBuffer(): GPUBuffer {
@@ -136,22 +80,6 @@ export class Line {
     this.device.queue.writeBuffer(this.vertexBuffer, 0, vertices);
   }
 
-  private setupBindGroup(): GPUBindGroup {
-    return this.device.createBindGroup({
-      layout: this.pipeline.getBindGroupLayout(0),
-      entries: [
-        {
-          binding: 0,
-          resource: { buffer: this.cameraBuffer },
-        },
-        {
-          binding: 1,
-          resource: { buffer: this.colorBuffer },
-        },
-      ],
-    });
-  }
-
   public setStartPoint(startPoint: Point): void {
     this.startPoint = startPoint;
     this.updateVertexBuffer();
@@ -162,7 +90,7 @@ export class Line {
     this.updateVertexBuffer();
   }
 
-  public draw(renderPass: GPURenderPassEncoder): void {
+  public override draw(renderPass: GPURenderPassEncoder): void {
     this.updateCameraBuffer();
     renderPass.setPipeline(this.pipeline);
     renderPass.setBindGroup(0, this.bindGroup);
@@ -170,26 +98,19 @@ export class Line {
     renderPass.draw(2);
   }
 
-  private updateCameraBuffer(): void {
-    const { x, y } = this.renderer.getCamera().getOffset();
-    const zoom = this.renderer.getCamera().getZoom();
-    const cameraData = new Float32Array([x, y, zoom, 0]);
-    this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
+  public override dispose(): void {
+    if (this.vertexBuffer) {
+      this.vertexBuffer.destroy();
+      this.vertexBuffer = null as any;
+    }
+    super.dispose();
   }
 
-  public getStartpoint(): Point {
+  public getStartPoint(): Point {
     return this.startPoint;
   }
 
-  public getEndpoint(): Point {
+  public getEndPoint(): Point {
     return this.endPoint;
-  }
-
-  public setColor(color: Float32Array): void {
-    if (color.length !== 4) {
-      throw new Error('Color must be a Float32Array with 4 components (RGBA).');
-    }
-    this.color = color;
-    this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
   }
 }

@@ -1,57 +1,128 @@
 // src/domain/entities/Polyline.ts
 
+import { RenderableEntity } from './RenderableEntity';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
-import { Line } from './Line';
+import { PolylineShader } from '../../shaders/PolylineShader'; // Ensure you have PolylineShader implemented
 import { Point } from './Point';
 
-export class Polyline {
-  private lines: Line[] = [];
-  private renderer: Renderer;
+export class Polyline extends RenderableEntity {
   private points: Point[] = [];
+  private vertexBuffer: GPUBuffer | null = null;
+  private vertexCount: number = 0;
 
   constructor(renderer: Renderer) {
-    this.renderer = renderer;
+    super(renderer);
+    this.setupPipeline();
+    this.setupBindGroup();
+  }
+
+  protected setupPipeline(): void {
+    const vertexShaderModule = this.device.createShaderModule({
+      code: PolylineShader.VERTEX,
+    });
+
+    const fragmentShaderModule = this.device.createShaderModule({
+      code: PolylineShader.FRAGMENT,
+    });
+
+    const bindGroupLayout = this.device.createBindGroupLayout({
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX,
+          buffer: { type: 'uniform' },
+        },
+        {
+          binding: 1,
+          visibility: GPUShaderStage.FRAGMENT,
+          buffer: { type: 'uniform' },
+        },
+      ],
+    });
+
+    const pipelineLayout = this.device.createPipelineLayout({
+      bindGroupLayouts: [bindGroupLayout],
+    });
+
+    this.pipeline = this.device.createRenderPipeline({
+      layout: pipelineLayout,
+      vertex: {
+        module: vertexShaderModule,
+        entryPoint: 'main',
+        buffers: [
+          {
+            arrayStride: 2 * 4, // 2 floats per vertex
+            attributes: [
+              {
+                shaderLocation: 0,
+                offset: 0,
+                format: 'float32x2',
+              },
+            ],
+          },
+        ],
+      },
+      fragment: {
+        module: fragmentShaderModule,
+        entryPoint: 'main',
+        targets: [
+          {
+            format: this.renderer.getFormat(),
+          },
+        ],
+      },
+      primitive: {
+        topology: 'line-strip',
+      },
+    });
   }
 
   public addPoint(point: Point): void {
     this.points.push(point);
-    if (this.points.length > 1) {
-      const startPoint = this.points[this.points.length - 2];
-      const endPoint = point;
-      const newLine = new Line(startPoint, endPoint, this.renderer);
-      this.lines.push(newLine);
-    }
+    this.updateVertexBuffer();
   }
 
   public removePoint(point: Point): void {
     const index = this.points.indexOf(point);
     if (index !== -1) {
       this.points.splice(index, 1);
-      // Remove associated lines
-      if (index > 0) {
-        // Remove line connecting to this point
-        this.lines.splice(index - 1, 1);
-      }
-      if (index < this.lines.length) {
-        // Update the start point of the next line
-        if (index === 0 && this.points.length > 0) {
-          this.lines[0].setStartPoint(this.points[0]);
-        } else if (index > 0 && index < this.points.length) {
-          this.lines[index - 1].setEndPoint(this.points[index]);
-        }
-      }
+      point.dispose();
+      this.updateVertexBuffer();
     }
   }
 
-  public updateLastPoint(x: number, y: number): void {
+  public updatePoint(index: number, x: number, y: number): void {
+    if (index >= 0 && index < this.points.length) {
+      const point = this.points[index];
+      point.setX(x);
+      point.setY(y);
+      this.updateVertexBuffer();
+    }
+  }
+
+  public updateVertexBuffer(): void {
+    if (this.vertexBuffer) {
+      this.vertexBuffer.destroy();
+    }
+
     if (this.points.length > 0) {
-      const lastPoint = this.points[this.points.length - 1];
-      lastPoint.setX(x);
-      lastPoint.setY(y);
-      if (this.lines.length > 0) {
-        const lastLine = this.lines[this.lines.length - 1];
-        lastLine.updateVertexBuffer();
+      const vertices = new Float32Array(this.points.length * 2);
+      for (let i = 0; i < this.points.length; i++) {
+        vertices[i * 2] = this.points[i].getX();
+        vertices[i * 2 + 1] = this.points[i].getY();
       }
+
+      this.vertexCount = this.points.length;
+
+      this.vertexBuffer = this.device.createBuffer({
+        size: vertices.byteLength,
+        usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+      });
+
+      this.device.queue.writeBuffer(this.vertexBuffer, 0, vertices);
+    } else {
+      this.vertexBuffer = null;
+      this.vertexCount = 0;
     }
   }
 
@@ -59,18 +130,32 @@ export class Polyline {
     return this.points;
   }
 
-  public removeLastLine(): void {
-    if (this.lines.length > 0) {
-      this.lines.pop();
+  public override draw(renderPass: GPURenderPassEncoder): void {
+    if (this.vertexBuffer && this.vertexCount > 1) {
+      this.updateCameraBuffer();
+      renderPass.setPipeline(this.pipeline);
+      renderPass.setBindGroup(0, this.bindGroup);
+      renderPass.setVertexBuffer(0, this.vertexBuffer);
+      renderPass.draw(this.vertexCount);
     }
-    if (this.points.length > 0) {
-      this.points.pop();
-    }
+
+    // Optionally, draw the control points
+    // for (const point of this.points) {
+    //   point.draw(renderPass);
+    // }
   }
 
-  public draw(renderPass: GPURenderPassEncoder): void {
-    for (const line of this.lines) {
-      line.draw(renderPass);
+  public override dispose(): void {
+    if (this.vertexBuffer) {
+      this.vertexBuffer.destroy();
+      this.vertexBuffer = null;
     }
+
+    for (const point of this.points) {
+      point.dispose();
+    }
+    this.points = [];
+
+    super.dispose();
   }
 }
