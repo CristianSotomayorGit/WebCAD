@@ -16,6 +16,7 @@ import { PolygonTool } from '../tools/DrawingTools/PolygonTool';
 import { ArcTool } from '../tools/DrawingTools/ArcTool';
 import { Camera } from '../Camera';
 import { EllipseTool } from '../tools/DrawingTools/EllipseTool';
+import { MoveTool } from '../tools/ModifyTools/MoveTool';
 
 export class ToolManager {
   private activeTool: DrawingTool;
@@ -35,6 +36,7 @@ export class ToolManager {
     this.tools['Polygon'] = new PolygonTool(entityManager, renderer);
     this.tools['Arc'] = new ArcTool(entityManager, renderer);
     this.tools['Ellipse'] = new EllipseTool(entityManager, renderer);
+    this.tools['Move'] = new MoveTool(entityManager, renderer);
 
 
     // Set default active tool

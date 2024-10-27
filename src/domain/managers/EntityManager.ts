@@ -1,5 +1,7 @@
 // src/domain/managers/EntityManager.ts
 
+import { RenderableEntity } from "../entities/RenderableEntity";
+
 export class EntityManager {
   private entities: any[] = [];
   private temporaryEntities: any[] = [];
@@ -42,4 +44,16 @@ export class EntityManager {
   public clearTemporaryEntities(): void {
     this.temporaryEntities = [];
   }
+
+  public hitTest(x: number, y: number): RenderableEntity | null {
+    // Iterate in reverse to check topmost entities first
+    for (let i = this.entities.length - 1; i >= 0; i--) {
+      const entity = this.entities[i];
+      if (entity.isPointInside(x, y)) {
+        return entity;
+      }
+    }
+    return null;
+  }
+
 }

@@ -169,4 +169,18 @@ export class Point extends RenderableEntity {
     }
     super.dispose();
   }
+
+  protected updateTransform(): void {
+    this.x = this.position.x;
+    this.y = this.position.y;
+    this.createBuffers(); // Recreate buffers with new position
+  }
+
+  public isPointInside(x: number, y: number): boolean {
+    const dx = x - this.x;
+    const dy = y - this.y;
+    const distanceSquared = dx * dx + dy * dy;
+    const radius = 0.02; // Adjust as needed
+    return distanceSquared <= radius * radius;
+  }
 }

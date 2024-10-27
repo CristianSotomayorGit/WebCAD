@@ -12,6 +12,11 @@ export abstract class RenderableEntity implements Entity {
   protected colorBuffer!: GPUBuffer;
   protected color: Float32Array;
 
+  // Transformation properties
+  protected position: { x: number; y: number } = { x: 0, y: 0 };
+  protected rotation: number = 0;
+  protected scale: { x: number; y: number } = { x: 1, y: 1 };
+
   constructor(renderer: Renderer, color?: Float32Array) {
     this.renderer = renderer;
     this.device = renderer.getDevice();
@@ -73,6 +78,18 @@ export abstract class RenderableEntity implements Entity {
     this.color = color;
     this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
   }
+
+  // Transformation methods
+  public translate(deltaX: number, deltaY: number): void {
+    this.position.x += deltaX;
+    this.position.y += deltaY;
+    this.updateTransform();
+  }
+
+  protected abstract updateTransform(): void;
+
+  // Hit testing
+  public abstract isPointInside(x: number, y: number): boolean;
 
   public abstract draw(renderPass: GPURenderPassEncoder): void;
 
