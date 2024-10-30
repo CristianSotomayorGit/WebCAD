@@ -91,7 +91,7 @@ const WebGPUCanvas: React.FC = () => {
         <div style={overlayStyle}>
           <div style={popupStyle}>
             <div style={popupHeaderStyle}>
-              <img src="/OtterCAD_logo.png" alt="Logo" style={logoStyle} />
+              <img src="/src/assets/OtterCAD_logo.png" alt="Logo" style={logoStyle} />
               <h1 style={popupTitleStyle}>OtterCAD</h1>
             </div>
             <p style={popupVersionStyle}>
