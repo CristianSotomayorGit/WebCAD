@@ -72,9 +72,4 @@ const homepageButtonStyle: React.CSSProperties = {
   transition: 'background-color 0.3s',
 };
 
-// Optional: Add hover effect for the button
-const homepageButtonHoverStyle: React.CSSProperties = {
-  backgroundColor: '#3d566e',
-};
-
 export default HomePage;
