@@ -1,9 +1,6 @@
 import { EntityManager } from '../../domain/managers/EntityManager';
 import { Camera } from '../../domain/Camera';
-import { Grid } from '../../domain/entities/Grid';
 import { GridShader } from '../../shaders/GridShader';
-import { Line } from '../../domain/entities/Line';
-import { Arc } from '../../domain/entities/Arc';
 
 export class Renderer {
   private device!: GPUDevice;
