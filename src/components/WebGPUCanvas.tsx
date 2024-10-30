@@ -4,20 +4,13 @@ import { EntityManager } from '../domain/managers/EntityManager';
 import { ToolManager } from '../domain/managers/ToolManager';
 import CommandToolbar from './CommandToolbar';
 import ButtonToolbar from './ButtonToolbar';
-import { ConstraintType } from '../domain/constraints/ConstraintTypes';
-import { ConstraintManager } from '../domain/managers/ConstraintManager';
-import ConstraintToolbar from './ConstraintToolbar';
 
 const WebGPUCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<Renderer>();
   const entityManagerRef = useRef(new EntityManager());
   const toolManagerRef = useRef<ToolManager>();
-  const constraintManagerRef = useRef<ConstraintManager>();
-
   const [activeToolName, setActiveToolName] = useState('Select');
-  const [isSnapChecked, setIsSnapChecked] = useState(false);
-  const [isOrthoChecked, setIsOrthoChecked] = useState(false);
 
   const [showPopup, setShowPopup] = useState(true);
   const [initializationError, setInitializationError] = useState<string | null>(null);
@@ -30,17 +23,7 @@ const WebGPUCanvas: React.FC = () => {
           entityManagerRef.current
         );
 
-        try {
-          await rendererRef.current.initialize();
-        } catch (error) {
-          console.error('Error during WebGPU initialization', error);
-          setInitializationError(error instanceof Error ? error.message : String(error));
-        }
-
-        constraintManagerRef.current = new ConstraintManager(
-          entityManagerRef.current,
-          rendererRef.current
-        );
+        await rendererRef.current.initialize();
 
         toolManagerRef.current = new ToolManager(
           entityManagerRef.current,
@@ -88,55 +71,8 @@ const WebGPUCanvas: React.FC = () => {
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (!constraintManagerRef.current || !toolManagerRef.current) return;
-
-    switch (event.key.toLowerCase()) {
-      case 'l':
-        setActiveToolName('Line');
-        toolManagerRef.current.setActiveTool('Line');
-        break;
-      case 's':
-        setActiveToolName('Select');
-        toolManagerRef.current.setActiveTool('Select');
-        break;
-      case 'p':
-        setActiveToolName('Polygon');
-        toolManagerRef.current.setActiveTool('Polygon');
-        break;
-      case 'c':
-        setActiveToolName('Circle');
-        toolManagerRef.current.setActiveTool('Circle');
-        break;
-      case 'y':
-        setActiveToolName('Spline');
-        toolManagerRef.current.setActiveTool('Spline');
-        break;
-      case 'r':
-        setActiveToolName('Rectangle');
-        toolManagerRef.current.setActiveTool('Rectangle');
-        break;
-      case 'e':
-        setActiveToolName('Ellipse');
-        toolManagerRef.current.setActiveTool('Ellipse');
-        break;
-      case 'shift' && 'z':
-        setIsOrthoChecked((prev) => !prev);
-        constraintManagerRef.current.toggleConstraint(
-          ConstraintType.Orthogonal,
-          'both'
-        );
-        break;
-      case 'f3' && 'x':
-        setIsSnapChecked((prev) => !prev);
-        constraintManagerRef.current.toggleConstraint(
-          ConstraintType.Snap,
-          'both'
-        );
-        break;
-      default:
-        toolManagerRef.current.getActiveTool()?.onKeyDown!(event);
-        break;
-    }
+    if (!toolManagerRef.current) return;
+    toolManagerRef.current.getActiveTool()?.onKeyDown!(event);
   };
 
   const handleWheel = (event: WheelEvent) => {
@@ -187,17 +123,7 @@ const WebGPUCanvas: React.FC = () => {
         toolManagerRef={toolManagerRef}
         setActiveToolName={setActiveToolName}
       />
-      <ConstraintToolbar
-        constraintToolbarRef={constraintManagerRef}
-        isSnapChecked={isSnapChecked}
-        setIsSnapChecked={setIsSnapChecked}
-        isOrthoChecked={isOrthoChecked}
-        setIsOrthoChecked={setIsOrthoChecked}
-      />
-      <canvas
-        ref={canvasRef}
-        style={{ display: 'block', width: '100%', height: '100vh' }}
-      />
+      <canvas ref={canvasRef} style={{ display: 'block', overflow: 'hidden' }} />
     </>
   );
 };
