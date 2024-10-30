@@ -153,9 +153,22 @@ const WebGPUCanvas: React.FC = () => {
               <img src="/OtterCAD_logo.png" alt="Logo" style={logoStyle} />
               <h1 style={popupTitleStyle}>OtterCAD</h1>
             </div>
+            <p style={popupVersionStyle}>
+              Version: Alpha 0.0.1            
+            </p>
             <p style={popupDescriptionStyle}>
-              Draw shapes, modify them, and explore the capabilities of WebGPU
-              with TypeScript.
+            This is the first release of OtterCAD. I've chosen to make it available early 
+            to share my progress. Currently, the application is in an experimental stage, 
+            offering only basic drawing functionality. this app is an exploration of WebGPU for 2D drafting, 
+            which is still highly experimental but has the potential to significantly enhance performance.
+
+            <br></br>
+            <br></br>
+
+
+            I chose the name OtterCAD because I believe our tools should get out of the way and enable 
+            us to work as seamlessly as otters swim. My goal is to develop OtterCAD into a reliable web-
+            based CAD tool, equipped with professional features and robust performance.
             </p>
             {initializationError && (
               <p style={errorStyle}>{initializationError}</p>
@@ -231,9 +244,15 @@ const popupTitleStyle: React.CSSProperties = {
   fontFamily: 'Arial, sans-serif',
 };
 
-const popupDescriptionStyle: React.CSSProperties = {
+const popupVersionStyle: React.CSSProperties = {
   fontSize: '24px',
   marginBottom: '40px',
+};
+
+const popupDescriptionStyle: React.CSSProperties = {
+  fontSize: '18px',
+  marginBottom: '40px',
+  textAlign: 'left'
 };
 
 const errorStyle: React.CSSProperties = {
