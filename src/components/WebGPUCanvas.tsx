@@ -23,7 +23,12 @@ const WebGPUCanvas: React.FC = () => {
           entityManagerRef.current
         );
 
-        await rendererRef.current.initialize();
+        try {
+          await rendererRef.current.initialize();
+        } catch (error) {
+          console.error('Error during WebGPU initialization', error);
+          setInitializationError(error instanceof Error ? error.message : String(error));
+        }
 
         toolManagerRef.current = new ToolManager(
           entityManagerRef.current,
@@ -90,28 +95,76 @@ const WebGPUCanvas: React.FC = () => {
               <h1 style={popupTitleStyle}>OtterCAD</h1>
             </div>
             <p style={popupVersionStyle}>
-              Version: Alpha 0.0.1            
+              Version: Alpha 0.0.1
             </p>
             <p style={popupDescriptionStyle}>
-            This is the first release of OtterCAD. I've chosen to make it available early 
-            to share my progress. Currently, the application is in an experimental stage, 
-            offering only basic drawing functionality. this app is an exploration of WebGPU for 2D drafting, 
-            which is still highly experimental but has the potential to significantly enhance performance.
-
-            <br></br>
-            <br></br>
-
-
-            I chose the name OtterCAD because I believe our tools should get out of the way and enable 
-            us to work as seamlessly as otters swim. My goal is to develop OtterCAD into a reliable web-
-            based CAD tool, equipped with professional features and robust performance.
+              From the dev:
+              <br /><br />
+              This is the first release of OtterCAD. I've chosen to make it available early
+              to share my progress. Currently, the application is in an experimental stage,
+              offering only basic drawing functionality. This app is an exploration of WebGPU for 2D drafting,
+              which is still highly experimental but has the potential to significantly enhance performance.
+              <br /><br />
+              I chose the name OtterCAD because I believe our tools should get out of the way and enable
+              us to work as seamlessly as otters swim. My goal is to develop OtterCAD into a reliable web-based 
+              CAD tool, equipped with professional features and robust performance.
             </p>
             {initializationError && (
-              <p style={errorStyle}>{initializationError}</p>
+              <>
+                <p style={errorStyle}>{initializationError}</p>
+                <ul style={troubleshootingListStyle}>
+                  <li>
+                    <strong>Use Firefox Nightly:</strong>
+                    <p>
+                      Firefox Nightly is the preferred browser of the OtterCAD dev team and offers the latest WebGPU features.
+                      Ensure you’re running the latest version and that WebGPU is enabled in the browser settings.
+                    </p>
+                  </li>
+                  <li>
+                    <strong>Update Other Browsers:</strong>
+                    <p>
+                      Use the newest versions of <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong>.
+                      Make sure to enable WebGPU in their experimental flags or settings to ensure proper functionality.
+                    </p>
+                  </li>
+                  <li>
+                    <strong>Check Graphics Drivers:</strong>
+                    <p>
+                      Ensure your graphics drivers are up to date. Outdated drivers can prevent WebGPU from functioning correctly
+                      and may cause compatibility issues.
+                    </p>
+                  </li>
+                  <li>
+                    <strong>Verify Hardware Compatibility:</strong>
+                    <p>
+                      Some older or integrated graphics cards might not support WebGPU. Verify that your hardware meets the necessary
+                      requirements for WebGPU support.
+                    </p>
+                  </li>
+                  <li>
+                    <strong>Avoid Virtual Environments:</strong>
+                    <p>
+                      Running OtterCAD in virtual machines or environments with disabled hardware acceleration can block WebGPU support.
+                      Use a native environment with hardware acceleration enabled for the best experience.
+                    </p>
+                  </li>
+                  <li>
+                    <strong>Contact Us on LinkedIn:</strong>
+                    <p>
+                      If you continue to experience issues, feel free to reach out for support on{' '}
+                      <a href="https://www.linkedin.com/in/your-profile" style={linkStyle} target="_blank" rel="noopener noreferrer">LinkedIn</a>.
+                    </p>
+                  </li>
+                </ul>
+              </>
             )}
             <button
               onClick={() => setShowPopup(false)}
-              style={popupButtonStyle}
+              style={{
+                ...popupButtonStyle,
+                ...(initializationError ? disabledButtonStyle : {}),
+              }}
+              disabled={!!initializationError}
             >
               Launch App
             </button>
@@ -149,6 +202,8 @@ const popupStyle: React.CSSProperties = {
   textAlign: 'center',
   maxWidth: '600px',
   width: '90%',
+  maxHeight: '90vh',
+  overflowY: 'auto',
 };
 
 const popupHeaderStyle: React.CSSProperties = {
@@ -178,12 +233,31 @@ const popupVersionStyle: React.CSSProperties = {
 const popupDescriptionStyle: React.CSSProperties = {
   fontSize: '18px',
   marginBottom: '40px',
-  textAlign: 'left'
+  textAlign: 'left',
+  backgroundColor: '#212830',
+  padding: '20px',
+  borderRadius: '4px',
 };
 
 const errorStyle: React.CSSProperties = {
   color: 'red',
   marginBottom: '20px',
+};
+
+const troubleshootingListStyle: React.CSSProperties = {
+  listStyleType: 'disc',
+  paddingLeft: '20px',
+  textAlign: 'left',
+  marginBottom: '20px',
+  backgroundColor: '#c0392b', // Aesthetic red background
+  color: '#ecf0f1', // White text
+  padding: '20px',
+  borderRadius: '4px',
+};
+
+const linkStyle: React.CSSProperties = {
+  color: '#ffdddd', // Light red for links
+  textDecoration: 'underline',
 };
 
 const popupButtonStyle: React.CSSProperties = {
@@ -198,6 +272,11 @@ const popupButtonStyle: React.CSSProperties = {
   transition: 'background-color 0.3s',
   border: 'none',
   cursor: 'pointer',
+};
+
+const disabledButtonStyle: React.CSSProperties = {
+  backgroundColor: '#7f8c8d', // Greyed out background
+  cursor: 'not-allowed',
 };
 
 export default WebGPUCanvas;
