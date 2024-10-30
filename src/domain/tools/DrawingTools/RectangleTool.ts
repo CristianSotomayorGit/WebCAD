@@ -89,4 +89,8 @@ export class RectangleTool extends AbstractDrawingTool {
     }
     this.startPoint = null;
   }
+
+  getStartPoint() {
+    return this.startPoint;
+  }
 }

@@ -12,9 +12,7 @@ import { CircleTool } from '../tools/DrawingTools/CircleTool';
 import { SplineTool } from '../tools/DrawingTools/SplineTool';
 import { RectangleTool } from '../tools/DrawingTools/RectangleTool';
 import { PolygonTool } from '../tools/DrawingTools/PolygonTool';
-// import { ConstraintManager } from './ConstraintManager'; // Remove if not used
 import { ArcTool } from '../tools/DrawingTools/ArcTool';
-import { Camera } from '../Camera';
 import { EllipseTool } from '../tools/DrawingTools/EllipseTool';
 
 export class ToolManager {

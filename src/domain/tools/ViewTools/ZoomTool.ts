@@ -17,9 +17,4 @@ export class ZoomTool  {
     const newZoom = this.camera.getZoom() * delta;
     this.camera.setZoom(newZoom);
   }
-
-  public onKeyDown(event: KeyboardEvent): void {
-    // Handle key events if necessary
-  }
-
 }

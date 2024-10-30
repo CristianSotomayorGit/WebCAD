@@ -7,21 +7,11 @@ import { Point } from '../../entities/Point';
 export class PolylineTool extends AbstractDrawingTool {
   private currentPolyline: Polyline | null = null;
   private tempPoint: Point | null = null;
-  private isOrthoConstraintActive = false;
 
   public onLeftClick(event: MouseEvent): void {
     const worldPosition = this.getWorldPosition(event);
 
-    let adjustedPosition = worldPosition;
-    if (this.isOrthoConstraintActive && this.isDrawing && this.tempPoint) {
-      const referencePoint = this.tempPoint;
-      adjustedPosition = this.applyOrthogonalConstraint(worldPosition, {
-        x: referencePoint.getX(),
-        y: referencePoint.getY(),
-      });
-    }
-
-    const newPoint = this.createAndAddPoint(adjustedPosition.x, adjustedPosition.y);
+    const newPoint = this.createAndAddPoint(worldPosition.x, worldPosition.y);
 
     if (!this.isDrawing) {
       this.isDrawing = true;
@@ -31,7 +21,7 @@ export class PolylineTool extends AbstractDrawingTool {
 
       this.currentPolyline.addPoint(newPoint);
 
-      this.tempPoint = this.createAndAddPoint(adjustedPosition.x, adjustedPosition.y);
+      this.tempPoint = this.createAndAddPoint(worldPosition.x, worldPosition.y);
       this.currentPolyline.addPoint(this.tempPoint);
     } else {
       if (this.currentPolyline && this.tempPoint) {
@@ -42,7 +32,7 @@ export class PolylineTool extends AbstractDrawingTool {
 
         this.currentPolyline.addPoint(newPoint);
 
-        this.tempPoint = this.createAndAddPoint(adjustedPosition.x, adjustedPosition.y);
+        this.tempPoint = this.createAndAddPoint(worldPosition.x, worldPosition.y);
         this.currentPolyline.addPoint(this.tempPoint);
       }
     }
@@ -52,17 +42,8 @@ export class PolylineTool extends AbstractDrawingTool {
     if (this.isDrawing && this.currentPolyline && this.tempPoint) {
       const worldPosition = this.getWorldPosition(event);
 
-      let adjustedPosition = worldPosition;
-      if (this.isOrthoConstraintActive && this.currentPolyline.getPoints().length > 1) {
-        const lastFixedPoint = this.currentPolyline.getPoints()[this.currentPolyline.getPoints().length - 2];
-        adjustedPosition = this.applyOrthogonalConstraint(worldPosition, {
-          x: lastFixedPoint.getX(),
-          y: lastFixedPoint.getY(),
-        });
-      }
-
-      this.tempPoint.setX(adjustedPosition.x);
-      this.tempPoint.setY(adjustedPosition.y);
+      this.tempPoint.setX(worldPosition.x);
+      this.tempPoint.setY(worldPosition.y);
 
       this.currentPolyline.updateVertexBuffer();
     }
@@ -74,8 +55,6 @@ export class PolylineTool extends AbstractDrawingTool {
     if (this.isDrawing) {
       if (event.key === 'Enter' || event.key === 'Return' || event.key === ' ') {
         this.finishDrawing();
-      } else if (event.key === 'Shift') {
-        this.isOrthoConstraintActive = !this.isOrthoConstraintActive;
       }
     }
   }
@@ -94,8 +73,6 @@ export class PolylineTool extends AbstractDrawingTool {
       this.tempPoint.dispose();
       this.tempPoint = null;
     }
-
-    this.isOrthoConstraintActive = false;
   }
 
   private finishDrawing(): void {
@@ -109,20 +86,5 @@ export class PolylineTool extends AbstractDrawingTool {
       this.currentPolyline = null;
     }
     this.isDrawing = false;
-    this.isOrthoConstraintActive = false;
-  }
-
-  private applyOrthogonalConstraint(
-    currentPoint: { x: number; y: number },
-    referencePoint: { x: number; y: number }
-  ): { x: number; y: number } {
-    const deltaX = Math.abs(currentPoint.x - referencePoint.x);
-    const deltaY = Math.abs(currentPoint.y - referencePoint.y);
-
-    if (deltaX > deltaY) {
-      return { x: currentPoint.x, y: referencePoint.y };
-    } else {
-      return { x: referencePoint.x, y: currentPoint.y };
-    }
   }
 }

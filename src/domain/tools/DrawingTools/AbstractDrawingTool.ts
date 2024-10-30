@@ -20,11 +20,11 @@ export abstract class AbstractDrawingTool implements DrawingTool {
     public abstract onLeftClick(event: MouseEvent): void;
 
     public onMouseMove(event: MouseEvent): void {
-        // Common mouse move logic can be placed here if needed
+        event
     }
 
     public onMouseUp(event: MouseEvent): void {
-        // Common mouse up logic can be placed here if needed
+        event
     }
 
     public onKeyDown(event: KeyboardEvent): void {
