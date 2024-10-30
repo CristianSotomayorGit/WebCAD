@@ -19,6 +19,9 @@ const WebGPUCanvas: React.FC = () => {
   const [isSnapChecked, setIsSnapChecked] = useState(false);
   const [isOrthoChecked, setIsOrthoChecked] = useState(false);
 
+  const [showPopup, setShowPopup] = useState(true);
+  const [initializationError, setInitializationError] = useState<string | null>(null);
+
   useEffect(() => {
     const initRenderer = async () => {
       if (canvasRef.current) {
@@ -27,13 +30,20 @@ const WebGPUCanvas: React.FC = () => {
           entityManagerRef.current
         );
 
-        await rendererRef.current.initialize();
+        try {
+          await rendererRef.current.initialize();
+        } catch (error) {
+          console.error('Error during WebGPU initialization', error);
+          setInitializationError(error instanceof Error ? error.message : String(error));
+        }
 
-        constraintManagerRef.current = new ConstraintManager(entityManagerRef.current, rendererRef.current);
+        constraintManagerRef.current = new ConstraintManager(
+          entityManagerRef.current,
+          rendererRef.current
+        );
 
         toolManagerRef.current = new ToolManager(
           entityManagerRef.current,
-          // constraintManagerRef.current,
           rendererRef.current
         );
 
@@ -62,8 +72,10 @@ const WebGPUCanvas: React.FC = () => {
   }, []);
 
   const handleMouseDown = (event: MouseEvent) => {
-    if (event.button === 0) toolManagerRef.current?.getActiveTool().onLeftClick(event);
-    if (event.button === 1) toolManagerRef.current?.getPanTool().onWheelClick(event);
+    if (event.button === 0)
+      toolManagerRef.current?.getActiveTool().onLeftClick(event);
+    if (event.button === 1)
+      toolManagerRef.current?.getPanTool().onWheelClick(event);
   };
 
   const handleMouseMove = (event: MouseEvent) => {
@@ -80,50 +92,47 @@ const WebGPUCanvas: React.FC = () => {
 
     switch (event.key.toLowerCase()) {
       case 'l':
-        setActiveToolName('Line'); // Update UI state
-        toolManagerRef.current.setActiveTool('Line'); // Update tool manager
+        setActiveToolName('Line');
+        toolManagerRef.current.setActiveTool('Line');
         break;
-
       case 's':
-        setActiveToolName('Select'); // Update UI state
-        toolManagerRef.current.setActiveTool('Select'); // Update tool manager
+        setActiveToolName('Select');
+        toolManagerRef.current.setActiveTool('Select');
         break;
-
       case 'p':
-        setActiveToolName('Polygon'); // Update UI state
-        toolManagerRef.current.setActiveTool('Polygon'); // Update tool manager
+        setActiveToolName('Polygon');
+        toolManagerRef.current.setActiveTool('Polygon');
         break;
-
       case 'c':
-        setActiveToolName('Circle'); // Update UI state
-        toolManagerRef.current.setActiveTool('Circle'); // Update tool manager
+        setActiveToolName('Circle');
+        toolManagerRef.current.setActiveTool('Circle');
         break;
-
-      case 'y': // Changed from 's' to 'y' to avoid conflict with 'Select'
-        setActiveToolName('Spline'); // Update UI state
-        toolManagerRef.current.setActiveTool('Spline'); // Update tool manager
+      case 'y':
+        setActiveToolName('Spline');
+        toolManagerRef.current.setActiveTool('Spline');
         break;
-
       case 'r':
-        setActiveToolName('Rectangle'); // Update UI state
-        toolManagerRef.current.setActiveTool('Rectangle'); // Update tool manager
+        setActiveToolName('Rectangle');
+        toolManagerRef.current.setActiveTool('Rectangle');
         break;
-
       case 'e':
-        setActiveToolName('Ellipse'); // Update UI state
-        toolManagerRef.current.setActiveTool('Ellipse'); // Update tool manager
+        setActiveToolName('Ellipse');
+        toolManagerRef.current.setActiveTool('Ellipse');
         break;
-
       case 'shift' && 'z':
-        setIsOrthoChecked((prev) => !prev); // Toggle Ortho checkbox state
-        constraintManagerRef.current.toggleConstraint(ConstraintType.Orthogonal, 'both');
+        setIsOrthoChecked((prev) => !prev);
+        constraintManagerRef.current.toggleConstraint(
+          ConstraintType.Orthogonal,
+          'both'
+        );
         break;
-
       case 'f3' && 'x':
-        setIsSnapChecked((prev) => !prev); // Toggle Snap checkbox state
-        constraintManagerRef.current.toggleConstraint(ConstraintType.Snap, 'both');
+        setIsSnapChecked((prev) => !prev);
+        constraintManagerRef.current.toggleConstraint(
+          ConstraintType.Snap,
+          'both'
+        );
         break;
-
       default:
         toolManagerRef.current.getActiveTool()?.onKeyDown!(event);
         break;
@@ -137,6 +146,29 @@ const WebGPUCanvas: React.FC = () => {
 
   return (
     <>
+      {showPopup && (
+        <div style={overlayStyle}>
+          <div style={popupStyle}>
+            <div style={popupHeaderStyle}>
+              <img src="/OtterCAD_logo.png" alt="Logo" style={logoStyle} />
+              <h1 style={popupTitleStyle}>OtterCAD</h1>
+            </div>
+            <p style={popupDescriptionStyle}>
+              Draw shapes, modify them, and explore the capabilities of WebGPU
+              with TypeScript.
+            </p>
+            {initializationError && (
+              <p style={errorStyle}>{initializationError}</p>
+            )}
+            <button
+              onClick={() => setShowPopup(false)}
+              style={popupButtonStyle}
+            >
+              Launch App
+            </button>
+          </div>
+        </div>
+      )}
       <CommandToolbar activeTool={activeToolName} />
       <ButtonToolbar
         toolManagerRef={toolManagerRef}
@@ -149,9 +181,78 @@ const WebGPUCanvas: React.FC = () => {
         isOrthoChecked={isOrthoChecked}
         setIsOrthoChecked={setIsOrthoChecked}
       />
-      <canvas ref={canvasRef} style={{ display: 'block', overflow: 'hidden' }} />
+      <canvas
+        ref={canvasRef}
+        style={{ display: 'block', width: '100%', height: '100vh' }}
+      />
     </>
   );
+};
+
+const overlayStyle: React.CSSProperties = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  backgroundColor: 'rgba(0, 0, 0, 0.5)', // Gray overlay
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 9999, // Ensure it's on top
+};
+
+const popupStyle: React.CSSProperties = {
+  backgroundColor: '#2c3e50', // Same as toolbar background
+  color: '#ecf0f1', // Same as toolbar text color
+  padding: '40px',
+  borderRadius: '8px',
+  textAlign: 'center',
+  maxWidth: '600px',
+  width: '90%',
+};
+
+const popupHeaderStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: '20px',
+};
+
+const logoStyle: React.CSSProperties = {
+  width: '64px',
+  height: '64px',
+  marginRight: '20px',
+};
+
+const popupTitleStyle: React.CSSProperties = {
+  fontSize: '48px',
+  margin: 0,
+  fontFamily: 'Arial, sans-serif',
+};
+
+const popupDescriptionStyle: React.CSSProperties = {
+  fontSize: '24px',
+  marginBottom: '40px',
+};
+
+const errorStyle: React.CSSProperties = {
+  color: 'red',
+  marginBottom: '20px',
+};
+
+const popupButtonStyle: React.CSSProperties = {
+  display: 'inline-block',
+  padding: '15px 30px',
+  backgroundColor: '#34495e', // Button background color
+  color: '#ecf0f1', // Button text color
+  textDecoration: 'none',
+  borderRadius: '4px',
+  fontSize: '18px',
+  fontFamily: 'Arial, sans-serif',
+  transition: 'background-color 0.3s',
+  border: 'none',
+  cursor: 'pointer',
 };
 
 export default WebGPUCanvas;
