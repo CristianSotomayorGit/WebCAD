@@ -152,22 +152,20 @@ const WebGPUCanvas: React.FC = () => {
                     <strong>Contact Us on LinkedIn:</strong>
                     <p>
                       If you continue to experience issues, feel free to reach out for support on{' '}
-                      <a href="https://www.linkedin.com/in/your-profile" style={linkStyle} target="_blank" rel="noopener noreferrer">LinkedIn</a>.
+                      <a href="https://www.linkedin.com/in/cristian-sotomayor/" style={linkStyle} target="_blank" rel="noopener noreferrer">LinkedIn</a>.
                     </p>
                   </li>
                 </ul>
               </>
             )}
-            <button
-              onClick={() => setShowPopup(false)}
-              style={{
-                ...popupButtonStyle,
-                ...(initializationError ? disabledButtonStyle : {}),
-              }}
-              disabled={!!initializationError}
-            >
-              Launch App
-            </button>
+            {!initializationError && (
+              <button
+                onClick={() => setShowPopup(false)}
+                style={popupButtonStyle}
+              >
+                Launch App
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -272,11 +270,6 @@ const popupButtonStyle: React.CSSProperties = {
   transition: 'background-color 0.3s',
   border: 'none',
   cursor: 'pointer',
-};
-
-const disabledButtonStyle: React.CSSProperties = {
-  backgroundColor: '#7f8c8d', // Greyed out background
-  cursor: 'not-allowed',
 };
 
 export default WebGPUCanvas;
