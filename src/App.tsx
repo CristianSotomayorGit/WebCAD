@@ -8,7 +8,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<WebGPUCanvas />} />
+        <Route path="/ottercad" element={<WebGPUCanvas />} />
       </Routes>
     </Router>
   );
