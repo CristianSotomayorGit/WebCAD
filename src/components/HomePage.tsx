@@ -6,7 +6,7 @@ const HomePage: React.FC = () => {
     <div style={homepageContainerStyle}>
       {/* Logo and Title Container */}
       <div style={logoTitleContainerStyle}>
-        <img src="/src/assets/OtterCAD_logo.png" alt="OtterCAD Logo" style={logoStyle} />
+        <img src="/OtterCAD_logo.png" alt="OtterCAD Logo" style={logoStyle} />
         <h1 style={homepageTitleStyle}>OtterCAD</h1>
       </div>
       <p style={homepageDescriptionStyle}>

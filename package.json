@@ -2,7 +2,7 @@
   "name": "ottercad",
   "private": true,
   "version": "0.0.1",
-  "homepage": "https://ottercad.io",
+  "homepage": "https://cristiansotomayorgit.github.io/OtterCAD/",
   "type": "module",
   "scripts": {
     "predeploy": "npm run build",
