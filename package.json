@@ -1,10 +1,12 @@
 {
-  "name": "y",
+  "name": "ottercad",
   "private": true,
-  "version": "0.0.0",
-  "homepage": "https://cristiansotomayorgit.github.io/OtterCAD",
+  "version": "0.0.1",
+  "homepage": "https://ottercad.io",
   "type": "module",
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist -r https://github.com/CristianSotomayorGit/OtterCAD.git",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
@@ -12,7 +14,8 @@
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.27.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
@@ -23,6 +26,7 @@
     "eslint": "^9.11.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.12",
+    "gh-pages": "^6.2.0",
     "globals": "^15.9.0",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.7.0",

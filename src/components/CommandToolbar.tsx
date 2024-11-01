@@ -12,7 +12,7 @@ const CommandToolbar: React.FC<CommandToolbarProps> = ({ activeTool }) => {
 
       {/* Right side: Logo and OtterCAD */}
       <div style={rightSideStyle}>
-        <img style={logoStyle} src="/src/assets/OtterCAD_logo.png" alt="OtterCAD Logo" />
+        <img style={logoStyle} src="/OtterCAD_logo.png" alt="OtterCAD Logo" />
         <span>OtterCAD</span>
       </div>
     </div>
