@@ -45,9 +45,14 @@ export class PanTool {
 
   public onMouseUp(event: MouseEvent): void {
 
-    if (event.button === 1 && this.isPanning) {
+    if (event.button === 0 || event.button === 1  && this.isPanning) {
       this.isPanning = false;
       this.lastMousePosition = null;
     }
+  }
+
+  public onLeftClick(event: MouseEvent): void {
+    this.isPanning = true;
+    this.lastMousePosition = { x: event.clientX, y: event.clientY };
   }
 }

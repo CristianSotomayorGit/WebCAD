@@ -23,6 +23,12 @@ export class ToolManager {
   private activeToolName: string = 'Point';
 
   constructor(entityManager: EntityManager, renderer: Renderer) {
+    
+    // Initialize pan and zoom tools
+    const camera = renderer.getCamera();
+    this.panTool = new PanTool(camera);
+    this.zoomTool = new ZoomTool(camera);
+
     // Initialize tools
     this.tools['Line'] = new LineTool(entityManager, renderer);
     this.tools['Point'] = new PointTool(entityManager, renderer);
@@ -33,16 +39,13 @@ export class ToolManager {
     this.tools['Polygon'] = new PolygonTool(entityManager, renderer);
     this.tools['Arc'] = new ArcTool(entityManager, renderer);
     this.tools['Ellipse'] = new EllipseTool(entityManager, renderer);
+    this.tools['Pan'] = this.panTool;
+    
 
 
     // Set default active tool
     this.activeTool = this.tools['Point'];
     this.activeToolName = 'Point';
-
-    // Initialize pan and zoom tools
-    const camera = renderer.getCamera();
-    this.panTool = new PanTool(camera);
-    this.zoomTool = new ZoomTool(camera);
   }
 
   public setActiveTool(toolName: string) {

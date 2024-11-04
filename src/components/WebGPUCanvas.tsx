@@ -73,6 +73,7 @@ const WebGPUCanvas: React.FC = () => {
 
   const handleMouseUp = (event: MouseEvent) => {
     toolManagerRef.current?.getPanTool().onMouseUp(event);
+
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
