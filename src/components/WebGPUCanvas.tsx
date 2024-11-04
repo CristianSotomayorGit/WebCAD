@@ -16,6 +16,9 @@ const WebGPUCanvas: React.FC = () => {
   const [initializationError, setInitializationError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Disable scrollbars globally
+    document.body.style.overflow = 'hidden';
+
     const initRenderer = async () => {
       if (canvasRef.current) {
         rendererRef.current = new Renderer(
@@ -38,14 +41,17 @@ const WebGPUCanvas: React.FC = () => {
         canvasRef.current.addEventListener('mousedown', handleMouseDown);
         canvasRef.current.addEventListener('mousemove', handleMouseMove);
         canvasRef.current.addEventListener('mouseup', handleMouseUp);
+        canvasRef.current.addEventListener('wheel', handleWheel, { passive: false });
         window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('wheel', handleWheel);
       }
     };
 
     initRenderer();
 
     return () => {
+      // Re-enable scrolling when component unmounts
+      document.body.style.overflow = 'auto';
+
       if (rendererRef.current) {
         rendererRef.current.dispose();
       }
@@ -53,9 +59,9 @@ const WebGPUCanvas: React.FC = () => {
         canvasRef.current.removeEventListener('mousedown', handleMouseDown);
         canvasRef.current.removeEventListener('mousemove', handleMouseMove);
         canvasRef.current.removeEventListener('mouseup', handleMouseUp);
+        canvasRef.current.removeEventListener('wheel', handleWheel);
       }
       window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('wheel', handleWheel);
     };
   }, []);
 
@@ -73,7 +79,6 @@ const WebGPUCanvas: React.FC = () => {
 
   const handleMouseUp = (event: MouseEvent) => {
     toolManagerRef.current?.getPanTool().onMouseUp(event);
-
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -82,7 +87,7 @@ const WebGPUCanvas: React.FC = () => {
   };
 
   const handleWheel = (event: WheelEvent) => {
-    event.preventDefault();
+    event.preventDefault(); // Prevents default scrolling behavior
     toolManagerRef.current?.getZoomTool().onWheel(event);
   };
 
@@ -175,9 +180,16 @@ const WebGPUCanvas: React.FC = () => {
         toolManagerRef={toolManagerRef}
         setActiveToolName={setActiveToolName}
       />
-      <canvas ref={canvasRef} style={{ display: 'block', overflow: 'hidden' }} />
+      <canvas ref={canvasRef} style={canvasStyle} />
     </>
   );
+};
+
+const canvasStyle: React.CSSProperties = {
+  display: 'block',
+  width: '100vw',
+  height: '100vh',
+  overflow: 'hidden', // Prevents scrollbars on the canvas itself
 };
 
 const overlayStyle: React.CSSProperties = {
