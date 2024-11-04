@@ -1,15 +1,7 @@
+// src/shaders/CircleShader.ts
+
 export enum CircleShader {
-    FRAGMENT =
-    `
-  @group(0) @binding(1) var<uniform> color: vec4<f32>; // Add color uniform
-
-  @fragment
-  fn main() -> @location(0) vec4<f32> {
-    return color; // Use the uniform color
-  }
-`,
-    VERTEX = `
-
+  VERTEX = `
     struct Uniforms {
       cameraOffset: vec2<f32>,
       zoomFactor: f32,
@@ -29,5 +21,14 @@ export enum CircleShader {
       output.position = vec4<f32>(pos, 0.0, 1.0);
       return output;
     }
-    `
+  `,
+
+  FRAGMENT = `
+    @group(0) @binding(1) var<uniform> color: vec4<f32>;
+
+    @fragment
+    fn main() -> @location(0) vec4<f32> {
+      return color;
+    }
+  `
 }

@@ -20,7 +20,7 @@ export enum PolylineShader {
       
       @vertex
       fn main(@location(0) position: vec2<f32>) -> @builtin(position) vec4<f32> {
-        let worldPosition = (position + uniforms.cameraOffset) * uniforms.zoomFactor;
+        let worldPosition = (position - uniforms.cameraOffset) * uniforms.zoomFactor;
         return vec4<f32>(worldPosition, 0.0, 1.0);
       }
     `
