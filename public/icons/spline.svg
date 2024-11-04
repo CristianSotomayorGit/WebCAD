@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+  <!-- Spline path in an "S" shape -->
+  <path d="M5 25 C10 5, 20 25, 25 5" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+
+  <!-- Vertices -->
+  <circle cx="5" cy="25" r="2" fill="#CCCCCC"/>     <!-- Start vertex -->
+  <circle cx="15" cy="15" r="2" fill="#CCCCCC"/>    <!-- Center vertex -->
+  <circle cx="25" cy="5" r="2" fill="#CCCCCC"/>      <!-- End vertex -->
+</svg>

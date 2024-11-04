@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+  <!-- Slightly Extended Quarter-Circle Arc Path -->
+  <path d="M8 22 A12 12 0 0 1 22 8" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+
+  <!-- Vertices -->
+  <circle cx="8" cy="22" r="2" fill="#CCCCCC"/>   <!-- Start vertex -->
+  <circle cx="22" cy="8" r="2" fill="#CCCCCC"/>   <!-- End vertex -->
+</svg>

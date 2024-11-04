@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+  <!-- Extended Horizontal line with larger arrows -->
+  <line x1="3" y1="15" x2="27" y2="15" stroke="#FFFFFF" stroke-width="1"/>
+  <!-- Larger arrowheads for horizontal line -->
+  <polygon points="1,15 7,12 7,18" fill="#FFFFFF"/>
+  <polygon points="29,15 23,12 23,18" fill="#FFFFFF"/>
+
+  <!-- Extended Vertical line with larger arrows -->
+  <line x1="15" y1="3" x2="15" y2="27" stroke="#FFFFFF" stroke-width="1"/>
+  <!-- Larger arrowheads for vertical line -->
+  <polygon points="15,1 12,7 18,7" fill="#FFFFFF"/>
+  <polygon points="15,29 12,23 18,23" fill="#FFFFFF"/>
+</svg>
