@@ -9,7 +9,7 @@ export class EllipseTool extends AbstractDrawingTool {
   private centerPoint: Point | null = null;
   private edgePoint: Point | null = null;
 
-  public onLeftClick(event: MouseEvent): void {
+  public onLeftClick(event: MouseEvent, color: Float32Array): void {
     const worldPosition = this.getWorldPosition(event);
 
     if (!this.isDrawing) {
@@ -21,6 +21,7 @@ export class EllipseTool extends AbstractDrawingTool {
 
       // Create an initial ellipse with zero radii
       this.currentEllipse = new Ellipse(this.renderer, worldPosition.x, worldPosition.y, 0, 0);
+      this.currentEllipse.setColor(color);
       this.entityManager.addEntity(this.currentEllipse);
     } else if (this.isDrawing && this.centerPoint) {
       // Finalize the ellipse

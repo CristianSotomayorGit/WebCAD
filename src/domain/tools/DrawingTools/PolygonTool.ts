@@ -10,7 +10,7 @@ export class PolygonTool extends AbstractDrawingTool {
   private centerY: number = 0;
   private inputElement: HTMLInputElement | null = null;
 
-  public onLeftClick(event: MouseEvent): void {
+  public onLeftClick(event: MouseEvent, color: Float32Array): void {
     const { x, y } = this.getWorldPosition(event);
 
     if (!this.isDrawing) {
@@ -23,6 +23,7 @@ export class PolygonTool extends AbstractDrawingTool {
 
       // Create the Polygon entity with default sides (3)
       this.currentPolygon = new Polygon(this.renderer, this.centerX, this.centerY, this.numSides);
+      this.currentPolygon.setColor(color);
       this.entityManager.addEntity(this.currentPolygon);
 
       // Display the input box
