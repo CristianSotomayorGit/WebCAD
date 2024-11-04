@@ -9,7 +9,7 @@ export class LineTool extends AbstractDrawingTool {
   private currentLine: Line | null = null;
   private temporaryEndPoint: Point | null = null;
 
-  public onLeftClick(event: MouseEvent): void {
+  public onLeftClick(event: MouseEvent, color: Float32Array): void {
     const worldPosition = this.getWorldPosition(event);
 
     if (!this.isDrawing) {
@@ -21,6 +21,7 @@ export class LineTool extends AbstractDrawingTool {
       this.temporaryEndPoint = endPoint;
 
       this.currentLine = new Line(this.startPoint, endPoint, this.renderer);
+      this.currentLine.setColor(color)
       this.entityManager.addEntity(this.currentLine);
     } else {
       // Finish drawing

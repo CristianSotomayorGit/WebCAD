@@ -8,7 +8,7 @@ export class SplineTool extends AbstractDrawingTool {
   private currentSpline: Spline | null = null;
   private tempPoint: Point | null = null;
 
-  public onLeftClick(event: MouseEvent): void {
+  public onLeftClick(event: MouseEvent, color: Float32Array): void {
     const { x, y } = this.getWorldPosition(event);
 
     // Remove the temporary point if it exists
@@ -23,6 +23,7 @@ export class SplineTool extends AbstractDrawingTool {
     if (!this.isDrawing) {
       this.isDrawing = true;
       this.currentSpline = new Spline(this.renderer);
+      this.currentSpline.setColor(color);
       this.currentSpline.addControlPoint(newPoint);
       this.entityManager.addEntity(this.currentSpline);
     } else {

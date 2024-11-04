@@ -8,7 +8,7 @@ export class PolylineTool extends AbstractDrawingTool {
   private currentPolyline: Polyline | null = null;
   private tempPoint: Point | null = null;
 
-  public onLeftClick(event: MouseEvent): void {
+  public onLeftClick(event: MouseEvent, color: Float32Array): void {
     const worldPosition = this.getWorldPosition(event);
 
     const newPoint = this.createAndAddPoint(worldPosition.x, worldPosition.y);
@@ -17,6 +17,7 @@ export class PolylineTool extends AbstractDrawingTool {
       this.isDrawing = true;
 
       this.currentPolyline = new Polyline(this.renderer);
+      this.currentPolyline.setColor(color)
       this.entityManager.addEntity(this.currentPolyline);
 
       this.currentPolyline.addPoint(newPoint);

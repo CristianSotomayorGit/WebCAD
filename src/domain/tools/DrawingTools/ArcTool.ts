@@ -14,7 +14,7 @@ export class ArcTool extends AbstractDrawingTool {
     private endPoint: PointType | null = null;
     private temporaryArc: Arc | null = null;
 
-    public onLeftClick(event: MouseEvent): void {
+    public onLeftClick(event: MouseEvent, color: Float32Array): void {
         const worldPosition = this.getWorldPosition(event);
 
         if (this.clickCount === 0) {
@@ -28,6 +28,7 @@ export class ArcTool extends AbstractDrawingTool {
 
             // Initialize temporary arc
             this.temporaryArc = new Arc(this.renderer);
+            this.temporaryArc.setColor(color);
             this.temporaryArc.setStartPoint(this.startPoint);
             this.entityManager.addTemporaryEntity(this.temporaryArc);
         } else if (this.clickCount === 1) {

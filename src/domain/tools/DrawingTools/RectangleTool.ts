@@ -9,7 +9,7 @@ export class RectangleTool extends AbstractDrawingTool {
   private startPoint: Point | null = null;
   private tempEndPoint: Point | null = null;
 
-  public onLeftClick(event: MouseEvent): void {
+  public onLeftClick(event: MouseEvent, color: Float32Array): void {
     const { x, y } = this.getWorldPosition(event);
 
     if (!this.isDrawing) {
@@ -18,6 +18,7 @@ export class RectangleTool extends AbstractDrawingTool {
       this.startPoint = this.createAndAddPoint(x, y);
 
       this.currentRectangle = new Rectangle(this.renderer, x, y);
+      this.currentRectangle.setColor(color);
       this.entityManager.addEntity(this.currentRectangle);
     } else {
       // Second click: finalize the rectangle
