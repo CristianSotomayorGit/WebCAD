@@ -17,7 +17,9 @@ export class Circle extends RenderableEntity {
     this.centerY = centerY;
     this.radius = radius;
 
+    this.setupPipeline();
     this.createBuffers();
+    this.setupBindGroup();
   }
 
   protected setupPipeline(): void {
@@ -57,12 +59,12 @@ export class Circle extends RenderableEntity {
         entryPoint: 'main',
         targets: [{ format: this.renderer.getFormat() }],
       },
-      primitive: { topology: 'triangle-strip' },
+      primitive: { topology: 'line-strip' },
     });
   }
 
   private createBuffers(): void {
-    const numSegments = 64;
+    const numSegments = 128; // Increased for smoother rendering
     const angleIncrement = (2 * Math.PI) / numSegments;
     const vertices: number[] = [];
 
