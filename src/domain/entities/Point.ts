@@ -8,8 +8,8 @@ export class Point extends RenderableEntity {
   private x: number;
   private y: number;
   private vertexBuffer!: GPUBuffer;
-  private indexBuffer!: GPUBuffer;
   private vertexCount!: number;
+  private uniformBuffer!: GPUBuffer;
 
   constructor(x: number, y: number, renderer: Renderer) {
     // Initialize with default color (gray)
@@ -57,7 +57,7 @@ export class Point extends RenderableEntity {
         entryPoint: 'main',
         buffers: [
           {
-            arrayStride: 2 * 4, // 2 floats (x, y)
+            arrayStride: 2 * 4, // 2 floats (vertexPosition)
             attributes: [
               {
                 shaderLocation: 0,
@@ -78,30 +78,20 @@ export class Point extends RenderableEntity {
         ],
       },
       primitive: {
-        topology: 'line-list',
+        topology: 'triangle-strip',
       },
     });
   }
 
   private createBuffers(): void {
-    const size = 0.015; // Adjust as needed
-    const halfSize = size / 2;
-
     const vertices = new Float32Array([
-      this.x - halfSize, this.y - halfSize, // Bottom-left (0)
-      this.x + halfSize, this.y - halfSize, // Bottom-right (1)
-      this.x + halfSize, this.y + halfSize, // Top-right (2)
-      this.x - halfSize, this.y + halfSize, // Top-left (3)
+      -0.5, -0.5, // Bottom-left
+      0.5, -0.5,  // Bottom-right
+      -0.5, 0.5,  // Top-left
+      0.5, 0.5,   // Top-right
     ]);
 
-    const indices = new Uint16Array([
-      0, 1, // Bottom edge
-      1, 2, // Right edge
-      2, 3, // Top edge
-      3, 0, // Left edge
-    ]);
-
-    this.vertexCount = indices.length;
+    this.vertexCount = 4;
 
     // Create vertex buffer
     this.vertexBuffer = this.device.createBuffer({
@@ -111,32 +101,49 @@ export class Point extends RenderableEntity {
     });
     new Float32Array(this.vertexBuffer.getMappedRange()).set(vertices);
     this.vertexBuffer.unmap();
-
-    // Create index buffer
-    this.indexBuffer = this.device.createBuffer({
-      size: indices.byteLength,
-      usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: true,
-    });
-    new Uint16Array(this.indexBuffer.getMappedRange()).set(indices);
-    this.indexBuffer.unmap();
   }
 
-  private updateBuffers(): void {
-    if (this.vertexBuffer) {
-      this.vertexBuffer.destroy();
-    }
-    this.createBuffers();
+  public setupBindGroup(): void {
+    // Create uniform buffer
+    this.uniformBuffer = this.device.createBuffer({
+      size: 32, // 8 floats * 4 bytes per float
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    // Create color buffer
+    this.colorBuffer = this.device.createBuffer({
+      size: 16, // 4 floats * 4 bytes per float
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      mappedAtCreation: true,
+    });
+    new Float32Array(this.colorBuffer.getMappedRange()).set(this.color);
+    this.colorBuffer.unmap();
+
+    this.bindGroup = this.device.createBindGroup({
+      layout: this.pipeline.getBindGroupLayout(0),
+      entries: [
+        {
+          binding: 0,
+          resource: {
+            buffer: this.uniformBuffer,
+          },
+        },
+        {
+          binding: 1,
+          resource: {
+            buffer: this.colorBuffer,
+          },
+        },
+      ],
+    });
   }
 
   public setX(x: number): void {
     this.x = x;
-    this.updateBuffers();
   }
 
   public setY(y: number): void {
     this.y = y;
-    this.updateBuffers();
   }
 
   public getX(): number {
@@ -148,14 +155,39 @@ export class Point extends RenderableEntity {
   }
 
   public override draw(renderPass: GPURenderPassEncoder): void {
-    if (this.vertexBuffer && this.indexBuffer && this.vertexCount > 0) {
-      this.updateCameraBuffer();
+    if (this.vertexBuffer && this.vertexCount > 0) {
+      this.updateUniformBuffer();
       renderPass.setPipeline(this.pipeline);
       renderPass.setBindGroup(0, this.bindGroup);
       renderPass.setVertexBuffer(0, this.vertexBuffer);
-      renderPass.setIndexBuffer(this.indexBuffer, 'uint16');
-      renderPass.drawIndexed(this.vertexCount);
+      renderPass.draw(this.vertexCount, 1, 0, 0);
     }
+  }
+
+  private updateUniformBuffer(): void {
+    const cameraOffset = this.renderer.getCamera().getOffset();
+    const zoomFactor = this.renderer.getCamera().getZoom();
+
+    const pointSize = 0.015; // Adjust as needed
+
+    const uniformData = new Float32Array([
+      cameraOffset.x, // cameraOffset.x
+      cameraOffset.y, // cameraOffset.y
+      zoomFactor,     // zoomFactor
+      pointSize,      // pointSize
+      this.x,         // pointPosition.x
+      this.y,         // pointPosition.y
+      0.0,            // Padding (optional, to align to 32 bytes)
+      0.0,            // Padding (optional)
+    ]);
+
+    this.device.queue.writeBuffer(
+      this.uniformBuffer,
+      0,
+      uniformData.buffer,
+      uniformData.byteOffset,
+      uniformData.byteLength
+    );
   }
 
   public override dispose(): void {
@@ -163,9 +195,9 @@ export class Point extends RenderableEntity {
       this.vertexBuffer.destroy();
       this.vertexBuffer = null as any;
     }
-    if (this.indexBuffer) {
-      this.indexBuffer.destroy();
-      this.indexBuffer = null as any;
+    if (this.uniformBuffer) {
+      this.uniformBuffer.destroy();
+      this.uniformBuffer = null as any;
     }
     super.dispose();
   }
