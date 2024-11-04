@@ -201,6 +201,7 @@ const canvasStyle: React.CSSProperties = {
   width: '100vw',
   height: '100vh',
   overflow: 'hidden', // Prevents scrollbars on the canvas itself
+  cursor: 'url(/Crosshairs.svg) 40 40, crosshair', // Center the cursor on the SVG
 };
 
 const overlayStyle: React.CSSProperties = {
@@ -295,5 +296,6 @@ const popupButtonStyle: React.CSSProperties = {
   border: 'none',
   cursor: 'pointer',
 };
+
 
 export default WebGPUCanvas;
