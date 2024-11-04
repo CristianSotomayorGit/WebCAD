@@ -31,7 +31,6 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
 
     // Normalize RGB values to the range [0.0, 1.0]
     const newColor = new Float32Array([r / 255, g / 255, b / 255, 1.0])
-    console.log(newColor)
     setActiveColor(newColor)
   };
 

@@ -19,8 +19,6 @@ const WebGPUCanvas: React.FC = () => {
   const [initializationError, setInitializationError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Log whenever activeColor changes
-    console.log('Active color changed:', activeColor);
     activeColorRef.current = activeColor
   }, [activeColor]);
 
