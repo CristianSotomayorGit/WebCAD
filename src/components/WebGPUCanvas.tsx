@@ -1,3 +1,5 @@
+// src/components/WebGPUCanvas.tsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Renderer } from '../infrastructure/rendering/Renderer';
 import { EntityManager } from '../domain/managers/EntityManager';
@@ -10,10 +12,17 @@ const WebGPUCanvas: React.FC = () => {
   const rendererRef = useRef<Renderer>();
   const entityManagerRef = useRef(new EntityManager());
   const toolManagerRef = useRef<ToolManager>();
+  const activeColorRef = useRef<Float32Array>();
   const [activeToolName, setActiveToolName] = useState('Select');
-
+  const [activeColor, setActiveColor] = useState(new Float32Array([0, 0, 0, 1])); // Default to black
   const [showPopup, setShowPopup] = useState(true);
   const [initializationError, setInitializationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Log whenever activeColor changes
+    console.log('Active color changed:', activeColor);
+    activeColorRef.current = activeColor
+  }, [activeColor]);
 
   useEffect(() => {
     // Disable scrollbars globally
@@ -66,29 +75,32 @@ const WebGPUCanvas: React.FC = () => {
   }, []);
 
   const handleMouseDown = (event: MouseEvent) => {
-    if (event.button === 0)
-      toolManagerRef.current?.getActiveTool().onLeftClick(event);
-    if (event.button === 1)
-      toolManagerRef.current?.getPanTool().onWheelClick(event);
+    if (event.button === 0) {
+      if (!activeColorRef.current) return;
+      toolManagerRef.current?.getActiveTool()?.onLeftClick(event, activeColorRef.current);
+    }
+    if (event.button === 1) {
+      toolManagerRef.current?.getPanTool()?.onWheelClick(event);
+    }
   };
 
   const handleMouseMove = (event: MouseEvent) => {
-    toolManagerRef.current?.getPanTool().onMouseMove(event);
-    toolManagerRef.current?.getActiveTool().onMouseMove!(event);
+    toolManagerRef.current?.getPanTool()?.onMouseMove(event);
+    toolManagerRef.current?.getActiveTool()?.onMouseMove?.(event);
   };
 
   const handleMouseUp = (event: MouseEvent) => {
-    toolManagerRef.current?.getPanTool().onMouseUp(event);
+    toolManagerRef.current?.getPanTool()?.onMouseUp(event);
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (!toolManagerRef.current) return;
-    toolManagerRef.current.getActiveTool()?.onKeyDown!(event);
+    toolManagerRef.current.getActiveTool()?.onKeyDown?.(event);
   };
 
   const handleWheel = (event: WheelEvent) => {
     event.preventDefault(); // Prevents default scrolling behavior
-    toolManagerRef.current?.getZoomTool().onWheel(event);
+    toolManagerRef.current?.getZoomTool()?.onWheel(event);
   };
 
   return (
@@ -179,6 +191,7 @@ const WebGPUCanvas: React.FC = () => {
       <ButtonToolbar
         toolManagerRef={toolManagerRef}
         setActiveToolName={setActiveToolName}
+        setActiveColor={setActiveColor} // Pass setActiveColor to ButtonToolbar
       />
       <canvas ref={canvasRef} style={canvasStyle} />
     </>
