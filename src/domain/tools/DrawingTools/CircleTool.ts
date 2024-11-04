@@ -9,7 +9,7 @@ export class CircleTool extends AbstractDrawingTool {
     private centerPoint: Point | null = null;
     private tempPoint: Point | null = null;
 
-    public onLeftClick(event: MouseEvent): void {
+    public onLeftClick(event: MouseEvent, color: Float32Array): void {
         const { x, y } = this.getWorldPosition(event);
 
         if (!this.isDrawing) {
@@ -19,6 +19,7 @@ export class CircleTool extends AbstractDrawingTool {
 
             // Create the circle with zero radius
             this.currentCircle = new Circle(this.renderer, x, y, 0);
+            this.currentCircle.setColor(color);
             this.entityManager.addEntity(this.currentCircle);
         } else if (this.isDrawing) {
             // Second click: finalize the circle
