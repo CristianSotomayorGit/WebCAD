@@ -1,4 +1,5 @@
 // src/domain/Camera.ts
+
 export class Camera {
     private offsetX: number = 0;
     private offsetY: number = 0;

@@ -7,17 +7,19 @@ import { EllipseShader } from '../../shaders/EllipseShader';
 export class Ellipse extends RenderableEntity {
     private centerX: number;
     private centerY: number;
-    private radiusX: number;
-    private radiusY: number;
+    private majorAxisLength: number;
+    private minorAxisLength: number;
+    private rotation: number; // Rotation in radians
     private vertexBuffer: GPUBuffer | null = null;
     private numVertices: number = 0;
 
-    constructor(renderer: Renderer, centerX: number, centerY: number, radiusX: number, radiusY: number) {
+    constructor(renderer: Renderer, centerX: number, centerY: number, majorAxisLength: number, minorAxisLength: number, rotation: number) {
         super(renderer);
         this.centerX = centerX;
         this.centerY = centerY;
-        this.radiusX = radiusX;
-        this.radiusY = radiusY;
+        this.majorAxisLength = majorAxisLength;
+        this.minorAxisLength = minorAxisLength;
+        this.rotation = rotation;
 
         this.setupPipeline();
         this.createBuffers();
@@ -80,9 +82,14 @@ export class Ellipse extends RenderableEntity {
 
         for (let i = 0; i <= numSegments; i++) {
             const angle = i * angleIncrement;
-            const x = this.centerX + this.radiusX * Math.cos(angle);
-            const y = this.centerY + this.radiusY * Math.sin(angle);
-            vertices.push(x, y);
+            const x = this.majorAxisLength * Math.cos(angle);
+            const y = this.minorAxisLength * Math.sin(angle);
+
+            // Apply rotation to the ellipse points
+            const rotatedX = this.centerX + x * Math.cos(this.rotation) - y * Math.sin(this.rotation);
+            const rotatedY = this.centerY + x * Math.sin(this.rotation) + y * Math.cos(this.rotation);
+
+            vertices.push(rotatedX, rotatedY);
         }
 
         this.numVertices = vertices.length / 2;
@@ -99,9 +106,10 @@ export class Ellipse extends RenderableEntity {
         this.device.queue.writeBuffer(this.vertexBuffer, 0, vertexData);
     }
 
-    public updateRadii(radiusX: number, radiusY: number): void {
-        this.radiusX = radiusX;
-        this.radiusY = radiusY;
+    public updateProperties(majorAxisLength: number, minorAxisLength: number, rotation: number): void {
+        this.majorAxisLength = majorAxisLength;
+        this.minorAxisLength = minorAxisLength;
+        this.rotation = rotation;
         this.createBuffers();
     }
 

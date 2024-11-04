@@ -13,7 +13,7 @@ export class SplineTool extends AbstractDrawingTool {
 
     // Remove the temporary point if it exists
     if (this.tempPoint) {
-      this.currentSpline!.getControlPoints().pop();
+      this.currentSpline!.getFitPoints().pop();
       this.entityManager.removeEntity(this.tempPoint);
       this.tempPoint = null;
     }
@@ -23,15 +23,15 @@ export class SplineTool extends AbstractDrawingTool {
     if (!this.isDrawing) {
       this.isDrawing = true;
       this.currentSpline = new Spline(this.renderer);
-      this.currentSpline.addControlPoint(newPoint);
+      this.currentSpline.addFitPoint(newPoint);
       this.entityManager.addEntity(this.currentSpline);
     } else {
-      this.currentSpline!.addControlPoint(newPoint);
+      this.currentSpline!.addFitPoint(newPoint);
     }
 
     // Add a new temporary point for dynamic feedback
     this.tempPoint = this.createAndAddPoint(x, y);
-    this.currentSpline!.addControlPoint(this.tempPoint);
+    this.currentSpline!.addFitPoint(this.tempPoint);
   }
 
   public onMouseMove(event: MouseEvent): void {
@@ -63,13 +63,13 @@ export class SplineTool extends AbstractDrawingTool {
     if (this.currentSpline) {
       // Remove the temporary point if it exists
       if (this.tempPoint) {
-        this.currentSpline.getControlPoints().pop();
+        this.currentSpline.getFitPoints().pop();
         this.entityManager.removeEntity(this.tempPoint);
         this.tempPoint = null;
       }
 
       // Remove the spline and its control points
-      for (const point of this.currentSpline.getControlPoints()) {
+      for (const point of this.currentSpline.getFitPoints()) {
         this.entityManager.removeEntity(point);
       }
       this.entityManager.removeEntity(this.currentSpline);
@@ -82,7 +82,7 @@ export class SplineTool extends AbstractDrawingTool {
     if (this.currentSpline) {
       // Remove the temporary point if it exists
       if (this.tempPoint) {
-        this.currentSpline.getControlPoints().pop();
+        this.currentSpline.getFitPoints().pop();
         this.entityManager.removeEntity(this.tempPoint);
         this.tempPoint = null;
       }

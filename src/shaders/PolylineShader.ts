@@ -24,4 +24,4 @@ export enum PolylineShader {
         return vec4<f32>(worldPosition, 0.0, 1.0);
       }
     `
-}location
+}

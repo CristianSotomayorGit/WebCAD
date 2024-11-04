@@ -2,16 +2,20 @@
 
 import { RenderableEntity } from './RenderableEntity';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
-import { SplineShader } from '../../shaders/SplineShader'; // Ensure you have SplineShader implemented
+import { SplineShader } from '../../shaders/SplineShader';
 import { Point } from './Point';
 
 export class Spline extends RenderableEntity {
   private controlPoints: Point[] = [];
+  private knotVector: number[] = [];
+  private weights: number[] = [];
+  private degree: number = 3; // Default degree for cubic splines
   private vertexBuffer: GPUBuffer | null = null;
   private numVertices: number = 0;
 
-  constructor(renderer: Renderer) {
+  constructor(renderer: Renderer, degree: number = 3) {
     super(renderer);
+    this.degree = degree;
     this.setupPipeline();
     this.setupBindGroup();
   }
@@ -53,7 +57,7 @@ export class Spline extends RenderableEntity {
           {
             arrayStride: 2 * 4,
             attributes: [
-              { shaderLocation: 0, offset: 0, format: 'float32x2' },
+              { shaderLocation: 0, offset: 0, format: 'float32x2' }, // controlPosition
             ],
           },
         ],
@@ -69,34 +73,21 @@ export class Spline extends RenderableEntity {
     });
   }
 
-  public addControlPoint(point: Point): void {
-    this.controlPoints.push(point);
+  public setControlPoints(points: Point[]): void {
+    this.controlPoints = points;
     this.updateVertexBuffer();
   }
 
-  public updateControlPoint(index: number, x: number, y: number): void {
-    if (index >= 0 && index < this.controlPoints.length) {
-      this.controlPoints[index].setX(x);
-      this.controlPoints[index].setY(y);
-      this.updateVertexBuffer();
-    }
+  public setKnotVector(knotVector: number[]): void {
+    this.knotVector = knotVector;
   }
 
-  public updateVertexBuffer(): void {
-    const vertices: number[] = [];
-    const numSegments = 20; // Adjust for curve smoothness per segment
+  public setWeights(weights: number[]): void {
+    this.weights = weights;
+  }
 
-    if (this.controlPoints.length >= 2) {
-      for (let i = 0; i < this.controlPoints.length - 1; i++) {
-        // For each segment between control points
-        for (let j = 0; j <= numSegments; j++) {
-          const t = j / numSegments;
-          const point = this.calculateSplinePoint(i, t);
-          vertices.push(point.x, point.y);
-        }
-      }
-    }
-
+  private updateVertexBuffer(): void {
+    const vertices = this.calculateSplineVertices();
     this.numVertices = vertices.length / 2;
 
     if (this.vertexBuffer) {
@@ -113,46 +104,60 @@ export class Spline extends RenderableEntity {
     }
   }
 
-  private calculateSplinePoint(segmentIndex: number, t: number): { x: number; y: number } {
-    // Use Catmull-Rom spline interpolation
-    const p0 = this.getControlPoint(segmentIndex - 1);
-    const p1 = this.getControlPoint(segmentIndex);
-    const p2 = this.getControlPoint(segmentIndex + 1);
-    const p3 = this.getControlPoint(segmentIndex + 2);
+  private calculateSplineVertices(): number[] {
+    const vertices: number[] = [];
+    const numSegments = 100; // Adjust for spline smoothness
 
-    const t2 = t * t;
-    const t3 = t2 * t;
-
-    const x =
-      0.5 *
-      ((2 * p1.getX()) +
-        (-p0.getX() + p2.getX()) * t +
-        (2 * p0.getX() - 5 * p1.getX() + 4 * p2.getX() - p3.getX()) * t2 +
-        (-p0.getX() + 3 * p1.getX() - 3 * p2.getX() + p3.getX()) * t3);
-
-    const y =
-      0.5 *
-      ((2 * p1.getY()) +
-        (-p0.getY() + p2.getY()) * t +
-        (2 * p0.getY() - 5 * p1.getY() + 4 * p2.getY() - p3.getY()) * t2 +
-        (-p0.getY() + 3 * p1.getY() - 3 * p2.getY() + p3.getY()) * t3);
-
-    return { x, y };
-  }
-
-  private getControlPoint(index: number): Point {
-    const total = this.controlPoints.length;
-    if (index < 0) {
-      return this.controlPoints[0];
-    } else if (index >= total) {
-      return this.controlPoints[total - 1];
-    } else {
-      return this.controlPoints[index];
+    if (this.controlPoints.length < this.degree + 1 || this.knotVector.length < this.controlPoints.length + this.degree + 1) {
+      return vertices; // Insufficient data for spline calculation
     }
+
+    // Evaluate spline points using De Boor's algorithm or similar for B-spline interpolation
+    for (let i = 0; i <= numSegments; i++) {
+      const t = (this.knotVector[this.knotVector.length - 1] - this.knotVector[0]) * (i / numSegments) + this.knotVector[0];
+      const point = this.evaluateBSpline(t);
+      vertices.push(point.x, point.y);
+    }
+
+    return vertices;
   }
 
-  public getControlPoints(): Point[] {
-    return this.controlPoints;
+  private evaluateBSpline(t: number): { x: number; y: number } {
+    const k = this.findKnotIndex(t);
+    const d = this.degree;
+    const points = this.controlPoints;
+    const knots = this.knotVector;
+    const weights = this.weights.length > 0 ? this.weights : new Array(points.length).fill(1);
+
+    const deBoorPoints = points.map((p, i) => ({
+      x: p.getX() * weights[i],
+      y: p.getY() * weights[i],
+      weight: weights[i],
+    }));
+
+    for (let r = 1; r <= d; r++) {
+      for (let j = k; j > k - d + r - 1; j--) {
+        const alpha = (t - knots[j]) / (knots[j + d - r + 1] - knots[j]);
+        deBoorPoints[j].x = alpha * deBoorPoints[j].x + (1 - alpha) * deBoorPoints[j - 1].x;
+        deBoorPoints[j].y = alpha * deBoorPoints[j].y + (1 - alpha) * deBoorPoints[j - 1].y;
+        deBoorPoints[j].weight = alpha * deBoorPoints[j].weight + (1 - alpha) * deBoorPoints[j - 1].weight;
+      }
+    }
+
+    return {
+      x: deBoorPoints[k].x / deBoorPoints[k].weight,
+      y: deBoorPoints[k].y / deBoorPoints[k].weight,
+    };
+  }
+
+  private findKnotIndex(t: number): number {
+    const knots = this.knotVector;
+    for (let i = this.degree; i < knots.length - this.degree - 1; i++) {
+      if (t >= knots[i] && t < knots[i + 1]) {
+        return i;
+      }
+    }
+    return knots.length - this.degree - 2;
   }
 
   public override draw(renderPass: GPURenderPassEncoder): void {
@@ -163,11 +168,6 @@ export class Spline extends RenderableEntity {
       renderPass.setVertexBuffer(0, this.vertexBuffer);
       renderPass.draw(this.numVertices);
     }
-
-    // Optionally, draw control points
-    // for (const point of this.controlPoints) {
-    //   point.draw(renderPass);
-    // }
   }
 
   public override dispose(): void {
@@ -175,12 +175,6 @@ export class Spline extends RenderableEntity {
       this.vertexBuffer.destroy();
       this.vertexBuffer = null;
     }
-
-    for (const point of this.controlPoints) {
-      point.dispose();
-    }
-    this.controlPoints = [];
-
     super.dispose();
   }
 }

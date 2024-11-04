@@ -1,15 +1,20 @@
+// src/components/WebGPUCanvas.tsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Renderer } from '../infrastructure/rendering/Renderer';
 import { EntityManager } from '../domain/managers/EntityManager';
 import { ToolManager } from '../domain/managers/ToolManager';
 import CommandToolbar from './CommandToolbar';
 import ButtonToolbar from './ButtonToolbar';
+import { FileManager } from '../domain/managers/FileManager';
 
 const WebGPUCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<Renderer>();
   const entityManagerRef = useRef(new EntityManager());
   const toolManagerRef = useRef<ToolManager>();
+  const fileManagerRef = useRef<FileManager>();
+
   const [activeToolName, setActiveToolName] = useState('Select');
 
   const [showPopup, setShowPopup] = useState(true);
@@ -27,10 +32,17 @@ const WebGPUCanvas: React.FC = () => {
           await rendererRef.current.initialize();
         } catch (error) {
           console.error('Error during WebGPU initialization', error);
-          setInitializationError(error instanceof Error ? error.message : String(error));
+          setInitializationError(
+            error instanceof Error ? error.message : String(error)
+          );
         }
 
         toolManagerRef.current = new ToolManager(
+          entityManagerRef.current,
+          rendererRef.current
+        );
+
+        fileManagerRef.current = new FileManager(
           entityManagerRef.current,
           rendererRef.current
         );
@@ -94,9 +106,7 @@ const WebGPUCanvas: React.FC = () => {
               <img src="/OtterCAD_logo.png" alt="Logo" style={logoStyle} />
               <h1 style={popupTitleStyle}>OtterCAD</h1>
             </div>
-            <p style={popupVersionStyle}>
-              Version: Alpha 0.0.1
-            </p>
+            <p style={popupVersionStyle}>Version: Alpha 0.0.1</p>
             <p style={popupDescriptionStyle}>
               From the dev:
               <br /><br />
@@ -173,6 +183,7 @@ const WebGPUCanvas: React.FC = () => {
       <ButtonToolbar
         toolManagerRef={toolManagerRef}
         setActiveToolName={setActiveToolName}
+        fileManagerRef={fileManagerRef}
       />
       <canvas ref={canvasRef} style={{ display: 'block', overflow: 'hidden' }} />
     </>
