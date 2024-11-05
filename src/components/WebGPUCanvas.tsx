@@ -112,7 +112,7 @@ const WebGPUCanvas: React.FC = () => {
               <h1 style={popupTitleStyle}>OtterCAD</h1>
             </div>
             <p style={popupVersionStyle}>
-              Version: Alpha 0.0.1
+              Version: Alpha 0.0.2
             </p>
             <p style={popupDescriptionStyle}>
               From the dev:

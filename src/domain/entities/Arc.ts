@@ -5,10 +5,6 @@ import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { ArcShader } from '../../shaders/ArcShader';
 import { Point } from './Point';
 
-// interface PointType {
-//   x: number;
-//   y: number;
-// }
 
 export class Arc extends RenderableEntity {
   private startPoint: Point | null = null;

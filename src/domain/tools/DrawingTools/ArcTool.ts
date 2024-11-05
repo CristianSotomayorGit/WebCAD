@@ -4,15 +4,9 @@ import { AbstractDrawingTool } from './AbstractDrawingTool';
 import { Arc } from '../../entities/Arc';
 import { Point } from '../../entities/Point';
 
-// interface PointType {
-//     x: number;
-//     y: number;
-// }
 
 export class ArcTool extends AbstractDrawingTool {
-    // private startPoint: PointType | null = null;
-    // private midPoint: PointType | null = null;
-    // private endPoint: PointType | null = null;
+
     private startPoint: Point | null = null;
     private midPoint: Point | null = null;
     private endPoint: Point | null = null;
@@ -23,7 +17,6 @@ export class ArcTool extends AbstractDrawingTool {
 
         if (this.clickCount === 0) {
             // First click: set start point
-            // this.startPoint = worldPosition;
             this.clickCount = 1;
             this.isDrawing = true;
 
@@ -37,7 +30,6 @@ export class ArcTool extends AbstractDrawingTool {
             this.entityManager.addTemporaryEntity(this.temporaryArc);
         } else if (this.clickCount === 1) {
             // Second click: set mid point
-            // this.midPoint = worldPosition;
             this.clickCount = 2;
 
             // Create and add the mid point entity
@@ -49,7 +41,6 @@ export class ArcTool extends AbstractDrawingTool {
             }
         } else if (this.clickCount === 2) {
             // Third click: set end point
-            // this.endPoint = worldPosition;
             this.clickCount = 0;
             this.isDrawing = false;
 
