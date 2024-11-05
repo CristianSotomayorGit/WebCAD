@@ -6,12 +6,14 @@ import { Point } from '../../entities/Point';
 
 export class PolylineTool extends AbstractDrawingTool {
   private currentPolyline: Polyline | null = null;
+  private tempPoints: Point[] = [];
   private tempPoint: Point | null = null;
 
   public onLeftClick(event: MouseEvent, color: Float32Array): void {
     const worldPosition = this.getWorldPosition(event);
 
     const newPoint = this.createAndAddPoint(worldPosition.x, worldPosition.y);
+    this.tempPoints.push(newPoint);
 
     if (!this.isDrawing) {
       this.isDrawing = true;
@@ -73,6 +75,10 @@ export class PolylineTool extends AbstractDrawingTool {
       this.entityManager.removeEntity(this.tempPoint);
       this.tempPoint.dispose();
       this.tempPoint = null;
+    }
+
+    if (this.tempPoints.length < 0) {
+      this.entityManager.removeEntity(this.tempPoints)
     }
   }
 

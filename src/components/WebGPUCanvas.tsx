@@ -14,7 +14,8 @@ const WebGPUCanvas: React.FC = () => {
   const toolManagerRef = useRef<ToolManager>();
   const activeColorRef = useRef<Float32Array>();
   const [activeToolName, setActiveToolName] = useState('Select');
-  const [activeColor, setActiveColor] = useState(new Float32Array([0.0, 1.0, 1.0, 1.0])); // D
+  const [activeColor, setActiveColor] = useState(new Float32Array([0.0, 1.0, 1.0, 1.0]));
+
   const [showPopup, setShowPopup] = useState(true);
   const [initializationError, setInitializationError] = useState<string | null>(null);
 
