@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+  <!-- Equilateral Triangle -->
+  <polygon points="15,5 5,25 25,25" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+
+  <!-- Vertices -->
+  <circle cx="15" cy="5" r="2" fill="#CCCCCC"/>   <!-- Top vertex -->
+  <circle cx="5" cy="25" r="2" fill="#CCCCCC"/>    <!-- Bottom-left vertex -->
+  <circle cx="25" cy="25" r="2" fill="#CCCCCC"/>   <!-- Bottom-right vertex -->
+</svg>

@@ -19,74 +19,91 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
 
   const handleColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let colorHex = event.target.value;
-
-    // Remove the hash symbol if present
     colorHex = colorHex.replace('#', '');
-
-    // Parse the hexadecimal string into RGB components
     const bigint = parseInt(colorHex, 16);
     const r = (bigint >> 16) & 255;
     const g = (bigint >> 8) & 255;
     const b = bigint & 255;
-
-    // Normalize RGB values to the range [0.0, 1.0]
-    const newColor = new Float32Array([r / 255, g / 255, b / 255, 1.0])
-    setActiveColor(newColor)
+    const newColor = new Float32Array([r / 255, g / 255, b / 255, 1.0]);
+    setActiveColor(newColor);
   };
+
+  const tools = [
+    { name: 'Point', icon: '/icons/point.svg' },
+    { name: 'Line', icon: '/icons/line.svg' },
+    { name: 'Polyline', icon: '/icons/polyline.svg' },
+    { name: 'Circle', icon: '/icons/circle.svg' },
+    { name: 'Arc', icon: '/icons/arc.svg' },
+    { name: 'Spline', icon: '/icons/spline.svg' },
+    { name: 'Rectangle', icon: '/icons/rectangle.svg' },
+    { name: 'Polygon', icon: '/icons/polygon.svg' },
+    { name: 'Ellipse', icon: '/icons/ellipse.svg' },
+    { name: 'Pan', icon: '/icons/pan.svg' },
+  ];
 
   return (
     <div style={toolbarStyle}>
-      <button style={buttonStyle} onClick={() => handleToolChange('Point')}>Point</button>
-      <button style={buttonStyle} onClick={() => handleToolChange('Line')}>Line</button>
-      <button style={buttonStyle} onClick={() => handleToolChange('Polyline')}>Polyline</button>
-      <button style={buttonStyle} onClick={() => handleToolChange('Circle')}>Circle</button>
-      <button style={buttonStyle} onClick={() => handleToolChange('Arc')}>Arc</button>
-      <button style={buttonStyle} onClick={() => handleToolChange('Spline')}>Spline</button>
-      <button style={buttonStyle} onClick={() => handleToolChange('Rectangle')}>Rectangle</button>
-      <button style={buttonStyle} onClick={() => handleToolChange('Polygon')}>Polygon</button>
-      <button style={buttonStyle} onClick={() => handleToolChange('Ellipse')}>Ellipse</button>
-      <button style={buttonStyle} onClick={() => handleToolChange('Pan')}>Pan</button>
-      <input type="color" defaultValue="#00FFFF" style={colorPickerStyle} onChange={handleColorChange} />
+      {tools.map((tool) => (
+        <button
+          key={tool.name}
+          style={buttonStyle}
+          onClick={() => handleToolChange(tool.name)}
+          title={tool.name}
+        >
+          <img src={tool.icon} alt={`${tool.name} icon`} style={iconStyle} />
+        </button>
+      ))}
+      <input type="color" defaultValue="#00FFFF" style={colorPickerStyle} onChange={handleColorChange} title='Color'/>
     </div>
   );
 };
 
 const toolbarStyle: React.CSSProperties = {
   position: 'fixed',
-  top: '40px',
-  left: 0,
-  width: '120px',
-  height: '100%',
+  top: '50px',
+  left: '0',
+  width: '100px',
+  height: '100vh',
   backgroundColor: '#2c3e50',
   color: '#ecf0f1',
-  display: 'flex',
-  flexDirection: 'column',
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, 1fr)',
+  gridAutoRows: '40px',
   alignItems: 'center',
-  paddingTop: '16px',
-  fontSize: '18px',
+  padding: '8px',
+  fontSize: '16px',
+  gap: '2px', // Reduced gap for more compact horizontal spacing
   boxSizing: 'border-box',
   zIndex: 1000,
-  gap: '10px',
 };
 
 const buttonStyle: React.CSSProperties = {
-  width: '100px',
-  height: '30px',
+  width: '35px',
+  height: '35px',
   backgroundColor: '#34495e',
   color: '#ecf0f1',
   border: 'none',
   borderRadius: '4px',
   cursor: 'pointer',
-  fontSize: '13px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+const iconStyle: React.CSSProperties = {
+  width: '20px',
+  height: '20px',
 };
 
 const colorPickerStyle: React.CSSProperties = {
-  width: '100px',
-  height: '30px',
+  width: '80px',
+  height: '25px',
   backgroundColor: 'transparent',
   border: 'none',
   cursor: 'pointer',
   padding: 0,
+  gridColumn: 'span 2',
+  justifySelf: 'center',
 };
 
 export default ButtonToolbar;

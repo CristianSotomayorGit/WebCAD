@@ -2,12 +2,14 @@
 
 import { AbstractDrawingTool } from './AbstractDrawingTool';
 import { Polygon } from '../../entities/Polygon';
+import { Point } from '../../entities/Point';
 
 export class PolygonTool extends AbstractDrawingTool {
   private currentPolygon: Polygon | null = null;
   private numSides: number = 3; // Default value is 3
-  private centerX: number = 0;
-  private centerY: number = 0;
+  private centerPoint: Point | null = null;
+  // private centerX: number = 0;
+  // private centerY: number = 0;
   private inputElement: HTMLInputElement | null = null;
 
   public onLeftClick(event: MouseEvent, color: Float32Array): void {
@@ -15,14 +17,14 @@ export class PolygonTool extends AbstractDrawingTool {
 
     if (!this.isDrawing) {
       // First click: set the center
-      this.centerX = x;
-      this.centerY = y;
+      // this.centerPoint.x = x;
+      // this.centerPoint.y = y;
       this.isDrawing = true;
 
-      this.createAndAddPoint(x, y); // Center point
+      this.centerPoint = this.createAndAddPoint(x, y); // Center point
 
       // Create the Polygon entity with default sides (3)
-      this.currentPolygon = new Polygon(this.renderer, this.centerX, this.centerY, this.numSides);
+      this.currentPolygon = new Polygon(this.renderer, this.centerPoint.getX(), this.centerPoint.getY(), this.numSides);
       this.currentPolygon.setColor(color);
       this.entityManager.addEntity(this.currentPolygon);
 
@@ -102,13 +104,17 @@ export class PolygonTool extends AbstractDrawingTool {
     }
   }
 
-  protected cancelDrawing(): void {
+  public cancelDrawing(): void {
     super.cancelDrawing();
 
     if (this.inputElement) {
       document.body.removeChild(this.inputElement);
       this.inputElement = null;
     }
+    if (this.centerPoint) {
+      this.entityManager.removeEntity(this.centerPoint)
+    }
+
     if (this.currentPolygon) {
       this.entityManager.removeEntity(this.currentPolygon);
       this.currentPolygon = null;

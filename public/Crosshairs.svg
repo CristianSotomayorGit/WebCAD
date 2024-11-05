@@ -1,0 +1,13 @@
+<!-- public/crosshair.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <!-- Horizontal line, stopping at the circle edge -->
+  <line x1="0" y1="40" x2="30" y2="40" stroke="#FFFFFF" stroke-width="1"/>
+  <line x1="50" y1="40" x2="80" y2="40" stroke="#FFFFFF" stroke-width="1"/>
+  
+  <!-- Vertical line, stopping at the circle edge -->
+  <line x1="40" y1="0" x2="40" y2="30" stroke="#FFFFFF" stroke-width="1"/>
+  <line x1="40" y1="50" x2="40" y2="80" stroke="#FFFFFF" stroke-width="1"/>
+  
+  <!-- Center circle -->
+  <circle cx="40" cy="40" r="5" stroke="#FFFFFF" stroke-width="1" fill="none"/>
+</svg>

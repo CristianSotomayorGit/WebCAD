@@ -60,20 +60,27 @@ export class LineTool extends AbstractDrawingTool {
     super.onKeyDown(event);
 
     if (event.key === 'Escape' && this.isDrawing) {
-      // Cancel line drawing
-      if (this.currentLine) {
-        this.entityManager.removeEntity(this.currentLine);
-        this.currentLine = null;
-      }
-      if (this.startPoint) {
-        this.entityManager.removeEntity(this.startPoint);
-        this.startPoint = null;
-      }
-      if (this.temporaryEndPoint) {
-        this.entityManager.removeEntity(this.temporaryEndPoint);
-        this.temporaryEndPoint = null;
-      }
+
       this.cancelDrawing();
     }
+  }
+
+  public cancelDrawing(): void {
+    super.cancelDrawing();
+
+     // Cancel line drawing
+     if (this.currentLine) {
+      this.entityManager.removeEntity(this.currentLine);
+      this.currentLine = null;
+    }
+    if (this.startPoint) {
+      this.entityManager.removeEntity(this.startPoint);
+      this.startPoint = null;
+    }
+    if (this.temporaryEndPoint) {
+      this.entityManager.removeEntity(this.temporaryEndPoint);
+      this.temporaryEndPoint = null;
+    }
+    
   }
 }

@@ -19,7 +19,7 @@ export class Polygon extends RenderableEntity {
     this.centerX = centerX;
     this.centerY = centerY;
     this.numSides = numSides;
-    this.radius = 1; // Default radius
+    this.radius = 0; // Default radius
 
     this.setupPipeline();
     this.createBuffers();

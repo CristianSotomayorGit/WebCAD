@@ -14,7 +14,8 @@ const WebGPUCanvas: React.FC = () => {
   const toolManagerRef = useRef<ToolManager>();
   const activeColorRef = useRef<Float32Array>();
   const [activeToolName, setActiveToolName] = useState('Select');
-  const [activeColor, setActiveColor] = useState(new Float32Array([0.0, 1.0, 1.0, 1.0])); // D
+  const [activeColor, setActiveColor] = useState(new Float32Array([0.0, 1.0, 1.0, 1.0]));
+
   const [showPopup, setShowPopup] = useState(true);
   const [initializationError, setInitializationError] = useState<string | null>(null);
 
@@ -111,7 +112,7 @@ const WebGPUCanvas: React.FC = () => {
               <h1 style={popupTitleStyle}>OtterCAD</h1>
             </div>
             <p style={popupVersionStyle}>
-              Version: Alpha 0.0.1
+              Version: Alpha 0.0.2
             </p>
             <p style={popupDescriptionStyle}>
               From the dev:
@@ -201,6 +202,7 @@ const canvasStyle: React.CSSProperties = {
   width: '100vw',
   height: '100vh',
   overflow: 'hidden', // Prevents scrollbars on the canvas itself
+  cursor: 'url(/Crosshairs.svg) 40 40, crosshair', // Center the cursor on the SVG
 };
 
 const overlayStyle: React.CSSProperties = {
@@ -295,5 +297,6 @@ const popupButtonStyle: React.CSSProperties = {
   border: 'none',
   cursor: 'pointer',
 };
+
 
 export default WebGPUCanvas;
