@@ -77,7 +77,7 @@ export class RectangleTool extends AbstractDrawingTool {
     this.points = [];
   }
 
-  protected cancelDrawing(): void {
+  public cancelDrawing(): void {
     super.cancelDrawing();
 
     if (this.currentRectangle) {

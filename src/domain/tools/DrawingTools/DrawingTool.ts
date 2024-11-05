@@ -5,4 +5,5 @@ export interface DrawingTool {
   onMouseMove?(event: MouseEvent): void;
   onMouseUp?(event: MouseEvent): void;
   onKeyDown?(event: KeyboardEvent): void;
+  cancelDrawing(): void;
 }

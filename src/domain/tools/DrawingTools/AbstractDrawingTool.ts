@@ -54,7 +54,7 @@ export abstract class AbstractDrawingTool implements DrawingTool {
         this.points = [];
     }
 
-    protected cancelDrawing(): void {
+    public cancelDrawing(): void {
         this.isDrawing = false;
         this.clickCount = 0;
         this.removePoints();

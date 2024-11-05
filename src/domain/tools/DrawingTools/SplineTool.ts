@@ -58,7 +58,7 @@ export class SplineTool extends AbstractDrawingTool {
     }
   }
 
-  protected cancelDrawing(): void {
+  public cancelDrawing(): void {
     super.cancelDrawing();
 
     if (this.currentSpline) {

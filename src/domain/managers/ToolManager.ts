@@ -49,6 +49,9 @@ export class ToolManager {
   }
 
   public setActiveTool(toolName: string) {
+
+    this.activeTool.cancelDrawing();
+    
     if (this.tools[toolName]) {
       this.activeTool = this.tools[toolName];
       this.activeToolName = toolName;
@@ -70,4 +73,6 @@ export class ToolManager {
   public getZoomTool(): ZoomTool {
     return this.zoomTool;
   }
+
+
 }
