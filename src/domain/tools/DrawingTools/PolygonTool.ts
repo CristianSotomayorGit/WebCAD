@@ -102,7 +102,7 @@ export class PolygonTool extends AbstractDrawingTool {
     }
   }
 
-  protected cancelDrawing(): void {
+  public cancelDrawing(): void {
     super.cancelDrawing();
 
     if (this.inputElement) {

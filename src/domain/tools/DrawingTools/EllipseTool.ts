@@ -65,7 +65,7 @@ export class EllipseTool extends AbstractDrawingTool {
     }
   }
 
-  protected cancelDrawing(): void {
+  public cancelDrawing(): void {
     super.cancelDrawing();
 
     if (this.currentEllipse) {
