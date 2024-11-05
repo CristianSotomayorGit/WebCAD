@@ -3,16 +3,17 @@
 import { RenderableEntity } from './RenderableEntity';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { ArcShader } from '../../shaders/ArcShader';
+import { Point } from './Point';
 
-interface PointType {
-  x: number;
-  y: number;
-}
+// interface PointType {
+//   x: number;
+//   y: number;
+// }
 
 export class Arc extends RenderableEntity {
-  private startPoint: PointType | null = null;
-  private midPoint: PointType | null = null;
-  private endPoint: PointType | null = null;
+  private startPoint: Point | null = null;
+  private midPoint: Point | null = null;
+  private endPoint: Point | null = null;
   private vertexBuffer: GPUBuffer | null = null;
   private numVertices: number = 0;
 
@@ -61,17 +62,17 @@ export class Arc extends RenderableEntity {
     });
   }
 
-  public setStartPoint(point: PointType): void {
+  public setStartPoint(point: Point): void {
     this.startPoint = point;
     this.updateVertexBuffer();
   }
 
-  public setMidPoint(point: PointType): void {
+  public setMidPoint(point: Point): void {
     this.midPoint = point;
     this.updateVertexBuffer();
   }
 
-  public setEndPoint(point: PointType): void {
+  public setEndPoint(point: Point): void {
     this.endPoint = point;
     this.updateVertexBuffer();
   }
@@ -106,26 +107,26 @@ export class Arc extends RenderableEntity {
     if (!circle) {
       // Points are colinear; return a straight line
       return [
-        this.startPoint!.x,
-        this.startPoint!.y,
-        this.endPoint!.x,
-        this.endPoint!.y,
+        this.startPoint!.getX(),
+        this.startPoint!.getY(),
+        this.endPoint!.getX(),
+        this.endPoint!.getY(),
       ];
     }
 
     const { centerX, centerY, radius } = circle;
 
     const startAngle = Math.atan2(
-      this.startPoint!.y - centerY,
-      this.startPoint!.x - centerX
+      this.startPoint!.getY() - centerY,
+      this.startPoint!.getX() - centerX
     );
     const midAngle = Math.atan2(
-      this.midPoint!.y - centerY,
-      this.midPoint!.x - centerX
+      this.midPoint!.getY() - centerY,
+      this.midPoint!.getX() - centerX
     );
     const endAngle = Math.atan2(
-      this.endPoint!.y - centerY,
-      this.endPoint!.x - centerX
+      this.endPoint!.getY() - centerY,
+      this.endPoint!.getX() - centerX
     );
 
     // Determine the arc direction (clockwise or counter-clockwise)
@@ -201,16 +202,16 @@ export class Arc extends RenderableEntity {
   }
 
   private calculateCircleFromPoints(
-    p1: PointType,
-    p2: PointType,
-    p3: PointType
+    p1: Point,
+    p2: Point,
+    p3: Point
   ): { centerX: number; centerY: number; radius: number } | null {
-    const x1 = p1.x,
-      y1 = p1.y;
-    const x2 = p2.x,
-      y2 = p2.y;
-    const x3 = p3.x,
-      y3 = p3.y;
+    const x1 = p1.getX(),
+      y1 = p1.getY();
+    const x2 = p2.getX(),
+      y2 = p2.getY();
+    const x3 = p3.getX(),
+      y3 = p3.getY();
 
     const a = x1 * (y2 - y3) - y1 * (x2 - x3) + x2 * y3 - x3 * y2;
     if (Math.abs(a) < 1e-10) {

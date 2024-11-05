@@ -88,6 +88,7 @@ export class RectangleTool extends AbstractDrawingTool {
       this.entityManager.removeEntity(this.tempEndPoint);
       this.tempEndPoint = null;
     }
+    if (this.startPoint) this.entityManager.removeEntity(this.startPoint);
     this.startPoint = null;
   }
 
