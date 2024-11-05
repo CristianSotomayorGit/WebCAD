@@ -103,13 +103,12 @@ export class ArcTool extends AbstractDrawingTool {
 
     public cancelDrawing(): void {
         super.cancelDrawing();
-        
+
         if (this.temporaryArc) {
             this.entityManager.removeTemporaryEntity(this.temporaryArc);
             this.temporaryArc = null;
         }
         if (this.startPoint) {
-            console.log('suh nigga')
             this.entityManager.removeTemporaryEntity(this.startPoint)
             this.entityManager.removeEntity(this.startPoint);
         }
