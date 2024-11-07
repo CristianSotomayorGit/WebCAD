@@ -18,13 +18,22 @@ export abstract class RenderableText {
   protected position: { x: number; y: number };
   protected text: string;
   protected fontSize: number;
+  protected resolutionScale: number; // New property
 
-  constructor(renderer: Renderer, text: string, x: number, y: number, fontSize: number = 32) {
+  constructor(
+    renderer: Renderer,
+    text: string,
+    x: number,
+    y: number,
+    fontSize: number = 32,
+    resolutionScale: number = 2 // Default resolution scale
+  ) {
     this.renderer = renderer;
     this.device = renderer.getDevice();
     this.position = { x, y };
     this.text = text;
     this.fontSize = fontSize;
+    this.resolutionScale = resolutionScale; // Initialize resolution scale
 
     this.createCameraBuffer();
     this.createTextTexture();
@@ -50,13 +59,15 @@ export abstract class RenderableText {
       throw new Error('Unable to get 2D context');
     }
 
-    context.font = `${this.fontSize}px sans-serif`;
+    // Increase the font size for higher resolution
+    const scaledFontSize = this.fontSize * this.resolutionScale;
+    context.font = `${scaledFontSize}px sans-serif`;
     const textMetrics = context.measureText(this.text);
     canvas.width = Math.ceil(textMetrics.width);
-    canvas.height = this.fontSize;
+    canvas.height = scaledFontSize;
 
-    // Ensure the canvas background is transparent by not filling it
-    context.font = `${this.fontSize}px sans-serif`;
+    // Draw the text at the higher resolution
+    context.font = `${scaledFontSize}px sans-serif`;
     context.fillStyle = 'white'; // Text color
     context.textBaseline = 'top';
     context.fillText(this.text, 0, 0);
@@ -131,22 +142,24 @@ export abstract class RenderableText {
       fragment: {
         module: fragmentShaderModule,
         entryPoint: 'main',
-        targets: [{
-          format: this.renderer.getFormat(),
-          blend: {
-            color: {
-              srcFactor: 'src-alpha',
-              dstFactor: 'one-minus-src-alpha',
-              operation: 'add',
+        targets: [
+          {
+            format: this.renderer.getFormat(),
+            blend: {
+              color: {
+                srcFactor: 'src-alpha',
+                dstFactor: 'one-minus-src-alpha',
+                operation: 'add',
+              },
+              alpha: {
+                srcFactor: 'one',
+                dstFactor: 'one-minus-src-alpha',
+                operation: 'add',
+              },
             },
-            alpha: {
-              srcFactor: 'one',
-              dstFactor: 'one-minus-src-alpha',
-              operation: 'add',
-            },
+            writeMask: GPUColorWrite.ALL,
           },
-          writeMask: GPUColorWrite.ALL,
-        }],
+        ],
       },
       primitive: { topology: 'triangle-strip' },
     });
@@ -155,9 +168,12 @@ export abstract class RenderableText {
   protected createBuffers(): void {
     const x = this.position.x;
     const y = this.position.y;
-    const width = this.textureWidth * 0.01; // Adjust scale as needed
-    const height = this.textureHeight * 0.01; // Adjust scale as needed
 
+    // Calculate the width and height based on the original font size
+    const width = (this.textureWidth / this.resolutionScale) * 0.01; // Adjust scale as needed
+    const height = (this.textureHeight / this.resolutionScale) * 0.01; // Adjust scale as needed
+
+    // Vertex positions and texture coordinates
     const vertices = new Float32Array([
       // x, y, u, v
       x, y, 0, 1,
