@@ -61,12 +61,12 @@ export class LineTool extends AbstractDrawingTool {
 
     if (event.key === 'Escape' && this.isDrawing) {
 
-      this.cancelDrawing();
+      this.cancel();
     }
   }
 
-  public cancelDrawing(): void {
-    super.cancelDrawing();
+  public cancel(): void {
+    super.cancel();
 
      // Cancel line drawing
      if (this.currentLine) {

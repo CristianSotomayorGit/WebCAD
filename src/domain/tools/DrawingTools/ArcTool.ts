@@ -85,15 +85,15 @@ export class ArcTool extends AbstractDrawingTool {
         if (event.key === 'Escape' && this.isDrawing) {
             // Cancel arc drawing
 
-            this.cancelDrawing();
+            this.cancel();
             this.startPoint = null;
             this.midPoint = null;
             this.endPoint = null;
         }
     }
 
-    public cancelDrawing(): void {
-        super.cancelDrawing();
+    public cancel(): void {
+        super.cancel();
 
         if (this.temporaryArc) {
             this.entityManager.removeTemporaryEntity(this.temporaryArc);

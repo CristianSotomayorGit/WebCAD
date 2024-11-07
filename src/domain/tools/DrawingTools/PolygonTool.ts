@@ -81,7 +81,7 @@ export class PolygonTool extends AbstractDrawingTool {
       if (e.key === 'Enter') {
         this.finishDrawing();
       } else if (e.key === 'Escape') {
-        this.cancelDrawing();
+        this.cancel();
       }
     });
   }
@@ -104,8 +104,8 @@ export class PolygonTool extends AbstractDrawingTool {
     }
   }
 
-  public cancelDrawing(): void {
-    super.cancelDrawing();
+  public cancel(): void {
+    super.cancel();
 
     if (this.inputElement) {
       document.body.removeChild(this.inputElement);

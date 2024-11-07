@@ -56,7 +56,7 @@ export class PanTool {
     this.lastMousePosition = { x: event.clientX, y: event.clientY };
   }
 
-  public cancelDrawing() {
+  public cancel() {
   //
   }
 }

@@ -62,8 +62,8 @@ export class PolylineTool extends AbstractDrawingTool {
     }
   }
 
-  public cancelDrawing(): void {
-    super.cancelDrawing();
+  public cancel(): void {
+    super.cancel();
 
     if (this.currentPolyline) {
       this.entityManager.removeEntity(this.currentPolyline);

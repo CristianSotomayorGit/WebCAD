@@ -36,7 +36,9 @@ const WebGPUCanvas: React.FC = () => {
 
         try {
           await rendererRef.current.initialize();
-        } catch (error) {
+        } 
+        
+        catch (error) {
           console.error('Error during WebGPU initialization', error);
           setInitializationError(error instanceof Error ? error.message : String(error));
         }

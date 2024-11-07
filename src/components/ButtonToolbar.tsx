@@ -39,6 +39,7 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
     { name: 'Polygon', icon: '/icons/polygon.svg' },
     { name: 'Ellipse', icon: '/icons/ellipse.svg' },
     { name: 'Pan', icon: '/icons/pan.svg' },
+    { name: 'Text', icon: '/icons/text.svg'}
   ];
 
   return (

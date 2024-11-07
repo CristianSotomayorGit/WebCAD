@@ -77,8 +77,8 @@ export class RectangleTool extends AbstractDrawingTool {
     this.points = [];
   }
 
-  public cancelDrawing(): void {
-    super.cancelDrawing();
+  public cancel(): void {
+    super.cancel();
 
     if (this.currentRectangle) {
       this.entityManager.removeEntity(this.currentRectangle);
