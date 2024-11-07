@@ -55,8 +55,9 @@ export abstract class RenderableText {
     canvas.width = Math.ceil(textMetrics.width);
     canvas.height = this.fontSize;
 
+    // Ensure the canvas background is transparent by not filling it
     context.font = `${this.fontSize}px sans-serif`;
-    context.fillStyle = 'white';
+    context.fillStyle = 'white'; // Text color
     context.textBaseline = 'top';
     context.fillText(this.text, 0, 0);
 
@@ -65,7 +66,7 @@ export abstract class RenderableText {
 
     this.textTexture = this.device.createTexture({
       size: [canvas.width, canvas.height, 1],
-      format: 'rgba8unorm',
+      format: 'rgba8unorm', // Supports alpha channel
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
     });
 
@@ -130,7 +131,22 @@ export abstract class RenderableText {
       fragment: {
         module: fragmentShaderModule,
         entryPoint: 'main',
-        targets: [{ format: this.renderer.getFormat() }],
+        targets: [{
+          format: this.renderer.getFormat(),
+          blend: {
+            color: {
+              srcFactor: 'src-alpha',
+              dstFactor: 'one-minus-src-alpha',
+              operation: 'add',
+            },
+            alpha: {
+              srcFactor: 'one',
+              dstFactor: 'one-minus-src-alpha',
+              operation: 'add',
+            },
+          },
+          writeMask: GPUColorWrite.ALL,
+        }],
       },
       primitive: { topology: 'triangle-strip' },
     });
