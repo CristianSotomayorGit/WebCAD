@@ -6,6 +6,14 @@ import { EntityManager } from '../domain/managers/EntityManager';
 import { ToolManager } from '../domain/managers/ToolManager';
 import CommandToolbar from './CommandToolbar';
 import ButtonToolbar from './ButtonToolbar';
+import { AbstractWritingTool } from '../domain/tools/WritingTools/AbstractWritingTool';
+import { AbstractDrawingTool } from '../domain/tools/DrawingTools/AbstractDrawingTool';
+import { PanTool } from '../domain/tools/ViewTools/PanTool';
+
+export type Font = {
+  size: string;
+  name: string;
+}
 
 const WebGPUCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -15,12 +23,24 @@ const WebGPUCanvas: React.FC = () => {
   const activeColorRef = useRef<Float32Array>(new Float32Array([0.0, 1.0, 1.0, 1.0])); // Default cyan color
   const [activeToolName, setActiveToolName] = useState('Select'); // Keep default tool as 'Select'
   const [activeColor, setActiveColor] = useState(new Float32Array([0.0, 1.0, 1.0, 1.0]));
+
+  const [activeFontSize, setActiveFontSize] = useState<number>(12);
+  const activeFontSizeRef = useRef<number>(12);
+
+  const [activeFont, setActiveFont] = useState<string>("Times New Roman");
+  const activeFontRef = useRef<string>("Times New Roman");
+
   const [showPopup, setShowPopup] = useState(true);
   const [initializationError, setInitializationError] = useState<string | null>(null);
 
   useEffect(() => {
     activeColorRef.current = activeColor;
   }, [activeColor]);
+
+  useEffect(() => {
+    activeFontRef.current = activeFont;
+    activeFontSizeRef.current = activeFontSize;
+  }, [activeFont, activeFontSize]);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -66,9 +86,18 @@ const WebGPUCanvas: React.FC = () => {
 
   const handleMouseDown = (event: MouseEvent) => {
     if (event.button === 0) {
-      if (!activeColorRef.current) return;
-      toolManagerRef.current?.getActiveTool()?.onLeftClick(event, activeColorRef.current);
+      const activeTool = toolManagerRef.current?.getActiveTool();
+
+      if (activeTool instanceof AbstractDrawingTool)
+        activeTool?.onLeftClick(event, activeColorRef.current);
+      
+      if (activeTool instanceof AbstractWritingTool)
+        activeTool?.onLeftClick(event, activeColorRef.current, activeFontRef.current, activeFontSizeRef.current);
+    
+      if (activeTool instanceof PanTool)
+        activeTool.onLeftClick(event);
     }
+
     if (event.button === 1) {
       toolManagerRef.current?.getPanTool()?.onWheelClick(event);
     }
@@ -133,10 +162,22 @@ const WebGPUCanvas: React.FC = () => {
       <CommandToolbar activeTool={activeToolName} />
       <ButtonToolbar
         toolManagerRef={toolManagerRef}
+
         setActiveToolName={setActiveToolName}
+
         setActiveColor={(color: Float32Array) => {
           setActiveColor(color);
           activeColorRef.current = color;
+        }}
+
+        setActiveFont={(fontName: string) => {
+          setActiveFont(fontName);
+          activeFontRef.current = fontName;
+        }}
+
+        setActiveFontSize={(fontSize: number) => {
+          setActiveFontSize(fontSize);
+          activeFontSizeRef.current = fontSize;
         }}
       />
       <canvas ref={canvasRef} style={canvasStyle} />

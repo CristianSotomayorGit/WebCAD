@@ -16,12 +16,14 @@ export class TextTool extends AbstractWritingTool {
   /**
    * Handles a left-click on the canvas to place or select text for editing.
    */
-  public onLeftClick(event: MouseEvent, color: Float32Array): void {
+  public onLeftClick(event: MouseEvent, color: Float32Array, font: string, fontSize: number): void {
     const position = this.getWorldPosition(event);
+
+    console.log('oi',font, fontSize)
 
     if (!this.isEditing) {
       // Create a new text entity when not editing
-      this.currentTextEntity = new Text(this.renderer, '', position.x, position.y, 32, 2, color);
+      this.currentTextEntity = new Text(this.renderer, '', position.x, position.y, font, fontSize, 16, color);
       this.entityManager.addEntity(this.currentTextEntity);
       this.isEditing = true; // Start editing mode
     } else {
@@ -47,7 +49,7 @@ export class TextTool extends AbstractWritingTool {
         const currentText = this.currentTextEntity.text;
 
         this.currentTextEntity.updateText(currentText + event.key);
-        console.log(this.currentTextEntity.text )
+        console.log(this.currentTextEntity.text)
         this.entityManager.addEntity(this.currentTextEntity);
       } else if (event.key === 'Enter') {
         // Stop editing on Enter

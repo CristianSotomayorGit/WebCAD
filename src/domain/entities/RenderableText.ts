@@ -17,6 +17,7 @@ export abstract class RenderableText {
   protected textureWidth!: number;
   protected textureHeight!: number;
   public text: string;
+  protected font: string;
   protected fontSize: number;
   protected resolutionScale: number;
   protected color: Float32Array;
@@ -27,6 +28,7 @@ export abstract class RenderableText {
     text: string,
     x: number,
     y: number,
+    font: string,
     fontSize: number = 32,
     resolutionScale: number = 2,
     color: Float32Array = new Float32Array([1.0, 1.0, 1.0, 1.0])
@@ -35,6 +37,7 @@ export abstract class RenderableText {
     this.device = renderer.getDevice();
     this.text = text;
     this.position = { x, y };
+    this.font = font;
     this.fontSize = fontSize;
     this.resolutionScale = resolutionScale;
     this.color = color;
@@ -83,7 +86,7 @@ export abstract class RenderableText {
 
     // Ensure font size and resolution scale are valid
     const scaledFontSize = Math.max(1, this.fontSize * this.resolutionScale); // Minimum font size of 1
-    context.font = `${scaledFontSize}px sans-serif`;
+    context.font = `${scaledFontSize}px ${this.font}`;
 
     // Measure text width
     const textMetrics = context.measureText(this.text);
@@ -99,7 +102,7 @@ export abstract class RenderableText {
     }
 
     // Render the text on the canvas
-    context.font = `${scaledFontSize}px sans-serif`;
+    context.font = `${scaledFontSize}px ${this.font}`;
     context.fillStyle = 'white';
     context.textBaseline = 'top';
     context.fillText(this.text, 0, 0);

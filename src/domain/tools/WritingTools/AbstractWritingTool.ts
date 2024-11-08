@@ -13,7 +13,7 @@ export abstract class AbstractWritingTool implements Tool {
         this.renderer = renderer;
     }
 
-    public abstract onLeftClick(event: MouseEvent, color: Float32Array): void;
+    public abstract onLeftClick(event: MouseEvent, color: Float32Array, font: string, fontSize: number): void;
 
     protected getWorldPosition(event: MouseEvent): { x: number; y: number } {
         const canvasRect = this.renderer.getCanvas().getBoundingClientRect();

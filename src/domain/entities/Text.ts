@@ -9,11 +9,12 @@ export class Text extends RenderableText {
     text: string,
     x: number,
     y: number,
-    fontSize: number = 32,
+    font: string,
+    fontSize: number = 12,
     resolutionScale: number = 2,
     color: Float32Array = new Float32Array([1.0, 1.0, 1.0, 1.0]) // Default white color
   ) {
-    super(renderer, text, x, y, fontSize, resolutionScale, color);
+    super(renderer, text, x, y, font, fontSize, resolutionScale, color);
   }
 
   /**

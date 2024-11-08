@@ -5,12 +5,16 @@ interface ButtonToolbarProps {
   toolManagerRef: MutableRefObject<ToolManager | undefined>;
   setActiveToolName: (toolName: string) => void;
   setActiveColor: (color: Float32Array) => void;
+  setActiveFont: (fontName: string) => void;
+  setActiveFontSize: (fontSize: number) => void;
 }
 
 const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
   toolManagerRef,
   setActiveToolName,
   setActiveColor,
+  setActiveFont,
+  setActiveFontSize,
 }) => {
   const handleToolChange = (toolName: string) => {
     setActiveToolName(toolName);
@@ -27,6 +31,16 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
     const newColor = new Float32Array([r / 255, g / 255, b / 255, 1.0]);
     setActiveColor(newColor);
   };
+
+  const handleFontChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    let fontName = event.target.value;
+    setActiveFont(fontName);
+  };
+
+  const handleFontSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    let fontSize = parseInt(event.target.value);
+    setActiveFontSize(fontSize);
+  }
 
   const tools = [
     { name: 'Point', icon: '/icons/point.svg' },
@@ -54,7 +68,29 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
           <img src={tool.icon} alt={`${tool.name} icon`} style={iconStyle} />
         </button>
       ))}
-      <input type="color" defaultValue="#00FFFF" style={colorPickerStyle} onChange={handleColorChange} title='Color'/>
+      <input type="color" defaultValue="#00FFFF" style={colorPickerStyle} onChange={handleColorChange} title="Color" />
+
+      <select style={fontSizePickerStyle} title="Font Size" onChange={handleFontSizeChange}>
+        <option value='12'>12 px</option>
+        <option value="16">16 px</option>
+        <option value="20">20 px</option>
+        <option value="24">24 px</option>
+        <option value="32">32 px</option>
+        <option value="40">40 px</option>
+        <option value="48">48 px</option>
+        <option value="56">56 px</option>
+      </select>
+
+      <select style={fontPickerStyle} title="Font" onChange={handleFontChange}>
+        <option value="Arial">Arial</option>
+        <option value="Helvetica">Helvetica</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Palatino">Palatino</option>
+        <option value="Garamond">Garamond</option>
+      </select>
     </div>
   );
 };
@@ -105,6 +141,34 @@ const colorPickerStyle: React.CSSProperties = {
   padding: 0,
   gridColumn: 'span 2',
   justifySelf: 'center',
+};
+
+const fontSizePickerStyle: React.CSSProperties = {
+  width: '80px',
+  height: '25px',
+  backgroundColor: '#34495e',
+  border: 'none',
+  color: '#ecf0f1',
+  fontSize: '14px',
+  cursor: 'pointer',
+  gridColumn: 'span 2',
+  justifySelf: 'center',
+  textAlign: 'center',
+  borderRadius: '4px',
+};
+
+const fontPickerStyle: React.CSSProperties = {
+  width: '80px',
+  height: '25px',
+  backgroundColor: '#34495e',
+  border: 'none',
+  color: '#ecf0f1',
+  fontSize: '14px',
+  cursor: 'pointer',
+  gridColumn: 'span 2',
+  justifySelf: 'center',
+  textAlign: 'center',
+  borderRadius: '4px',
 };
 
 export default ButtonToolbar;

@@ -17,7 +17,7 @@ export abstract class AbstractDrawingTool implements Tool {
         this.renderer = renderer;
     }
 
-    public abstract onLeftClick(event: MouseEvent, color: Float32Array, fontSize?: number): void;
+    public abstract onLeftClick(event: MouseEvent, color: Float32Array, font?: string, fontSize?: number): void;
 
     public onMouseMove(event: MouseEvent): void {
         event
