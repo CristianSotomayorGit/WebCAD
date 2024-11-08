@@ -4,7 +4,7 @@ import { AbstractWritingTool } from './AbstractWritingTool';
 import { Text } from '../../entities/Text';
 
 export class TextTool extends AbstractWritingTool {
-  public onLeftClick(event: MouseEvent): void {
+  public onLeftClick(event: MouseEvent, color: Float32Array): void {
     const position = this.getWorldPosition(event);
     const textEntity = new Text(
       this.renderer,
@@ -12,7 +12,8 @@ export class TextTool extends AbstractWritingTool {
       position.x,
       position.y,
       32, // Font size
-      4 // Resolution scale (adjust as needed)
+      2,  // Resolution scale
+      color // Custom color
     );
     this.entityManager.addEntity(textEntity);
   }

@@ -9,6 +9,7 @@ export abstract class RenderableText {
   protected pipeline!: GPURenderPipeline;
   protected bindGroup!: GPUBindGroup;
   protected cameraBuffer!: GPUBuffer;
+  protected colorBuffer!: GPUBuffer;
   protected vertexBuffer: GPUBuffer | null = null;
   protected numVertices: number = 0;
   protected textTexture!: GPUTexture;
@@ -18,7 +19,8 @@ export abstract class RenderableText {
   protected position: { x: number; y: number };
   protected text: string;
   protected fontSize: number;
-  protected resolutionScale: number; // New property
+  protected resolutionScale: number;
+  protected color: Float32Array;
 
   constructor(
     renderer: Renderer,
@@ -26,16 +28,19 @@ export abstract class RenderableText {
     x: number,
     y: number,
     fontSize: number = 32,
-    resolutionScale: number = 2 // Default resolution scale
+    resolutionScale: number = 2,
+    color: Float32Array = new Float32Array([1.0, 1.0, 1.0, 1.0]) // Default white color
   ) {
     this.renderer = renderer;
     this.device = renderer.getDevice();
     this.position = { x, y };
     this.text = text;
     this.fontSize = fontSize;
-    this.resolutionScale = resolutionScale; // Initialize resolution scale
+    this.resolutionScale = resolutionScale;
+    this.color = color;
 
     this.createCameraBuffer();
+    this.createColorBuffer();
     this.createTextTexture();
     this.setupPipeline();
     this.createBuffers();
@@ -51,6 +56,14 @@ export abstract class RenderableText {
     this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
   }
 
+  protected createColorBuffer(): void {
+    this.colorBuffer = this.device.createBuffer({
+      size: this.color.byteLength,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+    this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
+  }
+
   protected createTextTexture(): void {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
@@ -59,25 +72,26 @@ export abstract class RenderableText {
       throw new Error('Unable to get 2D context');
     }
 
-    // Increase the font size for higher resolution
+    // Increase font size based on resolution scale for higher resolution
     const scaledFontSize = this.fontSize * this.resolutionScale;
     context.font = `${scaledFontSize}px sans-serif`;
     const textMetrics = context.measureText(this.text);
     canvas.width = Math.ceil(textMetrics.width);
     canvas.height = scaledFontSize;
 
-    // Draw the text at the higher resolution
+    // Draw the text with the specified color
     context.font = `${scaledFontSize}px sans-serif`;
-    context.fillStyle = 'white'; // Text color
+    context.fillStyle = 'white'; // Text color is white; color will be applied in shader
     context.textBaseline = 'top';
     context.fillText(this.text, 0, 0);
 
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
 
+    // Create the GPU texture and upload the text image data
     this.textTexture = this.device.createTexture({
       size: [canvas.width, canvas.height, 1],
-      format: 'rgba8unorm', // Supports alpha channel
+      format: 'rgba8unorm',
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
     });
 
@@ -94,6 +108,7 @@ export abstract class RenderableText {
       }
     );
 
+    // Create a sampler for the texture
     this.textSampler = this.device.createSampler({
       magFilter: 'linear',
       minFilter: 'linear',
@@ -117,6 +132,7 @@ export abstract class RenderableText {
         { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } },
         { binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float' } },
         { binding: 2, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' } },
+        { binding: 3, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }, // Color uniform
       ],
     });
 
@@ -169,7 +185,7 @@ export abstract class RenderableText {
     const x = this.position.x;
     const y = this.position.y;
 
-    // Calculate the width and height based on the original font size
+    // Calculate width and height based on original font size and resolution scale
     const width = (this.textureWidth / this.resolutionScale) * 0.01; // Adjust scale as needed
     const height = (this.textureHeight / this.resolutionScale) * 0.01; // Adjust scale as needed
 
@@ -209,6 +225,10 @@ export abstract class RenderableText {
           binding: 2,
           resource: this.textSampler,
         },
+        {
+          binding: 3,
+          resource: { buffer: this.colorBuffer },
+        },
       ],
     });
   }
@@ -218,6 +238,14 @@ export abstract class RenderableText {
     const zoom = this.renderer.getCamera().getZoom();
     const cameraData = new Float32Array([x, y, zoom, 0]);
     this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
+  }
+
+  public setColor(color: Float32Array): void {
+    if (color.length !== 4) {
+      throw new Error('Color must be a Float32Array with 4 components (RGBA).');
+    }
+    this.color = color;
+    this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
   }
 
   public draw(renderPass: GPURenderPassEncoder): void {
@@ -240,6 +268,9 @@ export abstract class RenderableText {
     }
     if (this.cameraBuffer) {
       this.cameraBuffer.destroy();
+    }
+    if (this.colorBuffer) {
+      this.colorBuffer.destroy();
     }
   }
 }

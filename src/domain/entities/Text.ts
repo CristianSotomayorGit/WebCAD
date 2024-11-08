@@ -10,11 +10,9 @@ export class Text extends RenderableText {
     x: number,
     y: number,
     fontSize: number = 32,
-    resolutionScale: number = 2 // Default resolution scale
+    resolutionScale: number = 2,
+    color: Float32Array = new Float32Array([1.0, 1.0, 1.0, 1.0]) // Default color is white
   ) {
-    super(renderer, text, x, y, fontSize, resolutionScale);
-    // Additional initialization or overrides if needed
+    super(renderer, text, x, y, fontSize, resolutionScale, color);
   }
-
-  // Implement or override methods if necessary
 }
