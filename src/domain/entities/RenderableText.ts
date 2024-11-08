@@ -16,11 +16,11 @@ export abstract class RenderableText {
   protected textSampler!: GPUSampler;
   protected textureWidth!: number;
   protected textureHeight!: number;
-  protected position: { x: number; y: number };
-  protected text: string;
+  public text: string;
   protected fontSize: number;
   protected resolutionScale: number;
   protected color: Float32Array;
+  protected position: { x: number; y: number };
 
   constructor(
     renderer: Renderer,
@@ -29,12 +29,12 @@ export abstract class RenderableText {
     y: number,
     fontSize: number = 32,
     resolutionScale: number = 2,
-    color: Float32Array = new Float32Array([1.0, 1.0, 1.0, 1.0]) // Default white color
+    color: Float32Array = new Float32Array([1.0, 1.0, 1.0, 1.0])
   ) {
     this.renderer = renderer;
     this.device = renderer.getDevice();
-    this.position = { x, y };
     this.text = text;
+    this.position = { x, y };
     this.fontSize = fontSize;
     this.resolutionScale = resolutionScale;
     this.color = color;
@@ -65,6 +65,15 @@ export abstract class RenderableText {
   }
 
   protected createTextTexture(): void {
+    // Dispose of old texture and sampler
+    if (this.textTexture) {
+      this.textTexture.destroy();
+    }
+    // if (this.textSampler) {
+    //   // No destroy method for sampler, set to null for safety
+    //   this.textSampler = null;
+    // }
+
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
 
@@ -72,23 +81,32 @@ export abstract class RenderableText {
       throw new Error('Unable to get 2D context');
     }
 
-    // Increase font size based on resolution scale for higher resolution
-    const scaledFontSize = this.fontSize * this.resolutionScale;
+    // Ensure font size and resolution scale are valid
+    const scaledFontSize = Math.max(1, this.fontSize * this.resolutionScale); // Minimum font size of 1
     context.font = `${scaledFontSize}px sans-serif`;
+
+    // Measure text width
     const textMetrics = context.measureText(this.text);
-    canvas.width = Math.ceil(textMetrics.width);
+    const textWidth = Math.max(1, Math.ceil(textMetrics.width)); // Minimum width of 1
+
+    // Set canvas dimensions (fallback to 1 if invalid)
+    canvas.width = textWidth;
     canvas.height = scaledFontSize;
 
-    // Draw the text with the specified color
+    // Debug log for invalid values
+    if (isNaN(textWidth) || isNaN(scaledFontSize)) {
+      console.error('Invalid canvas dimensions:', { textWidth, scaledFontSize });
+    }
+
+    // Render the text on the canvas
     context.font = `${scaledFontSize}px sans-serif`;
-    context.fillStyle = 'white'; // Text color is white; color will be applied in shader
+    context.fillStyle = 'white';
     context.textBaseline = 'top';
     context.fillText(this.text, 0, 0);
 
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     const pixels = imageData.data;
 
-    // Create the GPU texture and upload the text image data
     this.textTexture = this.device.createTexture({
       size: [canvas.width, canvas.height, 1],
       format: 'rgba8unorm',
@@ -108,7 +126,6 @@ export abstract class RenderableText {
       }
     );
 
-    // Create a sampler for the texture
     this.textSampler = this.device.createSampler({
       magFilter: 'linear',
       minFilter: 'linear',
@@ -132,7 +149,7 @@ export abstract class RenderableText {
         { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } },
         { binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float' } },
         { binding: 2, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' } },
-        { binding: 3, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }, // Color uniform
+        { binding: 3, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
       ],
     });
 
@@ -147,10 +164,10 @@ export abstract class RenderableText {
         entryPoint: 'main',
         buffers: [
           {
-            arrayStride: 4 * 4, // 2 floats for position, 2 floats for texCoord
+            arrayStride: 4 * 4,
             attributes: [
-              { shaderLocation: 0, offset: 0, format: 'float32x2' }, // position
-              { shaderLocation: 1, offset: 2 * 4, format: 'float32x2' }, // texCoord
+              { shaderLocation: 0, offset: 0, format: 'float32x2' },
+              { shaderLocation: 1, offset: 2 * 4, format: 'float32x2' },
             ],
           },
         ],
@@ -185,13 +202,10 @@ export abstract class RenderableText {
     const x = this.position.x;
     const y = this.position.y;
 
-    // Calculate width and height based on original font size and resolution scale
-    const width = (this.textureWidth / this.resolutionScale) * 0.01; // Adjust scale as needed
-    const height = (this.textureHeight / this.resolutionScale) * 0.01; // Adjust scale as needed
+    const width = (this.textureWidth / this.resolutionScale) * 0.01;
+    const height = (this.textureHeight / this.resolutionScale) * 0.01;
 
-    // Vertex positions and texture coordinates
     const vertices = new Float32Array([
-      // x, y, u, v
       x, y, 0, 1,
       x + width, y, 1, 1,
       x, y + height, 0, 0,
@@ -213,22 +227,10 @@ export abstract class RenderableText {
     this.bindGroup = this.device.createBindGroup({
       layout: this.pipeline.getBindGroupLayout(0),
       entries: [
-        {
-          binding: 0,
-          resource: { buffer: this.cameraBuffer },
-        },
-        {
-          binding: 1,
-          resource: this.textTexture.createView(),
-        },
-        {
-          binding: 2,
-          resource: this.textSampler,
-        },
-        {
-          binding: 3,
-          resource: { buffer: this.colorBuffer },
-        },
+        { binding: 0, resource: { buffer: this.cameraBuffer } },
+        { binding: 1, resource: this.textTexture.createView() },
+        { binding: 2, resource: this.textSampler },
+        { binding: 3, resource: { buffer: this.colorBuffer } },
       ],
     });
   }
@@ -238,6 +240,13 @@ export abstract class RenderableText {
     const zoom = this.renderer.getCamera().getZoom();
     const cameraData = new Float32Array([x, y, zoom, 0]);
     this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
+  }
+
+  public setText(newText: string): void {
+    this.text = newText;
+    this.createTextTexture();
+    this.createBuffers();
+    this.setupBindGroup(); // Update the bind group with the new texture and sampler
   }
 
   public setColor(color: Float32Array): void {
@@ -259,18 +268,9 @@ export abstract class RenderableText {
   }
 
   public dispose(): void {
-    if (this.vertexBuffer) {
-      this.vertexBuffer.destroy();
-      this.vertexBuffer = null;
-    }
-    if (this.textTexture) {
-      this.textTexture.destroy();
-    }
-    if (this.cameraBuffer) {
-      this.cameraBuffer.destroy();
-    }
-    if (this.colorBuffer) {
-      this.colorBuffer.destroy();
-    }
+    if (this.vertexBuffer) this.vertexBuffer.destroy();
+    if (this.textTexture) this.textTexture.destroy();
+    if (this.cameraBuffer) this.cameraBuffer.destroy();
+    if (this.colorBuffer) this.colorBuffer.destroy();
   }
 }
