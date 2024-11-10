@@ -5,7 +5,6 @@ import { Text } from '../../entities/Text';
 import { Cursor } from '../../entities/Cursor';
 import { Renderer } from '../../../infrastructure/rendering/Renderer';
 import { EntityManager } from '../../managers/EntityManager';
-import { Point } from '../../entities/Point';
 
 export class TextTool extends AbstractWritingTool {
   private currentTextEntity: Text | null = null;

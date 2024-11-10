@@ -24,6 +24,11 @@ export abstract class RenderableText {
   public position: { x: number; y: number };
   public cursorIndex: number = 0; // Position of the cursor in the text
 
+  // Additions for deferred texture destruction and throttling
+  private oldTextures: GPUTexture[] = [];
+  private pendingTextUpdate: string | null = null;
+  private isUpdating: boolean = false;
+
   constructor(
     renderer: Renderer,
     text: string,
@@ -48,7 +53,6 @@ export abstract class RenderableText {
     this.setupPipeline();
     this.createTextTexture();
     this.createBuffers();
-    // No need to call setupBindGroup here; it's called within createTextTexture()
   }
 
   protected createCameraBuffer(): void {
@@ -200,9 +204,9 @@ export abstract class RenderableText {
       ],
     });
 
-    // Now it's safe to destroy the old texture
+    // Store the old texture instead of destroying it immediately
     if (this.textTexture) {
-      this.textTexture.destroy();
+      this.oldTextures.push(this.textTexture);
     }
 
     // Replace old texture and sampler references
@@ -211,6 +215,21 @@ export abstract class RenderableText {
 
     this.textureWidth = newCanvas.width;
     this.textureHeight = newCanvas.height;
+
+    // Schedule cleanup of old textures
+    this.cleanupOldTextures();
+  }
+
+  private cleanupOldTextures(): void {
+    // Wait for one rendering frame before destroying old textures
+    requestAnimationFrame(() => {
+      while (this.oldTextures.length > 0) {
+        const oldTexture = this.oldTextures.shift();
+        if (oldTexture) {
+          oldTexture.destroy();
+        }
+      }
+    });
   }
 
   protected createBuffers(): void {
@@ -246,10 +265,27 @@ export abstract class RenderableText {
   }
 
   public setText(newText: string): void {
+    if (this.isUpdating) {
+      // Store the latest text update
+      this.pendingTextUpdate = newText;
+      return;
+    }
+    this.isUpdating = true;
     this.text = newText;
-    // Do not modify cursorIndex here
+
+    // Proceed with updating the texture
     this.createTextTexture();
     this.createBuffers();
+
+    // After updating, check for pending updates
+    requestAnimationFrame(() => {
+      this.isUpdating = false;
+      if (this.pendingTextUpdate !== null) {
+        const pendingText = this.pendingTextUpdate;
+        this.pendingTextUpdate = null;
+        this.setText(pendingText);
+      }
+    });
   }
 
   public moveCursor(offset: number): void {
@@ -297,6 +333,10 @@ export abstract class RenderableText {
   public dispose(): void {
     if (this.vertexBuffer) this.vertexBuffer.destroy();
     if (this.textTexture) this.textTexture.destroy();
+    // Dispose old textures
+    for (const tex of this.oldTextures) {
+      tex.destroy();
+    }
     if (this.cameraBuffer) this.cameraBuffer.destroy();
     if (this.colorBuffer) this.colorBuffer.destroy();
   }
