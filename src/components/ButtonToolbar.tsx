@@ -33,14 +33,14 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
   };
 
   const handleFontChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    let fontName = event.target.value;
+    const fontName = event.target.value;
     setActiveFont(fontName);
   };
 
-  const handleFontSizeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    let fontSize = parseInt(event.target.value);
+  const handleFontSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fontSize = Math.max(10, Math.min(99, parseInt(event.target.value) || 12));
     setActiveFontSize(fontSize);
-  }
+  };
 
   const tools = [
     { name: 'Point', icon: '/icons/point.svg' },
@@ -53,7 +53,7 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
     { name: 'Polygon', icon: '/icons/polygon.svg' },
     { name: 'Ellipse', icon: '/icons/ellipse.svg' },
     { name: 'Pan', icon: '/icons/pan.svg' },
-    { name: 'Text', icon: '/icons/text.svg'}
+    { name: 'Text', icon: '/icons/text.svg' }
   ];
 
   return (
@@ -70,16 +70,15 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
       ))}
       <input type="color" defaultValue="#00FFFF" style={colorPickerStyle} onChange={handleColorChange} title="Color" />
 
-      <select style={fontSizePickerStyle} title="Font Size" onChange={handleFontSizeChange}>
-        <option value='12'>12 px</option>
-        <option value="16">16 px</option>
-        <option value="20">20 px</option>
-        <option value="24">24 px</option>
-        <option value="32">32 px</option>
-        <option value="40">40 px</option>
-        <option value="48">48 px</option>
-        <option value="56">56 px</option>
-      </select>
+      <input
+        type="number"
+        style={fontSizeInputStyle}
+        title="Font Size"
+        onChange={handleFontSizeChange}
+        min="10"
+        max="99"
+        defaultValue="12"
+      />
 
       <select style={fontPickerStyle} title="Font" onChange={handleFontChange}>
         <option value="Arial">Arial</option>
@@ -109,7 +108,7 @@ const toolbarStyle: React.CSSProperties = {
   alignItems: 'center',
   padding: '8px',
   fontSize: '16px',
-  gap: '2px', // Reduced gap for more compact horizontal spacing
+  gap: '2px',
   boxSizing: 'border-box',
   zIndex: 1000,
 };
@@ -143,7 +142,7 @@ const colorPickerStyle: React.CSSProperties = {
   justifySelf: 'center',
 };
 
-const fontSizePickerStyle: React.CSSProperties = {
+const fontSizeInputStyle: React.CSSProperties = {
   width: '80px',
   height: '25px',
   backgroundColor: '#34495e',
