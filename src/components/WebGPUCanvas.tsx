@@ -131,7 +131,7 @@ const WebGPUCanvas: React.FC = () => {
               <img src="/OtterCAD_logo.png" alt="Logo" style={logoStyle} />
               <h1 style={popupTitleStyle}>OtterCAD</h1>
             </div>
-            <p style={popupVersionStyle}>Version: Alpha 0.0.2</p>
+            <p style={popupVersionStyle}>Version: Alpha 0.0.3</p>
             <p style={popupDescriptionStyle}>
               From the dev:
               <br />
