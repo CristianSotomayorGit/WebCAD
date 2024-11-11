@@ -1,6 +1,7 @@
 import { EntityManager } from '../../domain/managers/EntityManager';
 import { Camera } from '../../domain/Camera';
 import { GridShader } from '../../shaders/GridShader';
+import { Point } from '../../domain/entities/Point';
 
 export class Renderer {
   private device!: GPUDevice;
@@ -368,10 +369,10 @@ export class Renderer {
     // });
 
     tempEntities.forEach((entity) => {
-        entity.draw(renderPass);
+      entity.draw(renderPass);
     });
 
-  
+
 
     // entities.forEach((entity) => {
     //   if (entity instanceof Polyline) {
@@ -417,7 +418,9 @@ export class Renderer {
     // });
 
     entities.forEach((entity) => {
-      entity.draw(renderPass);
+      if (!(entity instanceof Point)) {
+        entity.draw(renderPass);
+      }
     });
 
     renderPass.end();
