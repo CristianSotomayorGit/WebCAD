@@ -60,8 +60,8 @@ export class CircleTool extends AbstractDrawingTool {
         }
     }
 
-    public cancelDrawing(): void {
-        super.cancelDrawing();
+    public cancel(): void {
+        super.cancel();
 
         if (this.currentCircle) {
             this.entityManager.removeEntity(this.currentCircle);

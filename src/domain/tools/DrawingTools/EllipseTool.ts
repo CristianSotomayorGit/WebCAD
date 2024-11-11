@@ -61,12 +61,12 @@ export class EllipseTool extends AbstractDrawingTool {
     super.onKeyDown(event);
 
     if (this.isDrawing && (event.key === 'Escape' || event.key === 'Esc')) {
-      this.cancelDrawing();
+      this.cancel();
     }
   }
 
-  public cancelDrawing(): void {
-    super.cancelDrawing();
+  public cancel(): void {
+    super.cancel();
 
     if (this.currentEllipse) {
       this.entityManager.removeEntity(this.currentEllipse);

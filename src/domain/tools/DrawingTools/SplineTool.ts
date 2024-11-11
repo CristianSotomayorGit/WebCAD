@@ -58,8 +58,8 @@ export class SplineTool extends AbstractDrawingTool {
     }
   }
 
-  public cancelDrawing(): void {
-    super.cancelDrawing();
+  public cancel(): void {
+    super.cancel();
 
     if (this.currentSpline) {
       // Remove the temporary point if it exists

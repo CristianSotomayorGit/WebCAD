@@ -5,12 +5,16 @@ interface ButtonToolbarProps {
   toolManagerRef: MutableRefObject<ToolManager | undefined>;
   setActiveToolName: (toolName: string) => void;
   setActiveColor: (color: Float32Array) => void;
+  setActiveFont: (fontName: string) => void;
+  setActiveFontSize: (fontSize: number) => void;
 }
 
 const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
   toolManagerRef,
   setActiveToolName,
   setActiveColor,
+  setActiveFont,
+  setActiveFontSize,
 }) => {
   const handleToolChange = (toolName: string) => {
     setActiveToolName(toolName);
@@ -28,6 +32,16 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
     setActiveColor(newColor);
   };
 
+  const handleFontChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const fontName = event.target.value;
+    setActiveFont(fontName);
+  };
+
+  const handleFontSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fontSize = Math.max(10, Math.min(99, parseInt(event.target.value) || 12));
+    setActiveFontSize(fontSize);
+  };
+
   const tools = [
     { name: 'Point', icon: '/icons/point.svg' },
     { name: 'Line', icon: '/icons/line.svg' },
@@ -39,6 +53,7 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
     { name: 'Polygon', icon: '/icons/polygon.svg' },
     { name: 'Ellipse', icon: '/icons/ellipse.svg' },
     { name: 'Pan', icon: '/icons/pan.svg' },
+    { name: 'Text', icon: '/icons/text.svg' }
   ];
 
   return (
@@ -53,7 +68,28 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
           <img src={tool.icon} alt={`${tool.name} icon`} style={iconStyle} />
         </button>
       ))}
-      <input type="color" defaultValue="#00FFFF" style={colorPickerStyle} onChange={handleColorChange} title='Color'/>
+      <input type="color" defaultValue="#00FFFF" style={colorPickerStyle} onChange={handleColorChange} title="Color" />
+
+      <input
+        type="number"
+        style={fontSizeInputStyle}
+        title="Font Size"
+        onChange={handleFontSizeChange}
+        min="10"
+        max="99"
+        defaultValue="12"
+      />
+
+      <select style={fontPickerStyle} title="Font" onChange={handleFontChange}>
+        <option value="Arial">Arial</option>
+        <option value="Helvetica">Helvetica</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Palatino">Palatino</option>
+        <option value="Garamond">Garamond</option>
+      </select>
     </div>
   );
 };
@@ -72,7 +108,7 @@ const toolbarStyle: React.CSSProperties = {
   alignItems: 'center',
   padding: '8px',
   fontSize: '16px',
-  gap: '2px', // Reduced gap for more compact horizontal spacing
+  gap: '2px',
   boxSizing: 'border-box',
   zIndex: 1000,
 };
@@ -104,6 +140,34 @@ const colorPickerStyle: React.CSSProperties = {
   padding: 0,
   gridColumn: 'span 2',
   justifySelf: 'center',
+};
+
+const fontSizeInputStyle: React.CSSProperties = {
+  width: '80px',
+  height: '25px',
+  backgroundColor: '#34495e',
+  border: 'none',
+  color: '#ecf0f1',
+  fontSize: '14px',
+  cursor: 'pointer',
+  gridColumn: 'span 2',
+  justifySelf: 'center',
+  textAlign: 'center',
+  borderRadius: '4px',
+};
+
+const fontPickerStyle: React.CSSProperties = {
+  width: '80px',
+  height: '25px',
+  backgroundColor: '#34495e',
+  border: 'none',
+  color: '#ecf0f1',
+  fontSize: '14px',
+  cursor: 'pointer',
+  gridColumn: 'span 2',
+  justifySelf: 'center',
+  textAlign: 'center',
+  borderRadius: '4px',
 };
 
 export default ButtonToolbar;

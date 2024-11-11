@@ -1,11 +1,11 @@
 // src/domain/tools/AbstractDrawingTool.ts
 
-import { DrawingTool } from './DrawingTool';
+import { Tool } from './DrawingTool';
 import { Renderer } from '../../../infrastructure/rendering/Renderer';
 import { EntityManager } from '../../managers/EntityManager';
 import { Point } from '../../entities/Point';
 
-export abstract class AbstractDrawingTool implements DrawingTool {
+export abstract class AbstractDrawingTool implements Tool {
     protected renderer: Renderer;
     protected entityManager: EntityManager;
     protected isDrawing: boolean = false;
@@ -17,7 +17,7 @@ export abstract class AbstractDrawingTool implements DrawingTool {
         this.renderer = renderer;
     }
 
-    public abstract onLeftClick(event: MouseEvent, color: Float32Array): void;
+    public abstract onLeftClick(event: MouseEvent, color: Float32Array, font?: string, fontSize?: number): void;
 
     public onMouseMove(event: MouseEvent): void {
         event
@@ -29,7 +29,7 @@ export abstract class AbstractDrawingTool implements DrawingTool {
 
     public onKeyDown(event: KeyboardEvent): void {
         if (event.key === 'Escape') {
-            this.cancelDrawing();
+            this.cancel();
         }
     }
 
@@ -54,7 +54,7 @@ export abstract class AbstractDrawingTool implements DrawingTool {
         this.points = [];
     }
 
-    public cancelDrawing(): void {
+    public cancel(): void {
         this.isDrawing = false;
         this.clickCount = 0;
         // this.removePoints();
