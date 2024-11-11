@@ -90,10 +90,10 @@ const WebGPUCanvas: React.FC = () => {
 
       if (activeTool instanceof AbstractDrawingTool)
         activeTool?.onLeftClick(event, activeColorRef.current);
-      
+
       if (activeTool instanceof AbstractWritingTool)
         activeTool?.onLeftClick(event, activeColorRef.current, activeFontRef.current, activeFontSizeRef.current);
-    
+
       if (activeTool instanceof PanTool)
         activeTool.onLeftClick(event);
     }
@@ -149,6 +149,52 @@ const WebGPUCanvas: React.FC = () => {
             {initializationError && (
               <>
                 <p style={errorStyle}>{initializationError}</p>
+
+                <ul style={troubleshootingListStyle}>
+                  <li>
+                    <strong>Use Firefox Nightly:</strong>
+                    <p>
+                      Firefox Nightly is the preferred browser of the OtterCAD dev team and offers the latest WebGPU features.
+                      Ensure you’re running the latest version and that WebGPU is enabled in the browser settings.
+                    </p>
+                  </li>
+                  <li>
+                    <strong>Update Other Browsers:</strong>
+                    <p>
+                      Use the newest versions of <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong>.
+                      Make sure to enable WebGPU in their experimental flags or settings to ensure proper functionality.
+                    </p>
+                  </li>
+                  <li>
+                    <strong>Check Graphics Drivers:</strong>
+                    <p>
+                      Ensure your graphics drivers are up to date. Outdated drivers can prevent WebGPU from functioning correctly
+                      and may cause compatibility issues.
+                    </p>
+                  </li>
+                  <li>
+                    <strong>Verify Hardware Compatibility:</strong>
+                    <p>
+                      Some older or integrated graphics cards might not support WebGPU. Verify that your hardware meets the necessary
+                      requirements for WebGPU support.
+                    </p>
+                  </li>
+                  <li>
+                    <strong>Avoid Virtual Environments:</strong>
+                    <p>
+                      Running OtterCAD in virtual machines or environments with disabled hardware acceleration can block WebGPU support.
+                      Use a native environment with hardware acceleration enabled for the best experience.
+                    </p>
+                  </li>
+                  <li>
+                    <strong>Contact Us on LinkedIn:</strong>
+                    <p>
+                      If you continue to experience issues, feel free to reach out for support on{' '}
+                      <a href="https://www.linkedin.com/in/cristian-sotomayor/" style={linkStyle} target="_blank" rel="noopener noreferrer">LinkedIn</a>.
+                    </p>
+                  </li>
+                </ul>
+
               </>
             )}
             {!initializationError && (
@@ -254,6 +300,22 @@ const popupDescriptionStyle: React.CSSProperties = {
 const errorStyle: React.CSSProperties = {
   color: 'red',
   marginBottom: '20px',
+};
+
+const troubleshootingListStyle: React.CSSProperties = {
+  listStyleType: 'disc',
+  paddingLeft: '20px',
+  textAlign: 'left',
+  marginBottom: '20px',
+  backgroundColor: '#c0392b', // Aesthetic red background
+  color: '#ecf0f1', // White text
+  padding: '20px',
+  borderRadius: '4px',
+};
+
+const linkStyle: React.CSSProperties = {
+  color: '#ffdddd', // Light red for links
+  textDecoration: 'underline',
 };
 
 const popupButtonStyle: React.CSSProperties = {
