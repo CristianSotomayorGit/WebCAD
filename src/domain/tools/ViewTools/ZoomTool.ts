@@ -15,6 +15,7 @@ export class ZoomTool  {
     event.preventDefault();
     const delta = event.deltaY > 0 ? 1 / this.ZOOM_FACTOR : this.ZOOM_FACTOR;
     const newZoom = this.camera.getZoom() * delta;
+    console.log(newZoom)
     this.camera.setZoom(newZoom);
   }
 }
