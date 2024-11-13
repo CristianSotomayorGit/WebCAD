@@ -1,99 +1,52 @@
 // src/domain/entities/Grid.ts
 
-import { RenderableEntity } from './RenderableEntity';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
-import { GridShader } from '../../shaders/GridShader'; // Ensure you have GridShader implemented
+import { EntityManager } from '../managers/EntityManager';
+import { Line } from './Line';
+import { Point } from './Point';
 
-export class Grid extends RenderableEntity {
-  private vertexBuffer!: GPUBuffer;
-  private vertexCount!: number;
+const GridSettings = {
+  MAJOR_LINE_COLOR: new Float32Array([0.2, 0.2, 0.2, 1.0]),
+  MINOR_LINE_COLOR: new Float32Array([0.35, 0.35, 0.35, 1.0]),
+  NUMBER_OF_LINES: 501,
+  WORLD_COORDINATE_RANGE_START: -10,
+  WORLD_COORDINATE_RANGE_END: 10,
+}
 
-  constructor(renderer: Renderer) {
-    super(renderer);
-    this.createFullscreenQuad();
+export class Grid {
+  lines: Line[] = [];
+  renderer: Renderer;
+  entityManager: EntityManager
+
+  constructor(renderer: Renderer, entityManager: EntityManager) {
+    this.renderer = renderer;
+    this.entityManager = entityManager;
+    this.generateGrid();
   }
 
-  protected setupPipeline(): void {
-    const vertexShaderModule = this.device.createShaderModule({
-      code: GridShader.VERTEX,
-    });
+  generateGrid() {
+    const step = (GridSettings.WORLD_COORDINATE_RANGE_END - GridSettings.WORLD_COORDINATE_RANGE_START) / (GridSettings.NUMBER_OF_LINES - 1);
 
-    const fragmentShaderModule = this.device.createShaderModule({
-      code: GridShader.FRAGMENT,
-    });
-
-    const bindGroupLayout = this.device.createBindGroupLayout({
-      entries: [
-        {
-          binding: 0,
-          visibility: GPUShaderStage.VERTEX,
-          buffer: { type: 'uniform' },
-        },
-        {
-          binding: 1,
-          visibility: GPUShaderStage.FRAGMENT,
-          buffer: { type: 'uniform' },
-        },
-      ],
-    });
-
-    const pipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [bindGroupLayout],
-    });
-
-    this.pipeline = this.device.createRenderPipeline({
-      layout: pipelineLayout,
-      vertex: {
-        module: vertexShaderModule,
-        entryPoint: 'main',
-        buffers: [
-          {
-            arrayStride: 2 * 4,
-            attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x2' }],
-          },
-        ],
-      },
-      fragment: {
-        module: fragmentShaderModule,
-        entryPoint: 'main',
-        targets: [{ format: this.renderer.getFormat() }],
-      },
-      primitive: { topology: 'triangle-list' },
-    });
-  }
-
-  private createFullscreenQuad(): void {
-    const vertices = new Float32Array([
-      -1.0, -1.0,
-      1.0, -1.0,
-      -1.0, 1.0,
-      -1.0, 1.0,
-      1.0, -1.0,
-      1.0, 1.0,
-    ]);
-    this.vertexCount = vertices.length / 2;
-
-    this.vertexBuffer = this.device.createBuffer({
-      size: vertices.byteLength,
-      usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-    });
-
-    this.device.queue.writeBuffer(this.vertexBuffer, 0, vertices);
-  }
-
-  public override draw(renderPass: GPURenderPassEncoder): void {
-    this.updateCameraBuffer();
-    renderPass.setPipeline(this.pipeline);
-    renderPass.setBindGroup(0, this.bindGroup);
-    renderPass.setVertexBuffer(0, this.vertexBuffer);
-    renderPass.draw(this.vertexCount);
-  }
-
-  public override dispose(): void {
-    if (this.vertexBuffer) {
-      this.vertexBuffer.destroy();
-      this.vertexBuffer = null as any;
+    for (let i = 0; i < GridSettings.NUMBER_OF_LINES; i++) {
+      const x = GridSettings.WORLD_COORDINATE_RANGE_START + i * step;
+      let line = new Line(new Point(x, GridSettings.WORLD_COORDINATE_RANGE_END, this.renderer), new Point(x, GridSettings.WORLD_COORDINATE_RANGE_START, this.renderer), this.renderer);
+      if (i % 5 === 0) line.setColor(GridSettings.MINOR_LINE_COLOR);
+      else line.setColor(GridSettings.MAJOR_LINE_COLOR);
+      this.lines.push(line);
     }
-    super.dispose();
+
+    for (let i = 0; i < GridSettings.NUMBER_OF_LINES; i++) {
+      const y = GridSettings.WORLD_COORDINATE_RANGE_START + i * step;
+      let line = new Line(new Point(GridSettings.WORLD_COORDINATE_RANGE_START, y, this.renderer), new Point(GridSettings.WORLD_COORDINATE_RANGE_END, y, this.renderer), this.renderer);
+      if (i % 5 === 0) line.setColor(GridSettings.MINOR_LINE_COLOR);
+      else line.setColor(GridSettings.MAJOR_LINE_COLOR)
+      this.lines.push(line);
+    }
+  }
+
+  draw(renderPass: GPURenderPassEncoder) {
+    for (let line of this.lines) {
+      line.draw(renderPass)
+    }
   }
 }

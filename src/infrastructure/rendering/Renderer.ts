@@ -1,12 +1,13 @@
 import { EntityManager } from '../../domain/managers/EntityManager';
 import { Camera } from '../../domain/Camera';
-import { GridShader } from '../../shaders/GridShader';
-import { Point } from '../../domain/entities/Point';
+import { Grid } from '../../domain/entities/Grid';
+
 
 export class Renderer {
   private device!: GPUDevice;
   private context!: GPUCanvasContext;
   private format!: GPUTextureFormat;
+  private grid!: Grid;
 
   private gridPipeline!: GPURenderPipeline;
 
@@ -14,10 +15,11 @@ export class Renderer {
   private cameraBuffer!: GPUBuffer;
   private colorBuffer!: GPUBuffer;
   private camera: Camera;
+  
   // private grid!: Grid;
 
   constructor(
-    private canvas: HTMLCanvasElement,
+    public canvas: HTMLCanvasElement,
     private entityManager: EntityManager
   ) {
     this.camera = new Camera();
@@ -55,11 +57,12 @@ export class Renderer {
       throw new Error('Failed to get preferred canvas format.');
     }
 
-    // The context will be configured in resizeCanvas()
-    this.setupPipelines();
-    this.setupBuffers();
 
-    // this.grid = new Grid(this); // Initialize grid after device is ready
+    // The context will be configured in resizeCanvas()
+    // this.setupPipelines();
+    // this.setupBuffers();
+
+    this.grid = new Grid(this, this.entityManager); // Initialize grid after device is ready
   }
 
   public resizeCanvas() {
@@ -88,6 +91,7 @@ export class Renderer {
 
       // Reconfigure the context with the new size
       this.configureContext();
+
     }
   }
 
@@ -99,115 +103,115 @@ export class Renderer {
     });
   }
 
-  private setupPipelines() {
-    // Grid Pipeline
-    const gridVertexShaderModule = this.device.createShaderModule({
-      code: GridShader.VERTEX,
-    });
+  // private setupPipelines() {
+  //   // Grid Pipeline
+  //   const gridVertexShaderModule = this.device.createShaderModule({
+  //     code: GridShader.VERTEX,
+  //   });
 
-    const gridFragmentShaderModule = this.device.createShaderModule({
-      code: GridShader.FRAGMENT,
-    });
+  //   const gridFragmentShaderModule = this.device.createShaderModule({
+  //     code: GridShader.FRAGMENT,
+  //   });
 
-    const bindGroupLayout = this.device.createBindGroupLayout({
-      entries: [
-        {
-          binding: 0,
-          visibility: GPUShaderStage.VERTEX, // Visibility for camera buffer
-          buffer: {
-            type: 'uniform',
-          },
-        },
-        {
-          binding: 1,
-          visibility: GPUShaderStage.FRAGMENT, // Visibility for color buffer
-          buffer: {
-            type: 'uniform',
-          },
-        },
-      ],
-    });
+  //   const bindGroupLayout = this.device.createBindGroupLayout({
+  //     entries: [
+  //       {
+  //         binding: 0,
+  //         visibility: GPUShaderStage.VERTEX, // Visibility for camera buffer
+  //         buffer: {
+  //           type: 'uniform',
+  //         },
+  //       },
+  //       {
+  //         binding: 1,
+  //         visibility: GPUShaderStage.FRAGMENT, // Visibility for color buffer
+  //         buffer: {
+  //           type: 'uniform',
+  //         },
+  //       },
+  //     ],
+  //   });
 
-    const gridPipelineLayout = this.device.createPipelineLayout({
-      bindGroupLayouts: [bindGroupLayout],
-    });
+  //   const gridPipelineLayout = this.device.createPipelineLayout({
+  //     bindGroupLayouts: [bindGroupLayout],
+  //   });
 
-    this.gridPipeline = this.device.createRenderPipeline({
-      layout: gridPipelineLayout,
-      vertex: {
-        module: gridVertexShaderModule,
-        entryPoint: 'main',
-        buffers: [
-          {
-            arrayStride: 2 * 4, // 2 floats (x, y)
-            attributes: [
-              {
-                shaderLocation: 0,
-                offset: 0,
-                format: 'float32x2',
-              },
-            ],
-          },
-        ],
-      },
-      fragment: {
-        module: gridFragmentShaderModule,
-        entryPoint: 'main',
-        targets: [
-          {
-            format: this.format,
-          },
-        ],
-      },
-      primitive: {
-        topology: 'triangle-list',
-      },
-    });
+  //   this.gridPipeline = this.device.createRenderPipeline({
+  //     layout: gridPipelineLayout,
+  //     vertex: {
+  //       module: gridVertexShaderModule,
+  //       entryPoint: 'main',
+  //       buffers: [
+  //         {
+  //           arrayStride: 2 * 4, // 2 floats (x, y)
+  //           attributes: [
+  //             {
+  //               shaderLocation: 0,
+  //               offset: 0,
+  //               format: 'float32x2',
+  //             },
+  //           ],
+  //         },
+  //       ],
+  //     },
+  //     fragment: {
+  //       module: gridFragmentShaderModule,
+  //       entryPoint: 'main',
+  //       targets: [
+  //         {
+  //           format: this.format,
+  //         },
+  //       ],
+  //     },
+  //     primitive: {
+  //       topology: 'triangle-list',
+  //     },
+  //   });
 
 
-    // Grid Pipeline
-    // const gridVertexShaderModule = this.device.createShaderModule({
-    //   code: GridShader.VERTEX,
-    // });
+  //   // Grid Pipeline
+  //   // const gridVertexShaderModule = this.device.createShaderModule({
+  //   //   code: GridShader.VERTEX,
+  //   // });
 
-    // const gridFragmentShaderModule = this.device.createShaderModule({
-    //   code: GridShader.FRAGMENT,
-    // });
+  //   // const gridFragmentShaderModule = this.device.createShaderModule({
+  //   //   code: GridShader.FRAGMENT,
+  //   // });
 
-    // const bindGroupLayout = this.createBindGroupLayout();
+  //   // const bindGroupLayout = this.createBindGroupLayout();
 
-    // const gridPipelineLayout = this.device.createPipelineLayout({
-    //   bindGroupLayouts: [bindGroupLayout],
-    // });
+  //   // const gridPipelineLayout = this.device.createPipelineLayout({
+  //   //   bindGroupLayouts: [bindGroupLayout],
+  //   // });
 
-    // this.gridPipeline = this.device.createRenderPipeline({
-    //   layout: gridPipelineLayout,
-    //   vertex: {
-    //     module: gridVertexShaderModule,
-    //     entryPoint: 'main',
-    //     buffers: [
-    //       {
-    //         arrayStride: 8,
-    //         attributes: [
-    //           {
-    //             shaderLocation: 0,
-    //             offset: 0,
-    //             format: 'float32x2',
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //   },
-    //   fragment: {
-    //     module: gridFragmentShaderModule,
-    //     entryPoint: 'main',
-    //     targets: [{ format: this.format }],
-    //   },
-    //   primitive: {
-    //     topology: 'line-list',
-    //   },
-    // });
-  }
+  //   // this.gridPipeline = this.device.createRenderPipeline({
+  //   //   layout: gridPipelineLayout,
+  //   //   vertex: {
+  //   //     module: gridVertexShaderModule,
+  //   //     entryPoint: 'main',
+  //   //     buffers: [
+  //   //       {
+  //   //         arrayStride: 8,
+  //   //         attributes: [
+  //   //           {
+  //   //             shaderLocation: 0,
+  //   //             offset: 0,
+  //   //             format: 'float32x2',
+  //   //           },
+  //   //         ],
+  //   //       },
+  //   //     ],
+  //   //   },
+  //   //   fragment: {
+  //   //     module: gridFragmentShaderModule,
+  //   //     entryPoint: 'main',
+  //   //     targets: [{ format: this.format }],
+  //   //   },
+  //   //   primitive: {
+  //   //     topology: 'line-list',
+  //   //   },
+  //   // });
+  // }
 
 
   // private createBindGroupLayout(): GPUBindGroupLayout {
@@ -222,42 +226,42 @@ export class Renderer {
   //   });
   // }
 
-  private setupBuffers() {
-    const cameraData = new Float32Array([0, 0, 1, 0]);//-4 1 1 
-    const initialColor = new Float32Array([1.0, 0.0, 0.0, 1.0])
-    // const cameraData = new Float32Array([-1,1, 1, 0]);//-4 1 1 
+  // private setupBuffers() {
+  //   const cameraData = new Float32Array([0, 0, 1, 0]);//-4 1 1 
+  //   const initialColor = new Float32Array([1.0, 0.0, 0.0, 1.0])
+  //   // const cameraData = new Float32Array([-1,1, 1, 0]);//-4 1 1 
 
-    this.cameraBuffer = this.device.createBuffer({
-      size: cameraData.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+  //   this.cameraBuffer = this.device.createBuffer({
+  //     size: cameraData.byteLength,
+  //     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+  //   });
 
-    this.colorBuffer = this.device.createBuffer({
-      size: initialColor.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+  //   this.colorBuffer = this.device.createBuffer({
+  //     size: initialColor.byteLength,
+  //     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+  //   });
 
-    this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
-    this.device.queue.writeBuffer(this.colorBuffer, 0, initialColor);
+  //   this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
+  //   this.device.queue.writeBuffer(this.colorBuffer, 0, initialColor);
 
-    return this.device.createBindGroup({
-      layout: this.gridPipeline.getBindGroupLayout(0),
-      entries: [
-        {
-          binding: 0,
-          resource: {
-            buffer: this.cameraBuffer,
-          },
-        },
-        {
-          binding: 1, // Assuming colorBuffer is the second binding
-          resource: {
-            buffer: this.colorBuffer, // Add the color buffer
-          },
-        },
-      ],
-    });
-  }
+  //   return this.device.createBindGroup({
+  //     layout: this.gridPipeline.getBindGroupLayout(0),
+  //     entries: [
+  //       {
+  //         binding: 0,
+  //         resource: {
+  //           buffer: this.cameraBuffer,
+  //         },
+  //       },
+  //       {
+  //         binding: 1, // Assuming colorBuffer is the second binding
+  //         resource: {
+  //           buffer: this.colorBuffer, // Add the color buffer
+  //         },
+  //       },
+  //     ],
+  //   });
+  // }
 
   public updateCameraBuffer() {
     const { x, y } = this.camera.getOffset();
@@ -330,13 +334,15 @@ export class Renderer {
   public render() {
     if (!this.device) throw new Error('Device not yet initialized')
 
-    this.updateCameraBuffer();
+    // this.updateCameraBuffer();
 
     const commandEncoder = this.device.createCommandEncoder();
     if (!commandEncoder) throw new Error('Failed to create command encoder')
 
     const textureView = this.context.getCurrentTexture().createView();
     if (!textureView) throw new Error('Failed to get current texture')
+
+    // this.grid.updateUniforms({ x: this.camera.getOffset().x, y:this.camera.getOffset().y }, this.camera.getZoom(), 0);
 
     const renderPass = commandEncoder.beginRenderPass({
       colorAttachments: [
@@ -368,11 +374,13 @@ export class Renderer {
     //   }
     // });
 
+    // this.grid.draw(commandEncoder, textureView);
+
+    this.grid.draw(renderPass);
+
     tempEntities.forEach((entity) => {
       entity.draw(renderPass);
     });
-
-
 
     // entities.forEach((entity) => {
     //   if (entity instanceof Polyline) {
