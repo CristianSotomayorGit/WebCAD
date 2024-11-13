@@ -12,12 +12,22 @@ Additional Drawing Tools
 2. Arc and Ellipse Tools
 
     *Arc Tool: Provides the ability to draw arcs by specifying start point, end point, and radius or angle.
-    Ellipse Tool: Allows drawing ellipses by specifying the major and minor axes.
+    *Ellipse Tool: Allows drawing ellipses by specifying the major and minor axes.
 
 3. Text and Annotation Tools
 
-    Text Tool: Enables adding text annotations to drawings with options for font style, size, and alignment.
+    *Text Tool: Enables adding text annotations to drawings with options for font style, size, and alignment.
     Multiline Text (MTEXT): Supports paragraphs of text with formatting options.
+
+3. Import/Export Capabilities
+
+    File Formats: Supports common file formats like 
+    DXF, 
+    DWG, 
+    PDF, 
+    SVG.
+    
+    Export Options: Allows exporting drawings for use in other applications.
 
 4. Dimensioning Tools
 
