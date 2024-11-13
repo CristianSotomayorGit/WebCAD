@@ -37,9 +37,6 @@ export abstract class AbstractDrawingTool implements Tool {
         const canvasRect = this.renderer.getCanvas().getBoundingClientRect();
         const screenX = event.clientX - canvasRect.left;
         const screenY = event.clientY - canvasRect.top;
-
-        console.log('event', event.clientX, event.clientY)
-        console.log(this.renderer.screenToWorld(screenX, screenY));
         return this.renderer.screenToWorld(screenX, screenY);
     }
 
@@ -60,7 +57,5 @@ export abstract class AbstractDrawingTool implements Tool {
     public cancel(): void {
         this.isDrawing = false;
         this.clickCount = 0;
-        // this.removePoints();
-        // Additional cleanup in subclasses if needed
     }
 }
