@@ -2,127 +2,51 @@
 
 import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { EntityManager } from '../managers/EntityManager';
-import { ZoomTool } from '../tools/ViewTools/ZoomTool';
-import { Entity } from './Entity';
 import { Line } from './Line';
 import { Point } from './Point';
+
+const GridSettings = {
+  MAJOR_LINE_COLOR: new Float32Array([0.2, 0.2, 0.2, 1.0]),
+  MINOR_LINE_COLOR: new Float32Array([0.35, 0.35, 0.35, 1.0]),
+  NUMBER_OF_LINES: 501,
+  WORLD_COORDINATE_RANGE_START: -10,
+  WORLD_COORDINATE_RANGE_END: 10,
+}
 
 export class Grid {
   lines: Line[] = [];
   renderer: Renderer;
-  previousZoom: number;
   entityManager: EntityManager
 
   constructor(renderer: Renderer, entityManager: EntityManager) {
     this.renderer = renderer;
     this.entityManager = entityManager;
-    this.previousZoom = renderer.getCamera().getZoom();
-
-    const rangeStart = -2.0;
-    const rangeEnd = 2.0;
-    const numLines = 41; // 41 lines from -2 to 2
-
-    const step = (rangeEnd - rangeStart) / (numLines - 1); // Calculate step for each line
-
-    // Vertical lines
-    for (let i = 0; i < numLines; i++) {
-      const x = rangeStart + i * step;
-      this.lines.push(new Line(new Point(x, rangeEnd, renderer), new Point(x, rangeStart, renderer), renderer));
-    }
-
-    // Horizontal lines
-    for (let i = 0; i < numLines; i++) {
-      const y = rangeStart + i * step;
-      this.lines.push(new Line(new Point(rangeStart, y, renderer), new Point(rangeEnd, y, renderer), renderer));
-    }
-
-    for (let line of this.lines) {
-      entityManager.addEntity(line);
-    }
+    this.generateGrid();
   }
 
-  hasZoomDoubled(currentZoom: number): Boolean {
-    if (currentZoom % 2 == 0) return true;
-    return false;
+  generateGrid() {
+    const step = (GridSettings.WORLD_COORDINATE_RANGE_END - GridSettings.WORLD_COORDINATE_RANGE_START) / (GridSettings.NUMBER_OF_LINES - 1);
+
+    for (let i = 0; i < GridSettings.NUMBER_OF_LINES; i++) {
+      const x = GridSettings.WORLD_COORDINATE_RANGE_START + i * step;
+      let line = new Line(new Point(x, GridSettings.WORLD_COORDINATE_RANGE_END, this.renderer), new Point(x, GridSettings.WORLD_COORDINATE_RANGE_START, this.renderer), this.renderer);
+      if (i % 5 === 0) line.setColor(GridSettings.MINOR_LINE_COLOR);
+      else line.setColor(GridSettings.MAJOR_LINE_COLOR);
+      this.lines.push(line);
+    }
+
+    for (let i = 0; i < GridSettings.NUMBER_OF_LINES; i++) {
+      const y = GridSettings.WORLD_COORDINATE_RANGE_START + i * step;
+      let line = new Line(new Point(GridSettings.WORLD_COORDINATE_RANGE_START, y, this.renderer), new Point(GridSettings.WORLD_COORDINATE_RANGE_END, y, this.renderer), this.renderer);
+      if (i % 5 === 0) line.setColor(GridSettings.MINOR_LINE_COLOR);
+      else line.setColor(GridSettings.MAJOR_LINE_COLOR)
+      this.lines.push(line);
+    }
   }
-
-  hasZoomHalved() {
-
-  }
-
-  generateGrid(zoomFactor: number) {
-    let regenLines = [];
-
-    const rangeStart = -2.0 / zoomFactor;
-    const rangeEnd = 2.0 / zoomFactor;
-
-    const numLines = 41;
-    const step = (rangeEnd - rangeStart) / (numLines - 1); // Calculate step for each line
-
-    // Vertical lines
-    for (let i = 0; i < numLines; i++) {
-      const x = rangeStart + i * step;
-      regenLines.push(new Line(new Point(x, rangeEnd, this.renderer), new Point(x, rangeStart, this.renderer), this.renderer));
-    }
-
-    // Horizontal lines
-    for (let i = 0; i < numLines; i++) {
-      const y = rangeStart + i * step;
-      regenLines.push(new Line(new Point(rangeStart, y, this.renderer), new Point(rangeEnd, y, this.renderer), this.renderer));
-    }
-
-    for (let line of this.lines) {
-      this.entityManager.removeEntity(line)
-    }
-
-    for (let line of regenLines) {
-      this.entityManager.addEntity(line);
-    }
-
-    this.lines = regenLines;
-  }
-
 
   draw(renderPass: GPURenderPassEncoder) {
-    let currentZoom = this.renderer.getCamera().getZoom();
-
-    let previousRoundedZoom = Math.floor(this.previousZoom) 
-    let currenRoundedZoom = Math.floor(currentZoom)
-
-    if (previousRoundedZoom !== currenRoundedZoom) {
-      // console.log('yooooooo')
-      if (currenRoundedZoom  %  2 === 0) {
-
-        console.log('yooooooooooooo')
-
-        this.generateGrid(currentZoom);
-      //   this.previousZoom == currenRoundedZoom;
-       }
-      this.previousZoom = currentZoom;
-    }
-
-
     for (let line of this.lines) {
       line.draw(renderPass)
     }
-  }
-
-  private checkZoomDoubled(): Boolean {
-    const currentZoom = this.renderer.getCamera().getZoom();
-
-    // Calculate the logarithm of the current zoom to the base 2
-    const logZoom = Math.log2(currentZoom);
-
-    // Round the logZoom to avoid floating point precision issues
-    const roundedLogZoom = Math.round(logZoom);
-
-    // Check if the zoom has doubled by comparing it to the previous rounded logZoom
-    if (roundedLogZoom > Math.round(Math.log2(this.previousZoom))) {
-      // this.createGrid();  // Regenerate the grid if zoom has doubled
-      this.previousZoom = currentZoom;  // Update the previous zoom to the current zoom
-      return true;
-    }
-
-    return false;
   }
 }
