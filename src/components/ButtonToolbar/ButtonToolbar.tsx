@@ -1,13 +1,17 @@
-import React, { MutableRefObject } from 'react';
+import React from 'react';
 import { ToolManager } from '../../domain/managers/ToolManager';
 import styles from './ButtonToolbar.module.css';
 
 interface ButtonToolbarProps {
-  toolManagerRef: MutableRefObject<ToolManager | undefined>;
+  toolManagerRef: React.MutableRefObject<ToolManager | null>;
   setActiveToolName: (toolName: string) => void;
   setActiveColor: (color: Float32Array) => void;
   setActiveFont: (fontName: string) => void;
   setActiveFontSize: (fontSize: number) => void;
+  activeToolName: string; // To reflect active tool for UI
+  activeColor: Float32Array; // To reflect active color for UI
+  activeFont: string; // To reflect active font for UI
+  activeFontSize: number; // To reflect active font size for UI
 }
 
 const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
@@ -16,7 +20,12 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
   setActiveColor,
   setActiveFont,
   setActiveFontSize,
+  activeToolName,
+  activeColor,
+  activeFont,
+  activeFontSize,
 }) => {
+
   const handleToolChange = (toolName: string) => {
     setActiveToolName(toolName);
     toolManagerRef.current?.setActiveTool(toolName);
@@ -62,26 +71,35 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
       {tools.map((tool) => (
         <button
           key={tool.name}
-          className={styles.buttonStyle}
+          className={`${styles.buttonStyle} ${activeToolName === tool.name ? styles.activeTool : ''}`}
           onClick={() => handleToolChange(tool.name)}
           title={tool.name}
         >
           <img src={tool.icon} alt={`${tool.name} icon`} className={styles.iconStyle} />
         </button>
       ))}
-      <input type="color" defaultValue="#00FFFF" className={styles.colorPickerStyle} onChange={handleColorChange} title="Color" />
-
+      <input
+        type="color"
+        value={`#${((1 << 24) | (Math.round(activeColor[0] * 255) << 16) | (Math.round(activeColor[1] * 255) << 8) | Math.round(activeColor[2] * 255)).toString(16).slice(1)}`}
+        className={styles.colorPickerStyle}
+        onChange={handleColorChange}
+        title="Color"
+      />
       <input
         type="number"
         className={styles.fontSizeInputStyle}
+        value={activeFontSize}
         title="Font Size"
         onChange={handleFontSizeChange}
         min="10"
         max="99"
-        defaultValue="12"
       />
-
-      <select className={styles.fontPickerStyle} title="Font" onChange={handleFontChange}>
+      <select
+        className={styles.fontPickerStyle}
+        value={activeFont}
+        title="Font"
+        onChange={handleFontChange}
+      >
         <option value="Arial">Arial</option>
         <option value="Helvetica">Helvetica</option>
         <option value="Times New Roman">Times New Roman</option>
