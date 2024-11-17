@@ -16,9 +16,13 @@ export type Font = {
   name: string;
 }
 
-const WebGPUCanvas: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rendererRef = useRef<Renderer>();
+interface WeGPUCanvasProps {
+  canvasRef: React.RefObject<HTMLCanvasElement>;
+  rendererRef: Renderer;
+}
+
+const WebGPUCanvas: React.FC<WeGPUCanvasProps> = ({canvasRef, rendererRef}) => {
+  // const rendererRef = useRef<Renderer>();
   const entityManagerRef = useRef(new EntityManager());
   const toolManagerRef = useRef<ToolManager>();
   const activeColorRef = useRef<Float32Array>(new Float32Array([0.0, 1.0, 1.0, 1.0])); // Default cyan color
@@ -48,16 +52,16 @@ const WebGPUCanvas: React.FC = () => {
 
     const initRenderer = async () => {
       if (canvasRef.current) {
-        rendererRef.current = new Renderer(canvasRef.current, entityManagerRef.current);
+        // rendererRef.current = new Renderer(canvasRef.current, entityManagerRef.current);
 
         try {
-          await rendererRef.current.initialize();
+          // await rendererRef.current.initialize();
         } catch (error) {
           console.error('Error during WebGPU initialization', error);
           setInitializationError(error instanceof Error ? error.message : String(error));
         }
 
-        toolManagerRef.current = new ToolManager(entityManagerRef.current, rendererRef.current);
+        // toolManagerRef.current = new ToolManager(entityManagerRef.current, rendererRef.current);
 
         canvasRef.current.addEventListener('mousedown', handleMouseDown);
         canvasRef.current.addEventListener('mousemove', handleMouseMove);
@@ -73,7 +77,7 @@ const WebGPUCanvas: React.FC = () => {
       document.body.style.overflow = 'auto';
 
       if (rendererRef.current) {
-        rendererRef.current.dispose();
+        // rendererRef.current.dispose();
       }
       if (canvasRef.current) {
         canvasRef.current.removeEventListener('mousedown', handleMouseDown);

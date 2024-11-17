@@ -2,13 +2,13 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import WebGPUCanvas from './components/WebGPUCanvas/WebGPUCanvas';
+import Desk from './components/Desk/Desk';
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<WebGPUCanvas />} />
+        <Route path="/" element={<Desk />} />
       </Routes>
     </Router>
   );
