@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import WebGPUCanvas from './components/WebGPUCanvas';
+import WebGPUCanvas from './components/WebGPUCanvas/WebGPUCanvas';
 
 const App: React.FC = () => {
   return (

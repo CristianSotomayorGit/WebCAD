@@ -1,14 +1,15 @@
 // src/components/WebGPUCanvas.tsx
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Renderer } from '../infrastructure/rendering/Renderer';
-import { EntityManager } from '../domain/managers/EntityManager';
-import { ToolManager } from '../domain/managers/ToolManager';
-import CommandToolbar from './CommandToolbar';
-import ButtonToolbar from './ButtonToolbar';
-import { AbstractWritingTool } from '../domain/tools/WritingTools/AbstractWritingTool';
-import { AbstractDrawingTool } from '../domain/tools/DrawingTools/AbstractDrawingTool';
-import { PanTool } from '../domain/tools/ViewTools/PanTool';
+import { Renderer } from '../../infrastructure/rendering/Renderer';
+import { EntityManager } from '../../domain/managers/EntityManager';
+import { ToolManager } from '../../domain/managers/ToolManager';
+import CommandToolbar from '../CommandToolbar/CommandToolbar';
+import ButtonToolbar from '../ButtonToolbar/ButtonToolbar';
+import { AbstractWritingTool } from '../../domain/tools/WritingTools/AbstractWritingTool';
+import { AbstractDrawingTool } from '../../domain/tools/DrawingTools/AbstractDrawingTool';
+import { PanTool } from '../../domain/tools/ViewTools/PanTool';
+import styles from './WebGPUCanvas.module.css'
 
 export type Font = {
   size: string;
@@ -125,14 +126,14 @@ const WebGPUCanvas: React.FC = () => {
   return (
     <>
       {showPopup && (
-        <div style={overlayStyle}>
-          <div style={popupStyle}>
-            <div style={popupHeaderStyle}>
-              <img src="/OtterCAD_logo.png" alt="Logo" style={logoStyle} />
-              <h1 style={popupTitleStyle}>OtterCAD</h1>
+        <div className={styles.overlayStyle}>
+          <div className={styles.popupStyle}>
+            <div className={styles.popupHeaderStyle}>
+              <img src="/OtterCAD_logo.png" alt="Logo" className={styles.logoStyle} />
+              <h1 className={styles.popupTitleStyle}>OtterCAD</h1>
             </div>
-            <p style={popupVersionStyle}>Version: Alpha 0.0.3</p>
-            <p style={popupDescriptionStyle}>
+            <p className={styles.popupVersionStyle}>Version: Alpha 0.0.3</p>
+            <p className={styles.popupDescriptionStyle}>
               From the dev:
               <br />
               <br />
@@ -148,9 +149,9 @@ const WebGPUCanvas: React.FC = () => {
             </p>
             {initializationError && (
               <>
-                <p style={errorStyle}>{initializationError}</p>
+                <p className={styles.errorStyle}>{initializationError}</p>
 
-                <ul style={troubleshootingListStyle}>
+                <ul className={styles.troubleshootingListStyle}>
                   <li>
                     <strong>Use Firefox Nightly:</strong>
                     <p>
@@ -190,7 +191,7 @@ const WebGPUCanvas: React.FC = () => {
                     <strong>Contact Us on LinkedIn:</strong>
                     <p>
                       If you continue to experience issues, feel free to reach out for support on{' '}
-                      <a href="https://www.linkedin.com/in/cristian-sotomayor/" style={linkStyle} target="_blank" rel="noopener noreferrer">LinkedIn</a>.
+                      <a href="https://www.linkedin.com/in/cristian-sotomayor/" className={styles.linkStyle} target="_blank" rel="noopener noreferrer">LinkedIn</a>.
                     </p>
                   </li>
                 </ul>
@@ -198,7 +199,7 @@ const WebGPUCanvas: React.FC = () => {
               </>
             )}
             {!initializationError && (
-              <button onClick={() => setShowPopup(false)} style={popupButtonStyle}>
+              <button onClick={() => setShowPopup(false)} className={styles.popupButtonStyle}>
                 Launch App
               </button>
             )}
@@ -226,108 +227,11 @@ const WebGPUCanvas: React.FC = () => {
           activeFontSizeRef.current = fontSize;
         }}
       />
-      <canvas ref={canvasRef} style={canvasStyle} />
+      <canvas ref={canvasRef} className={styles.canvasStyle} />
     </>
   );
 };
 
-const canvasStyle: React.CSSProperties = {
-  display: 'block',
-  width: '100vw',
-  height: '100vh',
-  overflow: 'hidden',
-  cursor: 'url(/Crosshairs.svg) 40 40, crosshair',
-};
 
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  width: '100%',
-  height: '100%',
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 9999,
-};
-
-const popupStyle: React.CSSProperties = {
-  backgroundColor: '#2c3e50',
-  color: '#ecf0f1',
-  padding: '40px',
-  borderRadius: '8px',
-  textAlign: 'center',
-  maxWidth: '600px',
-  width: '90%',
-  maxHeight: '90vh',
-  overflowY: 'auto',
-};
-
-const popupHeaderStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginBottom: '20px',
-};
-
-const logoStyle: React.CSSProperties = {
-  width: '64px',
-  height: '64px',
-  marginRight: '20px',
-};
-
-const popupTitleStyle: React.CSSProperties = {
-  fontSize: '48px',
-  margin: 0,
-  fontFamily: 'Arial, sans-serif',
-};
-
-const popupVersionStyle: React.CSSProperties = {
-  fontSize: '24px',
-  marginBottom: '40px',
-};
-
-const popupDescriptionStyle: React.CSSProperties = {
-  fontSize: '18px',
-  marginBottom: '40px',
-  textAlign: 'left',
-  backgroundColor: '#212830',
-  padding: '20px',
-  borderRadius: '4px',
-};
-
-const errorStyle: React.CSSProperties = {
-  color: 'red',
-  marginBottom: '20px',
-};
-
-const troubleshootingListStyle: React.CSSProperties = {
-  listStyleType: 'disc',
-  paddingLeft: '20px',
-  textAlign: 'left',
-  marginBottom: '20px',
-  backgroundColor: '#c0392b', // Aesthetic red background
-  color: '#ecf0f1', // White text
-  padding: '20px',
-  borderRadius: '4px',
-};
-
-const linkStyle: React.CSSProperties = {
-  color: '#ffdddd', // Light red for links
-  textDecoration: 'underline',
-};
-
-const popupButtonStyle: React.CSSProperties = {
-  display: 'inline-block',
-  padding: '15px 30px',
-  backgroundColor: '#34495e',
-  color: '#ecf0f1',
-  textDecoration: 'none',
-  borderRadius: '4px',
-  fontSize: '18px',
-  border: 'none',
-  cursor: 'pointer',
-};
 
 export default WebGPUCanvas;
