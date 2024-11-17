@@ -2,11 +2,12 @@ import React from 'react';
 import styles from './PopUp.module.css';
 
 interface PopUpProps {
+    didLoad: boolean;
     initializationError: string;
     setShowPopup(show: boolean): void;
 }
 
-const PopUp: React.FC<PopUpProps> = ({ initializationError, setShowPopup }) => {
+const PopUp: React.FC<PopUpProps> = ({ didLoad, initializationError, setShowPopup }) => {
     return (
         <div className={styles.overlayStyle}>
             <div className={styles.popupStyle}>
@@ -30,7 +31,19 @@ const PopUp: React.FC<PopUpProps> = ({ initializationError, setShowPopup }) => {
                     with professional features and robust performance.
                 </p>
 
-                {initializationError ? (
+                {didLoad && (
+                    <button onClick={() => setShowPopup(false)} className={styles.popupButtonStyle}>
+                        Launch App
+                    </button>
+                )}
+
+                {!didLoad && !initializationError && (
+                    <div className={styles.loadingContainer}>
+                        <div className={styles.spinner}></div>
+                        <span className={styles.loadingText}>Loading...</span>
+                    </div>)}
+
+                {initializationError && (
                     <>
                         <p className={styles.errorStyle}>{initializationError}</p>
                         <ul className={styles.troubleshootingListStyle}>
@@ -85,10 +98,6 @@ const PopUp: React.FC<PopUpProps> = ({ initializationError, setShowPopup }) => {
                             </li>
                         </ul>
                     </>
-                ) : (
-                    <button onClick={() => setShowPopup(false)} className={styles.popupButtonStyle}>
-                        Launch App
-                    </button>
                 )}
             </div>
         </div>

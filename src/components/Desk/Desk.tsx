@@ -15,14 +15,15 @@ const Desk: React.FC = () => {
     const [activeFont, setActiveFont] = useState('Times New Roman');
     const [activeFontSize, setActiveFontSize] = useState(12);
     const [showPopup, setShowPopup] = useState(true);
-
-    const { toolManagerRef, initializationError } = useWebGPU(canvasRef);
+    const { didLoad, toolManagerRef, initializationError } = useWebGPU(canvasRef);
 
     useEffect(() => {
         if (toolManagerRef.current) {
             const toolManager = toolManagerRef.current;
 
             const handleMouseDown = (event: MouseEvent) => {
+
+                console.log('nigger!!!')
                 if (event.button === 0) {
                     const activeTool = toolManager.getActiveTool();
                     if (activeTool instanceof AbstractDrawingTool) {
@@ -76,7 +77,7 @@ const Desk: React.FC = () => {
 
     return (
         <>
-            {showPopup && <PopUp initializationError={initializationError!} setShowPopup={setShowPopup} />}
+            {showPopup && <PopUp didLoad={didLoad} initializationError={initializationError!} setShowPopup={setShowPopup} />}
             <CommandToolbar activeTool={activeToolName} />
             <ButtonToolbar
                 toolManagerRef={toolManagerRef}

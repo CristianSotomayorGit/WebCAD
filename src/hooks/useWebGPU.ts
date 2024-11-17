@@ -8,6 +8,8 @@ export const useWebGPU = (canvasRef: React.RefObject<HTMLCanvasElement>) => {
     const toolManagerRef = useRef<ToolManager | null>(null);
     const entityManagerRef = useRef(new EntityManager());
     const [initializationError, setInitializationError] = useState<string | null>(null);
+    const [didLoad, setLoad] = useState<boolean>(false);
+
 
     useEffect(() => {
         const initRenderer = async () => {
@@ -17,6 +19,8 @@ export const useWebGPU = (canvasRef: React.RefObject<HTMLCanvasElement>) => {
                 try {
                     await rendererRef.current.initialize();
                     toolManagerRef.current = new ToolManager(entityManagerRef.current, rendererRef.current);
+                    setLoad(!didLoad)
+
                 } catch (error) {
                     console.error('Error during WebGPU initialization', error);
                     setInitializationError(error instanceof Error ? error.message : String(error));
@@ -33,5 +37,5 @@ export const useWebGPU = (canvasRef: React.RefObject<HTMLCanvasElement>) => {
         };
     }, [canvasRef]);
 
-    return { rendererRef, toolManagerRef, initializationError };
+    return { rendererRef, didLoad, toolManagerRef, initializationError };
 };

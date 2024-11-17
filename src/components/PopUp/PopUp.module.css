@@ -1,91 +1,125 @@
 .overlayStyle {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-  }
-  
-  .popupStyle {
-    background-color: #2c3e50;
-    color: #ecf0f1;
-    padding: 40px;
-    border-radius: 8px;
-    text-align: center;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  
-  .popupHeaderStyle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-  
-  .logoStyle {
-    width: 64px;
-    height: 64px;
-    margin-right: 20px;
-  }
-  
-  .popupTitleStyle {
-    font-size: 48px;
-    margin: 0;
-    font-family: Arial, sans-serif;
-  }
-  
-  .popupVersionStyle {
-    font-size: 24px;
-    margin-bottom: 40px;
-  }
-  
-  .popupDescriptionStyle {
-    font-size: 18px;
-    margin-bottom: 40px;
-    text-align: left;
-    background-color: #212830;
-    padding: 20px;
-    border-radius: 4px;
-  }
-  
-  .errorStyle {
-    color: red;
-    margin-bottom: 20px;
-  }
-  
-  .troubleshootingListStyle {
-    list-style-type: disc;
-    padding-left: 20px;
-    text-align: left;
-    margin-bottom: 20px;
-    background-color: #c0392b;
-    color: #ecf0f1;
-    padding: 20px;
-    border-radius: 4px;
-  }
-  
-  .linkStyle {
-    color: #ffdddd;
-    text-decoration: underline;
-  }
-  
-  .popupButtonStyle {
-    display: inline-block;
-    padding: 15px 30px;
-    background-color: #34495e;
-    color: #ecf0f1;
-    text-decoration: none;
-    border-radius: 4px;
-    font-size: 18px;
-    border: none;
-    cursor: pointer;
-  }
-  
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.popupStyle {
+  background-color: #2c3e50;
+  color: #ecf0f1;
+  padding: 40px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.popupHeaderStyle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.logoStyle {
+  width: 64px;
+  height: 64px;
+  margin-right: 20px;
+}
+
+.popupTitleStyle {
+  font-size: 48px;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.popupVersionStyle {
+  font-size: 24px;
+  margin-bottom: 40px;
+}
+
+.popupDescriptionStyle {
+  font-size: 18px;
+  margin-bottom: 40px;
+  text-align: left;
+  background-color: #212830;
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.errorStyle {
+  color: red;
+  margin-bottom: 20px;
+}
+
+.troubleshootingListStyle {
+  list-style-type: disc;
+  padding-left: 20px;
+  text-align: left;
+  margin-bottom: 20px;
+  background-color: #c0392b;
+  color: #ecf0f1;
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.linkStyle {
+  color: #ffdddd;
+  text-decoration: underline;
+}
+
+.popupButtonStyle {
+  display: inline-block;
+  padding: 15px 30px;
+  background-color: #34495e;
+  color: #ecf0f1;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Spinner CSS */
+.spinner {
+  border: 8px solid #34495e; /* Darker background color */
+  border-top: 8px solid #ecf0f1; /* Light color for the spinning part */
+  border-radius: 50%;
+  width: 60px; /* Increased size */
+  height: 60px; /* Increased size */
+  animation: spin 1.5s linear infinite; /* Animation to spin */
+  margin-right: 15px; /* Add space between spinner and text */
+}
+
+/* Keyframes for spinning animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Container to hold both the spinner and the loading text */
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px; /* Space above the loading spinner */
+}
+
+/* Style for the "Loading..." text */
+.loadingText {
+  font-size: 18px;
+  color: #ecf0f1; /* Light color to match the overall design */
+  font-style: italic;
+  font-family: Arial, sans-serif; /* Use a clean font */
+}
+
+/* Optional: Adjust the size and positioning to match the design */
