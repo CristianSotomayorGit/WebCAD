@@ -152,7 +152,7 @@ export class Renderer {
     const entities = this.entityManager.getEntities();
     const tempEntities = this.entityManager.getTemporaryEntities();
 
-    // this.grid.draw(renderPass);
+    this.grid.draw(renderPass);
 
     tempEntities.forEach((entity) => {
       entity.draw(renderPass);

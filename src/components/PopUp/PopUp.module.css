@@ -89,37 +89,31 @@
   cursor: pointer;
 }
 
-/* Spinner CSS */
 .spinner {
-  border: 8px solid #34495e; /* Darker background color */
-  border-top: 8px solid #ecf0f1; /* Light color for the spinning part */
+  border: 8px solid #34495e;
+  border-top: 8px solid #ecf0f1;
   border-radius: 50%;
-  width: 60px; /* Increased size */
-  height: 60px; /* Increased size */
-  animation: spin 1.5s linear infinite; /* Animation to spin */
-  margin-right: 15px; /* Add space between spinner and text */
+  width: 30px;
+  height: 30px;
+  animation: spin 1.5s linear infinite;
+  margin-right: 15px;
 }
 
-/* Keyframes for spinning animation */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-/* Container to hold both the spinner and the loading text */
 .loadingContainer {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 20px; /* Space above the loading spinner */
+  margin-top: 20px;
 }
 
-/* Style for the "Loading..." text */
 .loadingText {
   font-size: 18px;
-  color: #ecf0f1; /* Light color to match the overall design */
+  color: #ecf0f1;
   font-style: italic;
-  font-family: Arial, sans-serif; /* Use a clean font */
+  font-family: Arial, sans-serif;
 }
-
-/* Optional: Adjust the size and positioning to match the design */
