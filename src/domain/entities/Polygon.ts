@@ -129,11 +129,6 @@ export class Polygon extends RenderableEntity {
       renderPass.setVertexBuffer(0, this.vertexBuffer);
       renderPass.draw(this.vertices.length / 2);
     }
-
-    // Draw point representations
-    for (const point of this.points) {
-      point.draw(renderPass);
-    }
   }
 
   public override dispose(): void {

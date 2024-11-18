@@ -140,10 +140,6 @@ export class Rectangle extends RenderableEntity {
       renderPass.setVertexBuffer(0, this.vertexBuffer);
       renderPass.draw(this.vertices.length / 2);
     }
-
-    for (const point of this.cornerPoints) {
-      point.draw(renderPass);
-    }
   }
 
   public override dispose(): void {
