@@ -61,7 +61,6 @@ const Desk: React.FC = () => {
             canvasRef.current?.addEventListener('mouseup', handleMouseUp);
             canvasRef.current?.addEventListener('wheel', handleWheel);
             window.addEventListener('keydown', handleKeyDown);
-
             return () => {
                 canvasRef.current?.removeEventListener('mousedown', handleMouseDown);
                 canvasRef.current?.removeEventListener('mousemove', handleMouseMove);
@@ -71,6 +70,7 @@ const Desk: React.FC = () => {
             };
         }
     }, [toolManagerRef, activeColor, activeFont, activeFontSize]);
+
 
     return (
         <>
