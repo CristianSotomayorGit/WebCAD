@@ -1,6 +1,7 @@
 import { EntityManager } from '../../domain/managers/EntityManager';
 import { Camera } from '../../domain/Camera';
 import { Grid } from '../../domain/entities/Grid';
+import { Point } from '../../domain/entities/Point';
 
 export class Renderer {
   private device!: GPUDevice;
@@ -12,8 +13,10 @@ export class Renderer {
   private cameraBuffer!: GPUBuffer;
   private colorBuffer!: GPUBuffer;
   private camera: Camera;
+  private drawGrid!: boolean;
+  private drawVertices!: boolean;
 
-  constructor(public canvas: HTMLCanvasElement,private entityManager: EntityManager) {
+  constructor(public canvas: HTMLCanvasElement, private entityManager: EntityManager) {
     this.camera = new Camera();
   }
 
@@ -152,15 +155,29 @@ export class Renderer {
     const entities = this.entityManager.getEntities();
     const tempEntities = this.entityManager.getTemporaryEntities();
 
-    this.grid.draw(renderPass);
 
-    tempEntities.forEach((entity) => {
-      entity.draw(renderPass);
-    });
+    if (this.drawGrid) {
+      this.grid.draw(renderPass);
+    }
 
-    entities.forEach((entity) => {
-      entity.draw(renderPass);
-    });
+    if (this.drawVertices) {
+      tempEntities.forEach((entity) => {
+        entity.draw(renderPass);
+      });
+
+      entities.forEach((entity) => {
+        entity.draw(renderPass);
+      });
+
+    } else {
+      tempEntities.forEach((entity) => {
+        if (!(entity instanceof Point)) entity.draw(renderPass);
+      });
+
+      entities.forEach((entity) => {
+        if (!(entity instanceof Point)) entity.draw(renderPass);
+      });
+    }
 
     renderPass.end();
     this.device.queue.submit([commandEncoder.finish()]);
@@ -168,5 +185,13 @@ export class Renderer {
 
   public getFormat(): GPUTextureFormat {
     return this.format;
+  }
+
+  setDrawGrid(drawGrid: boolean) {
+    this.drawGrid = drawGrid
+  }
+
+  setDrawVertices(drawVertices: boolean) {
+    this.drawVertices = drawVertices;
   }
 }
