@@ -19,12 +19,11 @@ const Desk: React.FC = () => {
     const { toolManagerRef, initializationError } = useWebGPU(canvasRef);
 
     useEffect(() => {
-        if (toolManagerRef.current) {
-            const toolManager = toolManagerRef.current;
+        if (canvasRef.current) {
 
             const handleMouseDown = (event: MouseEvent) => {
                 if (event.button === 0) {
-                    const activeTool = toolManager.getActiveTool();
+                    const activeTool = toolManagerRef.current!.getActiveTool();
                     if (activeTool instanceof AbstractDrawingTool) {
                         activeTool.onLeftClick(event, activeColor);
                     }
@@ -36,26 +35,26 @@ const Desk: React.FC = () => {
                     }
                 }
                 if (event.button === 1) {
-                    toolManager.getPanTool()?.onWheelClick(event);
+                    toolManagerRef.current!.getPanTool()?.onWheelClick(event);
                 }
             };
 
             const handleMouseMove = (event: MouseEvent) => {
-                toolManager.getPanTool()?.onMouseMove(event);
-                toolManager.getActiveTool()?.onMouseMove?.(event);
+                toolManagerRef.current!.getPanTool()?.onMouseMove(event);
+                toolManagerRef.current!.getActiveTool()?.onMouseMove?.(event);
             };
 
             const handleMouseUp = (event: MouseEvent) => {
-                toolManager.getPanTool()?.onMouseUp(event);
+                toolManagerRef.current!.getPanTool()?.onMouseUp(event);
             };
 
             const handleWheel = (event: WheelEvent) => {
                 event.preventDefault();
-                toolManager.getZoomTool()?.onWheel(event);
+                toolManagerRef.current!.getZoomTool()?.onWheel(event);
             };
 
             const handleKeyDown = (event: KeyboardEvent) => {
-                toolManager.getActiveTool()?.onKeyDown?.(event);
+                toolManagerRef.current!.getActiveTool()?.onKeyDown?.(event);
             };
 
             canvasRef.current?.addEventListener('mousedown', handleMouseDown);
@@ -63,7 +62,6 @@ const Desk: React.FC = () => {
             canvasRef.current?.addEventListener('mouseup', handleMouseUp);
             canvasRef.current?.addEventListener('wheel', handleWheel);
             window.addEventListener('keydown', handleKeyDown);
-
             return () => {
                 canvasRef.current?.removeEventListener('mousedown', handleMouseDown);
                 canvasRef.current?.removeEventListener('mousemove', handleMouseMove);
@@ -73,6 +71,7 @@ const Desk: React.FC = () => {
             };
         }
     }, [toolManagerRef, activeColor, activeFont, activeFontSize]);
+
 
     return (
         <>
