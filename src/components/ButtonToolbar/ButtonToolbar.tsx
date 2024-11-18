@@ -8,10 +8,10 @@ interface ButtonToolbarProps {
   setActiveColor: (color: Float32Array) => void;
   setActiveFont: (fontName: string) => void;
   setActiveFontSize: (fontSize: number) => void;
-  activeToolName: string; // To reflect active tool for UI
-  activeColor: Float32Array; // To reflect active color for UI
-  activeFont: string; // To reflect active font for UI
-  activeFontSize: number; // To reflect active font size for UI
+  activeToolName: string;
+  activeColor: Float32Array;
+  activeFont: string; 
+  activeFontSize: number;
 }
 
 const ButtonToolbar: React.FC<ButtonToolbarProps> = ({

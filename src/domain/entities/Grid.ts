@@ -16,7 +16,7 @@ const GridSettings = {
 export class Grid {
   lines: Line[] = [];
   renderer: Renderer;
-  entityManager: EntityManager
+  entityManager: EntityManager;
 
   constructor(renderer: Renderer, entityManager: EntityManager) {
     this.renderer = renderer;
@@ -44,9 +44,28 @@ export class Grid {
     }
   }
 
+  isLineInView(line: Line): boolean {
+    const camera = this.renderer.getCamera();
+    const { x, y } = camera.getOffset();
+    const zoom = camera.getZoom();
+    const cameraLeft = x - this.renderer.canvas.width / 2 / zoom;
+    const cameraRight = x + this.renderer.canvas.width / 2 / zoom;
+    const cameraTop = y + this.renderer.canvas.height / 2 / zoom;
+    const cameraBottom = y - this.renderer.canvas.height / 2 / zoom;
+    const start = line.getStartPoint();
+    const end = line.getEndPoint();
+
+    return (
+      (start.getX() >= cameraLeft && start.getX() <= cameraRight && start.getY() >= cameraBottom && start.getY() <= cameraTop) ||
+      (end.getX() >= cameraLeft && end.getX() <= cameraRight && end.getY() >= cameraBottom && end.getY() <= cameraTop)
+    );
+  }
+
   draw(renderPass: GPURenderPassEncoder) {
-    for (let line of this.lines) {
-      line.draw(renderPass)
-    }
+    this.lines.forEach((line) => {
+      if (this.isLineInView(line)) {
+        line.draw(renderPass);
+      }
+    });
   }
 }

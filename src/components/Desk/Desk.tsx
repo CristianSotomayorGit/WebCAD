@@ -7,6 +7,7 @@ import WebGPUCanvas from '../WebGPUCanvas/WebGPUCanvas';
 import { AbstractDrawingTool } from '../../domain/tools/DrawingTools/AbstractDrawingTool';
 import { AbstractWritingTool } from '../../domain/tools/WritingTools/AbstractWritingTool';
 import { PanTool } from '../../domain/tools/ViewTools/PanTool';
+import ViewToolbar from '../ViewToolbar/ViewToolbar';
 
 const Desk: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -15,10 +16,15 @@ const Desk: React.FC = () => {
     const [activeFont, setActiveFont] = useState('Times New Roman');
     const [activeFontSize, setActiveFontSize] = useState(12);
     const [showPopup, setShowPopup] = useState(true);
-    const { didLoad, toolManagerRef, initializationError } = useWebGPU(canvasRef);
+    const [drawGrid, setDrawGrid] = useState(true);
+    const [drawVertices, setDrawVertices] = useState(true);
+    const { rendererRef, didLoad, toolManagerRef, initializationError } = useWebGPU(canvasRef);
 
     useEffect(() => {
         if (canvasRef.current) {
+
+            rendererRef.current!.setDrawGrid(drawGrid)
+            rendererRef.current!.setDrawVertices(drawVertices)
             const handleMouseDown = (event: MouseEvent) => {
 
                 if (event.button === 0) {
@@ -72,6 +78,7 @@ const Desk: React.FC = () => {
     }, [toolManagerRef, activeColor, activeFont, activeFontSize]);
 
 
+
     return (
         <>
             {showPopup && <PopUp didLoad={didLoad} initializationError={initializationError!} setShowPopup={setShowPopup} />}
@@ -87,6 +94,10 @@ const Desk: React.FC = () => {
                 activeFont={activeFont}
                 activeFontSize={activeFontSize}
             />
+
+            <ViewToolbar renderer={rendererRef.current!} drawGrid={drawGrid} setDrawGrid={setDrawGrid} drawVertices={drawVertices} setDrawVertices={setDrawVertices} />
+
+
             <WebGPUCanvas canvasRef={canvasRef} />
         </>
     );
