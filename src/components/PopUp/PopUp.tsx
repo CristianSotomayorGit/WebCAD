@@ -15,7 +15,7 @@ const PopUp: React.FC<PopUpProps> = ({ didLoad, initializationError, setShowPopu
                     <img src="/OtterCAD_logo.png" alt="Logo" className={styles.logoStyle} />
                     <h1 className={styles.popupTitleStyle}>OtterCAD</h1>
                 </div>
-                <p className={styles.popupVersionStyle}>Version: Alpha 0.0.3</p>
+                <p className={styles.popupVersionStyle}>Version: Alpha 0.0.4</p>
                 <p className={styles.popupDescriptionStyle}>
                     From the dev:
                     <br />
