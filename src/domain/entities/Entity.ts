@@ -1,6 +1,7 @@
 // src/domain/entities/Entity.ts
 
 export interface Entity {
-  draw(renderPass: GPURenderPassEncoder): void;
+  draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void;
   dispose(): void;
+
 }

@@ -130,8 +130,12 @@ export class Polyline extends RenderableEntity {
     return this.points;
   }
 
-  public override draw(renderPass: GPURenderPassEncoder): void {
+  public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
     if (this.vertexBuffer && this.vertexCount > 1) {
+
+      if (drawVertices) {
+        for (let point of this.points) point.draw(renderPass);
+      }
       this.updateCameraBuffer();
       renderPass.setPipeline(this.pipeline);
       renderPass.setBindGroup(0, this.bindGroup);

@@ -74,8 +74,7 @@ export abstract class RenderableEntity implements Entity {
     this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
   }
 
-  public abstract draw(renderPass: GPURenderPassEncoder): void;
-
+  public abstract draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void;
   public dispose(): void {
     if (this.cameraBuffer) {
       this.cameraBuffer.destroy();

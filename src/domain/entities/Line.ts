@@ -90,8 +90,15 @@ export class Line extends RenderableEntity {
     this.updateVertexBuffer();
   }
 
-  public override draw(renderPass: GPURenderPassEncoder): void {
+
+  public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
     this.updateCameraBuffer();
+
+    if (drawVertices) {
+      this.endPoint.draw(renderPass)
+      this.startPoint.draw(renderPass)
+    }
+    
     renderPass.setPipeline(this.pipeline);
     renderPass.setBindGroup(0, this.bindGroup);
     renderPass.setVertexBuffer(0, this.vertexBuffer);

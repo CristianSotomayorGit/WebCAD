@@ -160,24 +160,24 @@ export class Renderer {
       this.grid.draw(renderPass);
     }
 
-    if (this.drawVertices) {
-      tempEntities.forEach((entity) => {
-        entity.draw(renderPass);
-      });
+    // if (this.drawVertices) {
+    //   tempEntities.forEach((entity) => {
+    //     entity.draw(renderPass);
+    //   });
 
-      entities.forEach((entity) => {
-        entity.draw(renderPass);
-      });
+    //   entities.forEach((entity) => {
+    //     entity.draw(renderPass);
+    //   });
 
-    } else {
-      tempEntities.forEach((entity) => {
-        if (!(entity instanceof Point)) entity.draw(renderPass);
-      });
+    // } else {
+    tempEntities.forEach((entity) => {
+      entity.draw(renderPass, this.drawVertices);
+    });
 
-      entities.forEach((entity) => {
-        if (!(entity instanceof Point)) entity.draw(renderPass);
-      });
-    }
+    entities.forEach((entity) => {
+      entity.draw(renderPass, this.drawVertices);
+    });
+    // }
 
     renderPass.end();
     this.device.queue.submit([commandEncoder.finish()]);
@@ -193,5 +193,17 @@ export class Renderer {
 
   setDrawVertices(drawVertices: boolean) {
     this.drawVertices = drawVertices;
+  }
+
+  removeLastItem() {
+    let lastEntity = this.entityManager.getLastEntity();
+    this.entityManager.removeEntity(lastEntity)
+    this.entityManager.addEntityToHistory(lastEntity)
+  }
+
+  recoverLastItem() {
+    let lastEntity = this.entityManager.getLastEntityInHistory();
+    this.entityManager.removeEntityFromHistory(lastEntity);
+    this.entityManager.addEntity2(lastEntity)
   }
 }

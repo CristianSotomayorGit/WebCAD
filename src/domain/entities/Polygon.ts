@@ -121,9 +121,16 @@ export class Polygon extends RenderableEntity {
     this.updateVertices();
   }
 
-  public override draw(renderPass: GPURenderPassEncoder): void {
+  public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
     if (this.vertexBuffer && this.vertices.length >= 4) {
       this.updateCameraBuffer();
+
+      if (drawVertices) {
+        for (let point of this.points) {
+          point.draw(renderPass)
+        }
+      }
+
       renderPass.setPipeline(this.pipeline);
       renderPass.setBindGroup(0, this.bindGroup);
       renderPass.setVertexBuffer(0, this.vertexBuffer);
@@ -141,6 +148,7 @@ export class Polygon extends RenderableEntity {
     for (const point of this.points) {
       point.dispose();
     }
+
     this.points = [];
 
     super.dispose();
