@@ -64,13 +64,10 @@ const Desk: React.FC = () => {
 
                 if (event.ctrlKey && !event.shiftKey && (event.key === 'z' || event.key === 'Z')) {
                     rendererRef.current!.removeLastItem();
-                    console.log('here1');
                 }
 
-                // Redo action (Ctrl + Shift + Z)
                 if (event.ctrlKey && event.shiftKey && (event.key === 'z' || event.key === 'Z')) {
                     rendererRef.current!.recoverLastItem();
-                    console.log('here2');
                 }
             };
 

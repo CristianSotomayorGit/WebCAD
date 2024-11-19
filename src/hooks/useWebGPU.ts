@@ -22,7 +22,6 @@ export const useWebGPU = (canvasRef: React.RefObject<HTMLCanvasElement>) => {
                     setLoad(!didLoad)
 
                 } catch (error) {
-                    console.error('Error during WebGPU initialization', error);
                     setInitializationError(error instanceof Error ? error.message : String(error));
                 }
             }
