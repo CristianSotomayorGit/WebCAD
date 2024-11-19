@@ -132,8 +132,14 @@ export class Rectangle extends RenderableEntity {
     return this.cornerPoints;
   }
 
-  public override draw(renderPass: GPURenderPassEncoder): void {
+  public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
     if (this.vertexBuffer) {
+
+      if (drawVertices) {
+        for (const point of this.cornerPoints) {
+          point.draw(renderPass);
+        }
+      }
       this.updateCameraBuffer();
       renderPass.setPipeline(this.pipeline);
       renderPass.setBindGroup(0, this.bindGroup);
@@ -151,6 +157,7 @@ export class Rectangle extends RenderableEntity {
     for (const point of this.cornerPoints) {
       point.dispose();
     }
+
     this.cornerPoints = [];
 
     super.dispose();
