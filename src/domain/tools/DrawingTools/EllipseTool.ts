@@ -17,11 +17,11 @@ export class EllipseTool extends AbstractDrawingTool {
 
       // Set the center point of the ellipse
       this.centerPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
-      this.entityManager.addEntity(this.centerPoint);
 
       // Create an initial ellipse with zero radii
       this.currentEllipse = new Ellipse(this.renderer, worldPosition.x, worldPosition.y, 0, 0);
       this.currentEllipse.setColor(color);
+      this.currentEllipse.addPoint(this.centerPoint)
       this.entityManager.addEntity(this.currentEllipse);
     } else if (this.isDrawing && this.centerPoint) {
       // Finalize the ellipse

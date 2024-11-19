@@ -92,6 +92,8 @@ export class Polygon extends RenderableEntity {
       const y = this.centerY + this.radius * Math.sin(angle);
       verticesArray.push(x, y);
 
+      this.points.push(new Point(this.centerX, this.centerY, this.renderer))
+
       if (i < this.numSides) {
         // Create point representations for each vertex
         const point = new Point(x, y, this.renderer);
@@ -152,5 +154,9 @@ export class Polygon extends RenderableEntity {
     this.points = [];
 
     super.dispose();
+  }
+
+  public addPoint(point: Point): void {
+    this.points.push(point);
   }
 }

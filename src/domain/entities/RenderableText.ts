@@ -2,6 +2,7 @@
 
 import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { TextShader } from '../../shaders/TextShader';
+import { Point } from './Point';
 
 export abstract class RenderableText {
   protected renderer: Renderer;
@@ -23,6 +24,7 @@ export abstract class RenderableText {
   public color: Float32Array;
   public position: { x: number; y: number };
   public cursorIndex: number = 0; // Position of the cursor in the text
+  public points: Point[] = [];
 
   // Additions for deferred texture destruction and throttling
   private oldTextures: GPUTexture[] = [];
@@ -320,8 +322,12 @@ export abstract class RenderableText {
     return { x, y };
   }
 
-  public draw(renderPass: GPURenderPassEncoder): void {
+  public draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
     if (this.vertexBuffer && this.numVertices > 0) {
+
+      if (drawVertices) {
+        for (let point of this.points) point.draw(renderPass);
+      }
       this.updateCameraBuffer();
       renderPass.setPipeline(this.pipeline);
       renderPass.setBindGroup(0, this.bindGroup);
