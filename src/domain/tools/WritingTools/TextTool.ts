@@ -5,6 +5,7 @@ import { Text } from '../../entities/Text';
 import { Cursor } from '../../entities/Cursor';
 import { Renderer } from '../../../infrastructure/rendering/Renderer';
 import { EntityManager } from '../../managers/EntityManager';
+import { Point } from '../../entities/Point';
 
 export class TextTool extends AbstractWritingTool {
   private currentTextEntity: Text | null = null;
@@ -19,6 +20,7 @@ export class TextTool extends AbstractWritingTool {
     const position = this.getWorldPosition(event);
 
     if (!this.isEditing) {
+      let point = new Point(position.x, position.y, this.renderer)
       // Create a new text entity when not editing
       this.currentTextEntity = new Text(
         this.renderer,
@@ -30,6 +32,7 @@ export class TextTool extends AbstractWritingTool {
         8,
         color
       );
+      this.currentTextEntity.addPoint(point);
       this.entityManager.addEntity(this.currentTextEntity);
       this.isEditing = true; // Start editing mode
 

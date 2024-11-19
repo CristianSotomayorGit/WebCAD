@@ -92,6 +92,8 @@ export class Polygon extends RenderableEntity {
       const y = this.centerY + this.radius * Math.sin(angle);
       verticesArray.push(x, y);
 
+      this.points.push(new Point(this.centerX, this.centerY, this.renderer))
+
       if (i < this.numSides) {
         // Create point representations for each vertex
         const point = new Point(x, y, this.renderer);
@@ -121,9 +123,16 @@ export class Polygon extends RenderableEntity {
     this.updateVertices();
   }
 
-  public override draw(renderPass: GPURenderPassEncoder): void {
+  public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
     if (this.vertexBuffer && this.vertices.length >= 4) {
       this.updateCameraBuffer();
+
+      if (drawVertices) {
+        for (let point of this.points) {
+          point.draw(renderPass)
+        }
+      }
+
       renderPass.setPipeline(this.pipeline);
       renderPass.setBindGroup(0, this.bindGroup);
       renderPass.setVertexBuffer(0, this.vertexBuffer);
@@ -141,8 +150,13 @@ export class Polygon extends RenderableEntity {
     for (const point of this.points) {
       point.dispose();
     }
+
     this.points = [];
 
     super.dispose();
+  }
+
+  public addPoint(point: Point): void {
+    this.points.push(point);
   }
 }

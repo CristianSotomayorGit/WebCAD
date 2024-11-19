@@ -8,6 +8,7 @@ import { AbstractDrawingTool } from '../../domain/tools/DrawingTools/AbstractDra
 import { AbstractWritingTool } from '../../domain/tools/WritingTools/AbstractWritingTool';
 import { PanTool } from '../../domain/tools/ViewTools/PanTool';
 import ViewToolbar from '../ViewToolbar/ViewToolbar';
+import { EntityManager } from '../../domain/managers/EntityManager';
 
 const Desk: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -16,7 +17,7 @@ const Desk: React.FC = () => {
     const [activeFont, setActiveFont] = useState('Times New Roman');
     const [activeFontSize, setActiveFontSize] = useState(12);
     const [showPopup, setShowPopup] = useState(true);
-    const [drawGrid, setDrawGrid] = useState(true);
+    const [drawGrid, setDrawGrid] = useState(false);
     const [drawVertices, setDrawVertices] = useState(true);
     const { rendererRef, didLoad, toolManagerRef, initializationError } = useWebGPU(canvasRef);
 
@@ -60,6 +61,14 @@ const Desk: React.FC = () => {
 
             const handleKeyDown = (event: KeyboardEvent) => {
                 toolManagerRef.current!.getActiveTool()?.onKeyDown?.(event);
+
+                if (event.ctrlKey && !event.shiftKey && (event.key === 'z' || event.key === 'Z')) {
+                    rendererRef.current!.removeLastItem();
+                }
+
+                if (event.ctrlKey && event.shiftKey && (event.key === 'z' || event.key === 'Z')) {
+                    rendererRef.current!.recoverLastItem();
+                }
             };
 
             canvasRef.current?.addEventListener('mousedown', handleMouseDown);

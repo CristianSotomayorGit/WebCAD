@@ -2,6 +2,7 @@
 
 import { RenderableText } from './RenderableText';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
+import { Point } from './Point';
 
 export class Text extends RenderableText {
   public cursorIndex: number = 0;
@@ -15,14 +16,11 @@ export class Text extends RenderableText {
     fontSize: number = 12,
     resolutionScale: number = 2,
     color: Float32Array = new Float32Array([1.0, 1.0, 1.0, 1.0]) // Default white color
+    
   ) {
     super(renderer, text, x, y, fontFamily, fontSize, resolutionScale, color);
   }
 
-  /**
-   * Dynamically updates the text content.
-   * This method overrides the base setText for additional functionality if needed.
-   */
   public updateText(newText: string): void {
     this.text = newText;
     // Do not modify cursorIndex here
@@ -30,10 +28,11 @@ export class Text extends RenderableText {
     this.createBuffers();
   }
 
-  /**
-   * Updates the text color dynamically.
-   */
   public updateColor(newColor: Float32Array): void {
-    this.setColor(newColor); // Call the base method to update the color
+    this.setColor(newColor); 
+  }
+
+  public addPoint(point: Point): void {
+    this.points.push(point);
   }
 }

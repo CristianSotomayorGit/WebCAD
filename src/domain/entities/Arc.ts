@@ -233,8 +233,14 @@ export class Arc extends RenderableEntity {
     return { centerX, centerY, radius };
   }
 
-  public override draw(renderPass: GPURenderPassEncoder): void {
+  public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
     if (this.numVertices > 0 && this.vertexBuffer) {
+      
+      if (drawVertices) {
+        this.startPoint?.draw(renderPass);
+        this.midPoint?.draw(renderPass);
+        this.endPoint?.draw(renderPass)
+      }
       this.updateCameraBuffer();
       renderPass.setPipeline(this.pipeline);
       renderPass.setBindGroup(0, this.bindGroup);

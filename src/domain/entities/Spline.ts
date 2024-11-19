@@ -155,7 +155,7 @@ export class Spline extends RenderableEntity {
     return this.controlPoints;
   }
 
-  public override draw(renderPass: GPURenderPassEncoder): void {
+  public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
     if (this.numVertices > 0 && this.vertexBuffer) {
       this.updateCameraBuffer();
       renderPass.setPipeline(this.pipeline);
@@ -164,10 +164,10 @@ export class Spline extends RenderableEntity {
       renderPass.draw(this.numVertices);
     }
 
-    // Optionally, draw control points
-    // for (const point of this.controlPoints) {
-    //   point.draw(renderPass);
-    // }
+    if (drawVertices)
+    for (const point of this.controlPoints) {
+      point.draw(renderPass);
+    }
   }
 
   public override dispose(): void {

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+  <!-- Curved Arrow -->
+  <path d="M15,10 C10,10 10,15 5,15" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+  <path d="M5,15 L8,12 L5,9" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+  
+  <!-- Vertices -->
+  <circle cx="15" cy="10" r="1.5" fill="#CCCCCC"/>   <!-- Arrow start (pivot) -->
+  <circle cx="5" cy="15" r="1.5" fill="#CCCCCC"/>    <!-- Arrow bend (tail) -->
+  <circle cx="8" cy="12" r="1.5" fill="#CCCCCC"/>    <!-- Arrow tip -->
+</svg>

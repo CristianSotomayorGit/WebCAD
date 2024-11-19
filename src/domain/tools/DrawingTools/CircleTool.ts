@@ -15,10 +15,13 @@ export class CircleTool extends AbstractDrawingTool {
         if (!this.isDrawing) {
             // First click: set the center of the circle
             this.centerPoint = this.createAndAddPoint(x, y);
+            
+            
             this.isDrawing = true;
 
             // Create the circle with zero radius
             this.currentCircle = new Circle(this.renderer, x, y, 0);
+            this.currentCircle.addPoint(this.centerPoint)
             this.currentCircle.setColor(color);
             this.entityManager.addEntity(this.currentCircle);
         } else if (this.isDrawing) {
@@ -45,6 +48,7 @@ export class CircleTool extends AbstractDrawingTool {
             } else {
                 // Create a temporary point at the current mouse position
                 this.tempPoint = this.createAndAddPoint(x, y);
+                this.currentCircle.addPoint(this.tempPoint)
             }
         }
     }

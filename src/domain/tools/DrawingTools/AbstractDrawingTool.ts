@@ -42,7 +42,7 @@ export abstract class AbstractDrawingTool implements Tool {
 
     protected createAndAddPoint(x: number, y: number): Point {
         const point = new Point(x, y, this.renderer);
-        this.entityManager.addEntity(point);
+        // this.entityManager.addEntity(point);
         this.points.push(point);
         return point;
     }

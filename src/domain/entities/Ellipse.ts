@@ -3,8 +3,10 @@
 import { RenderableEntity } from './RenderableEntity';
 import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { EllipseShader } from '../../shaders/EllipseShader';
+import { Point } from './Point';
 
 export class Ellipse extends RenderableEntity {
+    private points: Point[] = [];
     private centerX: number;
     private centerY: number;
     private radiusX: number;
@@ -105,8 +107,11 @@ export class Ellipse extends RenderableEntity {
         this.createBuffers();
     }
 
-    public override draw(renderPass: GPURenderPassEncoder): void {
+    public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
         if (this.vertexBuffer && this.numVertices > 0) {
+            if (drawVertices) {
+                for (let point of this.points) point.draw(renderPass);
+            }
             this.updateCameraBuffer();
             renderPass.setPipeline(this.pipeline);
             renderPass.setBindGroup(0, this.bindGroup);
@@ -122,4 +127,8 @@ export class Ellipse extends RenderableEntity {
         }
         super.dispose();
     }
+
+    public addPoint(point: Point): void {
+        this.points.push(point);
+      }
 }
