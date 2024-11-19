@@ -8,7 +8,6 @@ import { AbstractDrawingTool } from '../../domain/tools/DrawingTools/AbstractDra
 import { AbstractWritingTool } from '../../domain/tools/WritingTools/AbstractWritingTool';
 import { PanTool } from '../../domain/tools/ViewTools/PanTool';
 import ViewToolbar from '../ViewToolbar/ViewToolbar';
-import { EntityManager } from '../../domain/managers/EntityManager';
 
 const Desk: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -19,7 +18,7 @@ const Desk: React.FC = () => {
     const [showPopup, setShowPopup] = useState(true);
     const [drawGrid, setDrawGrid] = useState(false);
     const [drawVertices, setDrawVertices] = useState(true);
-    const { rendererRef, didLoad, toolManagerRef, initializationError } = useWebGPU(canvasRef);
+    const { rendererRef, didLoad, fileManagerRef, toolManagerRef, initializationError } = useWebGPU(canvasRef);
 
     useEffect(() => {
         if (canvasRef.current) {
@@ -93,6 +92,7 @@ const Desk: React.FC = () => {
             {showPopup && <PopUp didLoad={didLoad} initializationError={initializationError!} setShowPopup={setShowPopup} />}
             <CommandToolbar activeTool={activeToolName} />
             <ButtonToolbar
+                fileManagerRef = {fileManagerRef}
                 toolManagerRef={toolManagerRef}
                 setActiveToolName={setActiveToolName}
                 setActiveColor={setActiveColor}

@@ -5,16 +5,48 @@ import { Renderer } from '../../infrastructure/rendering/Renderer';
 import { ArcShader } from '../../shaders/ArcShader';
 import { Point } from './Point';
 
-
 export class Arc extends RenderableEntity {
+  private centerX: number;
+  private centerY: number;
+  private radius: number;
+  private startAngle: number;
+  private endAngle: number;
+  private vertexBuffer: GPUBuffer | null = null;
+  private numVertices: number = 0;
+  private isClockwise: boolean;
+
+  // Add properties for points
   private startPoint: Point | null = null;
   private midPoint: Point | null = null;
   private endPoint: Point | null = null;
-  private vertexBuffer: GPUBuffer | null = null;
-  private numVertices: number = 0;
 
-  constructor(renderer: Renderer) {
+  constructor(
+    renderer: Renderer,
+    centerX: number,
+    centerY: number,
+    radius: number,
+    startAngle: number,
+    endAngle: number,
+    isClockwise: boolean = false,
+    startPoint?: Point,
+    midPoint?: Point,
+    endPoint?: Point
+  ) {
     super(renderer, new Float32Array([0.0, 1.0, 0.0, 1.0])); // Green color
+    this.centerX = centerX;
+    this.centerY = centerY;
+    this.radius = radius;
+    this.startAngle = startAngle;
+    this.endAngle = endAngle;
+    this.isClockwise = isClockwise;
+
+    // Store the points if provided
+    this.startPoint = startPoint || null;
+    this.midPoint = midPoint || null;
+    this.endPoint = endPoint || null;
+
+    this.setupPipeline();
+    this.updateVertexBuffer();
   }
 
   protected setupPipeline(): void {
@@ -58,188 +90,81 @@ export class Arc extends RenderableEntity {
     });
   }
 
-  public setStartPoint(point: Point): void {
-    this.startPoint = point;
-    this.updateVertexBuffer();
-  }
-
-  public setMidPoint(point: Point): void {
-    this.midPoint = point;
-    this.updateVertexBuffer();
-  }
-
-  public setEndPoint(point: Point): void {
-    this.endPoint = point;
-    this.updateVertexBuffer();
-  }
-
   private updateVertexBuffer(): void {
-    if (this.startPoint && this.midPoint && this.endPoint) {
-      const vertices = this.calculateArcVertices();
-      this.numVertices = vertices.length / 2;
+    const vertices = this.calculateArcVertices();
+    this.numVertices = vertices.length / 2;
 
-      if (this.vertexBuffer) {
-        this.vertexBuffer.destroy();
-      }
+    if (this.vertexBuffer) {
+      this.vertexBuffer.destroy();
+    }
 
-      if (vertices.length > 0) {
-        const vertexData = new Float32Array(vertices);
-        this.vertexBuffer = this.device.createBuffer({
-          size: vertexData.byteLength,
-          usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-        });
-        this.device.queue.writeBuffer(this.vertexBuffer, 0, vertexData);
-      }
+    if (vertices.length > 0) {
+      const vertexData = new Float32Array(vertices);
+      this.vertexBuffer = this.device.createBuffer({
+        size: vertexData.byteLength,
+        usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+      });
+      this.device.queue.writeBuffer(this.vertexBuffer, 0, vertexData);
     }
   }
 
   private calculateArcVertices(): number[] {
-    const circle = this.calculateCircleFromPoints(
-      this.startPoint!,
-      this.midPoint!,
-      this.endPoint!
-    );
-
-    if (!circle) {
-      // Points are colinear; return a straight line
-      return [
-        this.startPoint!.getX(),
-        this.startPoint!.getY(),
-        this.endPoint!.getX(),
-        this.endPoint!.getY(),
-      ];
-    }
-
-    const { centerX, centerY, radius } = circle;
-
-    const startAngle = Math.atan2(
-      this.startPoint!.getY() - centerY,
-      this.startPoint!.getX() - centerX
-    );
-    const midAngle = Math.atan2(
-      this.midPoint!.getY() - centerY,
-      this.midPoint!.getX() - centerX
-    );
-    const endAngle = Math.atan2(
-      this.endPoint!.getY() - centerY,
-      this.endPoint!.getX() - centerX
-    );
-
-    // Determine the arc direction (clockwise or counter-clockwise)
-    const angles = [startAngle, midAngle, endAngle].map((angle) =>
-      angle < 0 ? angle + 2 * Math.PI : angle
-    );
-
-    let angleStart = angles[0];
-    let angleMid = angles[1];
-    let angleEnd = angles[2];
-
-    let angleDeltaStartMid = this.normalizeAngle(angleMid - angleStart);
-    let angleDeltaMidEnd = this.normalizeAngle(angleEnd - angleMid);
-    let totalAngle = this.normalizeAngle(angleEnd - angleStart);
-
-    let isClockwise = false;
-
-    if (angleDeltaStartMid + angleDeltaMidEnd > totalAngle) {
-      // The arc goes the other way around the circle
-      isClockwise = true;
-    }
-
-    const vertices = this.generateArcVertices(
-      centerX,
-      centerY,
-      radius,
-      angleStart,
-      angleEnd,
-      isClockwise
-    );
-
-    return vertices;
-  }
-
-  private normalizeAngle(angle: number): number {
-    angle = angle % (2 * Math.PI);
-    if (angle < 0) angle += 2 * Math.PI;
-    return angle;
-  }
-
-  private generateArcVertices(
-    centerX: number,
-    centerY: number,
-    radius: number,
-    startAngle: number,
-    endAngle: number,
-    isClockwise: boolean
-  ): number[] {
-    const numSegments = 50; // Adjust for smoothness
     const vertices: number[] = [];
+    const numSegments = 50; // Adjust for smoothness
 
-    let angleDiff = endAngle - startAngle;
-    if (isClockwise) {
-      if (angleDiff > 0) {
-        angleDiff -= 2 * Math.PI;
-      }
+    let angleDiff = this.endAngle - this.startAngle;
+    if (this.isClockwise) {
+      if (angleDiff > 0) angleDiff -= 2 * Math.PI;
     } else {
-      if (angleDiff < 0) {
-        angleDiff += 2 * Math.PI;
-      }
+      if (angleDiff < 0) angleDiff += 2 * Math.PI;
     }
 
     const angleStep = angleDiff / numSegments;
 
     for (let i = 0; i <= numSegments; i++) {
-      const angle = startAngle + angleStep * i;
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
+      const angle = this.startAngle + angleStep * i;
+      const x = this.centerX + this.radius * Math.cos(angle);
+      const y = this.centerY + this.radius * Math.sin(angle);
       vertices.push(x, y);
     }
 
     return vertices;
   }
 
-  private calculateCircleFromPoints(
-    p1: Point,
-    p2: Point,
-    p3: Point
-  ): { centerX: number; centerY: number; radius: number } | null {
-    const x1 = p1.getX(),
-      y1 = p1.getY();
-    const x2 = p2.getX(),
-      y2 = p2.getY();
-    const x3 = p3.getX(),
-      y3 = p3.getY();
+  public updateArcParameters(
+    centerX: number,
+    centerY: number,
+    radius: number,
+    startAngle: number,
+    endAngle: number,
+    isClockwise: boolean,
+    startPoint?: Point,
+    midPoint?: Point,
+    endPoint?: Point
+  ): void {
+    this.centerX = centerX;
+    this.centerY = centerY;
+    this.radius = radius;
+    this.startAngle = startAngle;
+    this.endAngle = endAngle;
+    this.isClockwise = isClockwise;
 
-    const a = x1 * (y2 - y3) - y1 * (x2 - x3) + x2 * y3 - x3 * y2;
-    if (Math.abs(a) < 1e-10) {
-      // Points are colinear
-      return null;
-    }
+    // Update points if provided
+    if (startPoint) this.startPoint = startPoint;
+    if (midPoint) this.midPoint = midPoint;
+    if (endPoint) this.endPoint = endPoint;
 
-    const b =
-      ((x1 * x1 + y1 * y1) * (y3 - y2) +
-        (x2 * x2 + y2 * y2) * (y1 - y3) +
-        (x3 * x3 + y3 * y3) * (y2 - y1)) /
-      (2 * a);
-    const c =
-      ((x1 * x1 + y1 * y1) * (x2 - x3) +
-        (x2 * x2 + y2 * y2) * (x3 - x1) +
-        (x3 * x3 + y3 * y3) * (x1 - x2)) /
-      (2 * a);
-
-    const centerX = b;
-    const centerY = c;
-    const radius = Math.sqrt((x1 - centerX) ** 2 + (y1 - centerY) ** 2);
-
-    return { centerX, centerY, radius };
+    this.updateVertexBuffer();
   }
 
+  // Modify the draw method
   public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
     if (this.numVertices > 0 && this.vertexBuffer) {
-      
       if (drawVertices) {
-        this.startPoint?.draw(renderPass);
-        this.midPoint?.draw(renderPass);
-        this.endPoint?.draw(renderPass)
+        // Draw the points
+        if (this.startPoint) this.startPoint.draw(renderPass);
+        if (this.midPoint) this.midPoint.draw(renderPass);
+        if (this.endPoint) this.endPoint.draw(renderPass);
       }
       this.updateCameraBuffer();
       renderPass.setPipeline(this.pipeline);

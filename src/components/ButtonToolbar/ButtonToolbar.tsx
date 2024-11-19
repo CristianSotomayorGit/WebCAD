@@ -1,20 +1,23 @@
 import React from 'react';
 import { ToolManager } from '../../domain/managers/ToolManager';
 import styles from './ButtonToolbar.module.css';
+import { FileManager } from '../../domain/managers/FileManager';
 
 interface ButtonToolbarProps {
   toolManagerRef: React.MutableRefObject<ToolManager | null>;
+  fileManagerRef: React.MutableRefObject<FileManager | null>;
   setActiveToolName: (toolName: string) => void;
   setActiveColor: (color: Float32Array) => void;
   setActiveFont: (fontName: string) => void;
   setActiveFontSize: (fontSize: number) => void;
   activeToolName: string;
   activeColor: Float32Array;
-  activeFont: string; 
+  activeFont: string;
   activeFontSize: number;
 }
 
 const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
+  fileManagerRef,
   toolManagerRef,
   setActiveToolName,
   setActiveColor,
@@ -52,6 +55,15 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
     setActiveFontSize(fontSize);
   };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      fileManagerRef.current?.loadDXF(file);
+    }
+  };
+
+  const importDXF = { name: 'Import DXF', icon: '/icons/upload.svg' }
+
   const tools = [
     { name: 'Point', icon: '/icons/point.svg' },
     { name: 'Line', icon: '/icons/line.svg' },
@@ -67,7 +79,18 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
   ];
 
   return (
+
     <div className={styles.toolbarStyle}>
+      <label className={styles.importButtonStyle}>
+        DXF
+        <img src={importDXF.icon} alt={`${importDXF.name} icon`} className={styles.iconStyle} />
+        <input
+          type="file"
+          accept=".dxf"
+          onChange={handleFileUpload}
+          style={{ display: 'none' }}
+        />
+      </label>
       {tools.map((tool) => (
         <button
           key={tool.name}

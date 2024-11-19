@@ -19,7 +19,7 @@ export class EllipseTool extends AbstractDrawingTool {
       this.centerPoint = new Point(worldPosition.x, worldPosition.y, this.renderer);
 
       // Create an initial ellipse with zero radii
-      this.currentEllipse = new Ellipse(this.renderer, worldPosition.x, worldPosition.y, 0, 0);
+      this.currentEllipse = new Ellipse(this.renderer, worldPosition.x, worldPosition.y, 0, 0, 0);
       this.currentEllipse.setColor(color);
       this.currentEllipse.addPoint(this.centerPoint)
       this.entityManager.addEntity(this.currentEllipse);
@@ -45,7 +45,7 @@ export class EllipseTool extends AbstractDrawingTool {
       const radiusX = Math.abs(worldPosition.x - this.centerPoint.getX());
       const radiusY = Math.abs(worldPosition.y - this.centerPoint.getY());
 
-      this.currentEllipse.updateRadii(radiusX, radiusY);
+      this.currentEllipse.updateProperties(radiusX, radiusY, 0);
 
       if (!this.edgePoint) {
         this.edgePoint = new Point(worldPosition.x, worldPosition.y, this.renderer);

@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Renderer } from '../infrastructure/rendering/Renderer';
 import { ToolManager } from '../domain/managers/ToolManager';
 import { EntityManager } from '../domain/managers/EntityManager';
+import { FileManager } from '../domain/managers/FileManager';
 
 export const useWebGPU = (canvasRef: React.RefObject<HTMLCanvasElement>) => {
     const rendererRef = useRef<Renderer | null>(null);
+    const fileManagerRef =useRef<FileManager | null>(null);
     const toolManagerRef = useRef<ToolManager | null>(null);
     const entityManagerRef = useRef(new EntityManager());
     const [initializationError, setInitializationError] = useState<string | null>(null);
@@ -18,6 +20,7 @@ export const useWebGPU = (canvasRef: React.RefObject<HTMLCanvasElement>) => {
 
                 try {
                     await rendererRef.current.initialize();
+                    fileManagerRef.current = new FileManager(entityManagerRef.current,rendererRef.current)
                     toolManagerRef.current = new ToolManager(entityManagerRef.current, rendererRef.current);
                     setLoad(!didLoad)
 
@@ -36,5 +39,5 @@ export const useWebGPU = (canvasRef: React.RefObject<HTMLCanvasElement>) => {
         };
     }, [canvasRef]);
 
-    return { rendererRef, didLoad, toolManagerRef, initializationError };
+    return { rendererRef, didLoad, fileManagerRef, toolManagerRef, initializationError };
 };

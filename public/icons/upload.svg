@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+  <!-- Box -->
+  <rect x="7" y="15" width="16" height="8" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+
+  <!-- Arrow -->
+  <line x1="15" y1="15" x2="15" y2="5" stroke="#FFFFFF" stroke-width="1"/>
+  <polygon points="15,5 12,8 18,8" fill="#FFFFFF"/>
+
+  <!-- Vertices -->
+  <circle cx="15" cy="5" r="2" fill="#CCCCCC"/>   <!-- Arrow tip vertex -->
+  <circle cx="15" cy="15" r="2" fill="#CCCCCC"/>   <!-- Bottom of the arrow line -->
+</svg>
