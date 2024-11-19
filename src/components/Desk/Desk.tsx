@@ -8,7 +8,6 @@ import { AbstractDrawingTool } from '../../domain/tools/DrawingTools/AbstractDra
 import { AbstractWritingTool } from '../../domain/tools/WritingTools/AbstractWritingTool';
 import { PanTool } from '../../domain/tools/ViewTools/PanTool';
 import ViewToolbar from '../ViewToolbar/ViewToolbar';
-import { EntityManager } from '../../domain/managers/EntityManager';
 
 const Desk: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);

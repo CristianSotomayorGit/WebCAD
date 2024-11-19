@@ -15,6 +15,7 @@ import { ArcTool } from '../tools/DrawingTools/ArcTool';
 import { EllipseTool } from '../tools/DrawingTools/EllipseTool';
 import { TextTool } from '../tools/WritingTools/TextTool';
 import { Tool } from '../tools/DrawingTools/DrawingTool';
+import { SelectTool } from '../tools/EditTools/SelectTool';
 
 export class ToolManager {
   private activeTool: Tool;
@@ -41,6 +42,9 @@ export class ToolManager {
     this.tools['Arc'] = new ArcTool(entityManager, renderer);
     this.tools['Ellipse'] = new EllipseTool(entityManager, renderer);
     this.tools['Text'] = new TextTool(entityManager,renderer);
+
+    this.tools['Select'] = new SelectTool(entityManager,renderer);
+
 
     this.tools['Pan'] = this.panTool;
     

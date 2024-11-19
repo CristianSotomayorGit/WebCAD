@@ -10,7 +10,7 @@ interface ButtonToolbarProps {
   setActiveFontSize: (fontSize: number) => void;
   activeToolName: string;
   activeColor: Float32Array;
-  activeFont: string; 
+  activeFont: string;
   activeFontSize: number;
 }
 
@@ -53,6 +53,7 @@ const ButtonToolbar: React.FC<ButtonToolbarProps> = ({
   };
 
   const tools = [
+    { name: 'Select', icon: '/icons/select.svg' },
     { name: 'Point', icon: '/icons/point.svg' },
     { name: 'Line', icon: '/icons/line.svg' },
     { name: 'Polyline', icon: '/icons/polyline.svg' },
