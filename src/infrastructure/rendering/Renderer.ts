@@ -204,6 +204,6 @@ export class Renderer {
   recoverLastItem() {
     let lastEntity = this.entityManager.getLastEntityInHistory();
     this.entityManager.removeEntityFromHistory(lastEntity);
-    this.entityManager.addEntity2(lastEntity)
+    this.entityManager.addEntityBack(lastEntity)
   }
 }
