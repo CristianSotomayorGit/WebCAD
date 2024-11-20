@@ -9,6 +9,7 @@ import { Point } from "../../entities/Point";
 import { Polygon } from "../../entities/Polygon";
 import { Polyline } from "../../entities/Polyline";
 import { Rectangle } from "../../entities/Rectangle";
+import { Spline } from "../../entities/Spline";
 import { AbstractDrawingTool } from "../DrawingTools/AbstractDrawingTool";
 
 const SelectToolSettings = {
@@ -90,10 +91,44 @@ export class SelectTool extends AbstractDrawingTool {
             let aspectRatio = Math.max(radiusX, radiusY) / Math.min(radiusX, radiusY);
             let adjustedTolerance = SelectToolSettings.INITIAL_TOLERANCE * aspectRatio;
             let distanceEllipse = ((mouseX - center.x) ** 2) / (radiusX ** 2) + ((mouseY - center.y) ** 2) / (radiusY ** 2);
-            if (Math.abs(distanceEllipse - 1) <= adjustedTolerance) {
-                return true;
-            }
+            if (Math.abs(distanceEllipse - 1) <= adjustedTolerance) return true;
         }
+
+
+        if (entity instanceof Spline) {
+            let controlPoints = entity.getControlPoints();
+            let samples = 100; // Number of samples along the spline for accuracy
+            let closestDistance = Infinity;
+        
+            // Iterate through each segment of the spline
+            for (let i = 0; i < controlPoints.length - 1; i++) {
+                for (let j = 0; j <= samples; j++) {
+                    let t = j / samples;
+                    let splinePoint = entity['calculateSplinePoint'](i, t);
+                    let distanceToSpline = ((mouseX - splinePoint.x) ** 2) + ((mouseY - splinePoint.y) ** 2);
+                    closestDistance = Math.min(closestDistance, distanceToSpline);
+                }
+            }
+        
+            // Adjust tolerance based on the spline's characteristics
+            let adjustedTolerance = SelectToolSettings.INITIAL_TOLERANCE;
+        
+            // Optionally, modify tolerance based on the spline's control point distance or scale
+            let splineLength = 0;
+            for (let i = 0; i < controlPoints.length - 1; i++) {
+                let dx = controlPoints[i+1].getX() - controlPoints[i].getX();
+                let dy = controlPoints[i+1].getY() - controlPoints[i].getY();
+                splineLength += Math.sqrt(dx * dx + dy * dy);
+            }
+            
+            // Adjust tolerance based on the length of the spline (scale it accordingly)
+            let lengthFactor = splineLength / 1000; // Normalize based on spline length
+            adjustedTolerance *= lengthFactor; // Increase or decrease tolerance based on spline length
+        
+            // If the closest distance is within the tolerance, return true
+            if (closestDistance <= adjustedTolerance) return true;
+        }
+        
 
         return false;
     }
