@@ -1,6 +1,8 @@
 // src/domain/tools/PointTool.ts
 
+import { Arc } from "../../entities/Arc";
 import { Circle } from "../../entities/Circle";
+import { Ellipse } from "../../entities/Ellipse";
 import { Entity } from "../../entities/Entity";
 import { Line } from "../../entities/Line";
 import { Point } from "../../entities/Point";
@@ -59,7 +61,7 @@ export class SelectTool extends AbstractDrawingTool {
         }
 
         if (entity instanceof Polygon || entity instanceof Rectangle) {
-            let nearEdge = false;
+            let onEdge = false;
             let points = entity.getPoints()
             for (let i = 0, j = 1; i < points.length; i++, j++) {
                 if (j === points.length) j = 0;
@@ -69,16 +71,28 @@ export class SelectTool extends AbstractDrawingTool {
                 const dy = endPoint.y - startPoint.y;
                 const len = Math.hypot(dx, dy);
                 const distance = Math.abs(dy * mouseX - dx * mouseY + endPoint.x * startPoint.y - endPoint.y * startPoint.x) / len;
-                if (distance <= SelectToolSettings.INITIAL_TOLERANCE) nearEdge = true;
+                if (distance <= SelectToolSettings.INITIAL_TOLERANCE) onEdge = true;
             }
 
-            return nearEdge
+            return onEdge
         }
 
         if (entity instanceof Circle) {
             let center = entity.getCenter();
             let distance = Math.sqrt(((mouseX - center.x) ** 2) + ((mouseY - center.y) ** 2));
             if (Math.abs(distance - entity.getRadius()) <= SelectToolSettings.INITIAL_TOLERANCE) return true;
+        }
+
+        if (entity instanceof Ellipse) {
+            let center = entity.getCenter();
+            let radiusX = entity.getRadiusX();
+            let radiusY = entity.getRadiusY();
+            let aspectRatio = Math.max(radiusX, radiusY) / Math.min(radiusX, radiusY);
+            let adjustedTolerance = SelectToolSettings.INITIAL_TOLERANCE * aspectRatio;
+            let distanceEllipse = ((mouseX - center.x) ** 2) / (radiusX ** 2) + ((mouseY - center.y) ** 2) / (radiusY ** 2);
+            if (Math.abs(distanceEllipse - 1) <= adjustedTolerance) {
+                return true;
+            }
         }
 
         return false;

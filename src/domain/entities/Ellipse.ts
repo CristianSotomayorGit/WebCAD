@@ -130,5 +130,9 @@ export class Ellipse extends RenderableEntity {
 
     public addPoint(point: Point): void {
         this.points.push(point);
-      }
+    }
+
+    public getCenter() { return { x: this.centerX, y: this.centerY } }
+    public getRadiusY() { return this.radiusY }
+    public getRadiusX() { return this.radiusX }
 }
