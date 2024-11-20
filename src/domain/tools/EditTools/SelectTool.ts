@@ -1,5 +1,6 @@
 // src/domain/tools/PointTool.ts
 
+import { Arc } from "../../entities/Arc";
 import { Circle } from "../../entities/Circle";
 import { Ellipse } from "../../entities/Ellipse";
 import { Entity } from "../../entities/Entity";
@@ -97,7 +98,6 @@ export class SelectTool extends AbstractDrawingTool {
             let controlPoints = entity.getControlPoints();
             let samples = 100;
             let closestDistance = Infinity;
-
             for (let i = 0; i < controlPoints.length - 1; i++) {
                 for (let j = 0; j <= samples; j++) {
                     let t = j / samples;
@@ -106,19 +106,28 @@ export class SelectTool extends AbstractDrawingTool {
                     closestDistance = Math.min(closestDistance, distanceToSpline);
                 }
             }
-
             let splineLength = 0;
             for (let i = 0; i < controlPoints.length - 1; i++) {
                 let dx = controlPoints[i + 1].getX() - controlPoints[i].getX();
                 let dy = controlPoints[i + 1].getY() - controlPoints[i].getY();
                 splineLength += Math.sqrt(dx * dx + dy * dy);
             }
-
             let adjustedTolerance = SelectToolSettings.INITIAL_TOLERANCE * (splineLength / 1000);
-
             if (closestDistance <= adjustedTolerance) return true;
         }
 
+        if (entity instanceof Arc) {
+            let closestDistance = Infinity;
+            let arcVertices = entity['calculateArcVertices']();
+            for (let i = 0; i < arcVertices.length; i += 2) {
+                let arcPointX = arcVertices[i];
+                let arcPointY = arcVertices[i + 1];
+                let distanceToArc = ((mouseX - arcPointX) ** 2) + ((mouseY - arcPointY) ** 2);
+                closestDistance = Math.min(closestDistance, distanceToArc);
+            }
+            let adjustedTolerance = SelectToolSettings.INITIAL_TOLERANCE / 100;
+            if (closestDistance <= adjustedTolerance) return true;
+        }
         return false;
     }
 }
