@@ -1,6 +1,5 @@
 // src/domain/tools/PointTool.ts
 
-import { Arc } from "../../entities/Arc";
 import { Circle } from "../../entities/Circle";
 import { Ellipse } from "../../entities/Ellipse";
 import { Entity } from "../../entities/Entity";
@@ -94,13 +93,11 @@ export class SelectTool extends AbstractDrawingTool {
             if (Math.abs(distanceEllipse - 1) <= adjustedTolerance) return true;
         }
 
-
         if (entity instanceof Spline) {
             let controlPoints = entity.getControlPoints();
-            let samples = 100; // Number of samples along the spline for accuracy
+            let samples = 100;
             let closestDistance = Infinity;
-        
-            // Iterate through each segment of the spline
+
             for (let i = 0; i < controlPoints.length - 1; i++) {
                 for (let j = 0; j <= samples; j++) {
                     let t = j / samples;
@@ -109,26 +106,18 @@ export class SelectTool extends AbstractDrawingTool {
                     closestDistance = Math.min(closestDistance, distanceToSpline);
                 }
             }
-        
-            // Adjust tolerance based on the spline's characteristics
-            let adjustedTolerance = SelectToolSettings.INITIAL_TOLERANCE;
-        
-            // Optionally, modify tolerance based on the spline's control point distance or scale
+
             let splineLength = 0;
             for (let i = 0; i < controlPoints.length - 1; i++) {
-                let dx = controlPoints[i+1].getX() - controlPoints[i].getX();
-                let dy = controlPoints[i+1].getY() - controlPoints[i].getY();
+                let dx = controlPoints[i + 1].getX() - controlPoints[i].getX();
+                let dy = controlPoints[i + 1].getY() - controlPoints[i].getY();
                 splineLength += Math.sqrt(dx * dx + dy * dy);
             }
-            
-            // Adjust tolerance based on the length of the spline (scale it accordingly)
-            let lengthFactor = splineLength / 1000; // Normalize based on spline length
-            adjustedTolerance *= lengthFactor; // Increase or decrease tolerance based on spline length
-        
-            // If the closest distance is within the tolerance, return true
+
+            let adjustedTolerance = SelectToolSettings.INITIAL_TOLERANCE * (splineLength / 1000);
+
             if (closestDistance <= adjustedTolerance) return true;
         }
-        
 
         return false;
     }
