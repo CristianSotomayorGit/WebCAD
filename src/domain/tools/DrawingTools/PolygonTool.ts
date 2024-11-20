@@ -26,7 +26,7 @@ export class PolygonTool extends AbstractDrawingTool {
 
       // Create the Polygon entity with default sides (3)
       this.currentPolygon = new Polygon(this.renderer, this.centerPoint.getX(), this.centerPoint.getY(), this.numSides);
-      this.currentPolygon.addPoint(this.centerPoint)
+      // this.currentPolygon.addPoint(this.centerPoint)
       this.currentPolygon.setColor(color);
       this.entityManager.addEntity(this.currentPolygon);
 

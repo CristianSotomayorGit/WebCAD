@@ -12,7 +12,7 @@ export class Rectangle extends RenderableEntity {
   private endY: number;
   private vertexBuffer: GPUBuffer | null = null;
   private vertices: Float32Array = new Float32Array(0);
-  private cornerPoints: Point[] = [];
+  private points: Point[] = [];
 
   constructor(renderer: Renderer, startX: number, startY: number) {
     super(renderer);
@@ -26,7 +26,7 @@ export class Rectangle extends RenderableEntity {
     this.setupBindGroup();
 
     const startPoint = new Point(this.startX, this.startY, this.renderer);
-    this.cornerPoints.push(startPoint);
+    this.points.push(startPoint);
   }
 
   protected setupPipeline(): void {
@@ -111,14 +111,12 @@ export class Rectangle extends RenderableEntity {
       this.startX, this.startY,
     ]);
 
-    // Update corner points
-    if (this.cornerPoints.length < 2) {
-      const endPoint = new Point(this.endX, this.endY, this.renderer);
-      this.cornerPoints.push(endPoint);
-    } else {
-      this.cornerPoints[1].setX(this.endX);
-      this.cornerPoints[1].setY(this.endY);
-    }
+    this.points = [
+      new Point(this.startX, this.startY, this.renderer),
+      new Point(this.endX, this.startY, this.renderer),
+      new Point(this.endX, this.endY, this.renderer),
+      new Point(this.startX, this.endY, this.renderer),
+    ];
 
     this.vertexBuffer = this.device.createBuffer({
       size: this.vertices.byteLength,
@@ -128,15 +126,11 @@ export class Rectangle extends RenderableEntity {
     this.device.queue.writeBuffer(this.vertexBuffer, 0, this.vertices);
   }
 
-  public getCornerPoints(): Point[] {
-    return this.cornerPoints;
-  }
-
   public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
     if (this.vertexBuffer) {
 
       if (drawVertices) {
-        for (const point of this.cornerPoints) {
+        for (const point of this.points) {
           point.draw(renderPass);
         }
       }
@@ -154,12 +148,16 @@ export class Rectangle extends RenderableEntity {
       this.vertexBuffer = null;
     }
 
-    for (const point of this.cornerPoints) {
+    for (const point of this.points) {
       point.dispose();
     }
 
-    this.cornerPoints = [];
+    this.points = [];
 
     super.dispose();
+  }
+
+  public getPoints() {
+    return this.points;
   }
 }

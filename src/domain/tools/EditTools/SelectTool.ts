@@ -3,9 +3,17 @@
 import { Entity } from "../../entities/Entity";
 import { Line } from "../../entities/Line";
 import { Point } from "../../entities/Point";
+import { Polygon } from "../../entities/Polygon";
+import { Polyline } from "../../entities/Polyline";
+import { Rectangle } from "../../entities/Rectangle";
 import { AbstractDrawingTool } from "../DrawingTools/AbstractDrawingTool";
 
+const SelectToolSettings = {
+    INITIAL_TOLERANCE: 0.0125
+  }
+
 export class SelectTool extends AbstractDrawingTool {
+
     public onLeftClick(event: MouseEvent): void {
         const { x, y } = this.getWorldPosition(event);
         console.log(x, y);
@@ -18,30 +26,53 @@ export class SelectTool extends AbstractDrawingTool {
         }
     }
 
-
     public isMouseNearShape(entity: Entity, mouseX: number, mouseY: number) {
         if (entity instanceof Point) {
-            return Math.hypot(mouseX - entity.getX(), mouseY - entity.getY()) <= 0.05;
+            return Math.hypot(mouseX - entity.getX(), mouseY - entity.getY()) <= 0.0;
         }
-        // if (entity instanceof Line) {
-        //     const dx = shape.x2 - shape.x1;
-        //     const dy = shape.y2 - shape.y1;
-        //     const len = Math.hypot(dx, dy);
-        //     const distance = Math.abs(dy * mouseX - dx * mouseY + shape.x2 * shape.y1 - shape.y2 * shape.x1) / len;
-        //     return distance < 5; // Threshold for hover area
-        // }
 
-        // if (shape.type === 'polygon') {
-        //     let inside = false;
-        //     for (let i = 0, j = shape.vertices.length - 1; i < shape.vertices.length; j = i++) {
-        //         const xi = shape.vertices[i].x, yi = shape.vertices[i].y;
-        //         const xj = shape.vertices[j].x, yj = shape.vertices[j].y;
-        //         const intersect = ((yi > mouseY) !== (yj > mouseY)) &&
-        //                           (mouseX < (xj - xi) * (mouseY - yi) / (yj - yi) + xi);
-        //         if (intersect) inside = !inside;
-        //     }
-        //     return inside;
-        // }
+        if (entity instanceof Line) {
+            let startPoint = { x: entity.getStartPoint().getX(), y: entity.getStartPoint().getY() };
+            let endPoint = { x: entity.getEndPoint().getX(), y: entity.getEndPoint().getY() };
+            const dx = endPoint.x - startPoint.x;
+            const dy = endPoint.y - startPoint.y;
+            const len = Math.hypot(dx, dy);
+            const distance = Math.abs(dy * mouseX - dx * mouseY + endPoint.x * startPoint.y - endPoint.y * startPoint.x) / len;
+            return distance < SelectToolSettings.INITIAL_TOLERANCE;
+        }
+
+        if (entity instanceof Polyline) {
+            let onEdge = false;
+            let points = entity.getPoints()
+            for (let i = 0, j = 1; i < points.length - 1; i++, j++) {
+                let startPoint = { x: points[i].getX(), y: points[i].getY() };
+                let endPoint = { x: points[j].getX(), y: points[j].getY() };
+                const dx = endPoint.x - startPoint.x;
+                const dy = endPoint.y - startPoint.y;
+                const len = Math.hypot(dx, dy);
+                const distance = Math.abs(dy * mouseX - dx * mouseY + endPoint.x * startPoint.y - endPoint.y * startPoint.x) / len;
+                if (distance <= SelectToolSettings.INITIAL_TOLERANCE) onEdge = true;
+            }
+
+            return onEdge
+        }
+
+        if (entity instanceof Polygon || entity instanceof Rectangle) {
+            let onEdge = false;
+            let points = entity.getPoints()
+            for (let i = 0, j = 1; i < points.length; i++, j++) {
+                if (j === points.length) j = 0;
+                let startPoint = { x: points[i].getX(), y: points[i].getY() };
+                let endPoint = { x: points[j].getX(), y: points[j].getY() };
+                const dx = endPoint.x - startPoint.x;
+                const dy = endPoint.y - startPoint.y;
+                const len = Math.hypot(dx, dy);
+                const distance = Math.abs(dy * mouseX - dx * mouseY + endPoint.x * startPoint.y - endPoint.y * startPoint.x) / len;
+                if (distance <= SelectToolSettings.INITIAL_TOLERANCE) onEdge = true;
+            }
+
+            return onEdge
+        }
         return false;
     }
 }

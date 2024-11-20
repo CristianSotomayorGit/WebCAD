@@ -92,9 +92,10 @@ export class Polygon extends RenderableEntity {
       const y = this.centerY + this.radius * Math.sin(angle);
       verticesArray.push(x, y);
 
-      this.points.push(new Point(this.centerX, this.centerY, this.renderer))
+      // this.points.push(new Point(this.centerX, this.centerY, this.renderer))
 
       if (i < this.numSides) {
+        // console.log(i)
         // Create point representations for each vertex
         const point = new Point(x, y, this.renderer);
         this.points.push(point);
@@ -127,8 +128,11 @@ export class Polygon extends RenderableEntity {
     if (this.vertexBuffer && this.vertices.length >= 4) {
       this.updateCameraBuffer();
 
+      // console.log('here11111');
+
       if (drawVertices) {
         for (let point of this.points) {
+          // console.log(point)
           point.draw(renderPass)
         }
       }
@@ -158,5 +162,9 @@ export class Polygon extends RenderableEntity {
 
   public addPoint(point: Point): void {
     this.points.push(point);
+  }
+
+  public getPoints() {
+    return this.points;
   }
 }

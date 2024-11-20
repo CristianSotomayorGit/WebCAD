@@ -64,7 +64,7 @@ export class Grid {
   draw(renderPass: GPURenderPassEncoder) {
     this.lines.forEach((line) => {
       if (this.isLineInView(line)) {
-        line.draw(renderPass);
+        line.draw(renderPass, false);
       }
     });
   }
