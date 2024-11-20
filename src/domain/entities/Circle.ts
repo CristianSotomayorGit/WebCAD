@@ -96,7 +96,7 @@ export class Circle extends RenderableEntity {
     this.createBuffers();
   }
 
-  public override draw(renderPass: GPURenderPassEncoder, drawVertices:boolean): void {
+  public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
     if (this.vertexBuffer && this.numVertices > 0) {
 
       if (drawVertices) {
@@ -121,5 +121,13 @@ export class Circle extends RenderableEntity {
 
   public addPoint(point: Point): void {
     this.points.push(point);
+  }
+
+  public getCenter(): { x: number, y: number } {
+    return { x: this.centerX, y: this.centerY }
+  }
+
+  public getRadius(): number {
+    return this.radius
   }
 }

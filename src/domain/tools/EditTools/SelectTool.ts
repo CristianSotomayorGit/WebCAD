@@ -1,5 +1,6 @@
 // src/domain/tools/PointTool.ts
 
+import { Circle } from "../../entities/Circle";
 import { Entity } from "../../entities/Entity";
 import { Line } from "../../entities/Line";
 import { Point } from "../../entities/Point";
@@ -10,7 +11,7 @@ import { AbstractDrawingTool } from "../DrawingTools/AbstractDrawingTool";
 
 const SelectToolSettings = {
     INITIAL_TOLERANCE: 0.0125
-  }
+}
 
 export class SelectTool extends AbstractDrawingTool {
 
@@ -42,7 +43,7 @@ export class SelectTool extends AbstractDrawingTool {
         }
 
         if (entity instanceof Polyline) {
-            let onEdge = false;
+            let nearEdge = false;
             let points = entity.getPoints()
             for (let i = 0, j = 1; i < points.length - 1; i++, j++) {
                 let startPoint = { x: points[i].getX(), y: points[i].getY() };
@@ -51,14 +52,14 @@ export class SelectTool extends AbstractDrawingTool {
                 const dy = endPoint.y - startPoint.y;
                 const len = Math.hypot(dx, dy);
                 const distance = Math.abs(dy * mouseX - dx * mouseY + endPoint.x * startPoint.y - endPoint.y * startPoint.x) / len;
-                if (distance <= SelectToolSettings.INITIAL_TOLERANCE) onEdge = true;
+                if (distance <= SelectToolSettings.INITIAL_TOLERANCE) nearEdge = true;
             }
 
-            return onEdge
+            return nearEdge
         }
 
         if (entity instanceof Polygon || entity instanceof Rectangle) {
-            let onEdge = false;
+            let nearEdge = false;
             let points = entity.getPoints()
             for (let i = 0, j = 1; i < points.length; i++, j++) {
                 if (j === points.length) j = 0;
@@ -68,11 +69,18 @@ export class SelectTool extends AbstractDrawingTool {
                 const dy = endPoint.y - startPoint.y;
                 const len = Math.hypot(dx, dy);
                 const distance = Math.abs(dy * mouseX - dx * mouseY + endPoint.x * startPoint.y - endPoint.y * startPoint.x) / len;
-                if (distance <= SelectToolSettings.INITIAL_TOLERANCE) onEdge = true;
+                if (distance <= SelectToolSettings.INITIAL_TOLERANCE) nearEdge = true;
             }
 
-            return onEdge
+            return nearEdge
         }
+
+        if (entity instanceof Circle) {
+            let center = entity.getCenter();
+            let distance = Math.sqrt(((mouseX - center.x) ** 2) + ((mouseY - center.y) ** 2));
+            if (Math.abs(distance - entity.getRadius()) <= SelectToolSettings.INITIAL_TOLERANCE) return true;
+        }
+
         return false;
     }
 }
