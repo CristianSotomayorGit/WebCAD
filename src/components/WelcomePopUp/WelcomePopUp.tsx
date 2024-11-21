@@ -1,13 +1,13 @@
 import React from 'react';
-import styles from './PopUp.module.css';
+import styles from './WelcomePopUp.module.css';
 
-interface PopUpProps {
+interface WelcomePopUpProps {
     didLoad: boolean;
     initializationError: string;
     setShowPopup(show: boolean): void;
 }
 
-const PopUp: React.FC<PopUpProps> = ({ didLoad, initializationError, setShowPopup }) => {
+const WelcomePopUp: React.FC<WelcomePopUpProps> = ({ didLoad, initializationError, setShowPopup }) => {
     return (
         <div className={styles.overlayStyle}>
             <div className={styles.popupStyle}>
@@ -104,4 +104,4 @@ const PopUp: React.FC<PopUpProps> = ({ didLoad, initializationError, setShowPopu
     );
 };
 
-export default PopUp;
+export default WelcomePopUp;

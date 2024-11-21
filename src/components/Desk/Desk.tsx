@@ -2,13 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useWebGPU } from '../../hooks/useWebGPU';
 import CommandToolbar from '../CommandToolbar/CommandToolbar';
 import ButtonToolbar from '../ButtonToolbar/ButtonToolbar';
-import PopUp from '../PopUp/PopUp';
 import WebGPUCanvas from '../WebGPUCanvas/WebGPUCanvas';
 import { AbstractDrawingTool } from '../../domain/tools/DrawingTools/AbstractDrawingTool';
 import { AbstractWritingTool } from '../../domain/tools/WritingTools/AbstractWritingTool';
 import { PanTool } from '../../domain/tools/ViewTools/PanTool';
 import ViewToolbar from '../ViewToolbar/ViewToolbar';
-import { EntityManager } from '../../domain/managers/EntityManager';
+import SignInPopUp from '../SignInPopUp/SignInPopUp';
+import SignUpPopUp from '../SignUpPopUp/SignUpPopUp';
+import WelcomePopUp from '../WelcomePopUp/WelcomePopUp';
 
 const Desk: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -17,6 +18,8 @@ const Desk: React.FC = () => {
     const [activeFont, setActiveFont] = useState('Times New Roman');
     const [activeFontSize, setActiveFontSize] = useState(12);
     const [showPopup, setShowPopup] = useState(true);
+    const [isSigningUp, setSigningUp] = useState(false);
+    const [isSigningIn, setSigningIn] = useState(false);
     const [drawGrid, setDrawGrid] = useState(false);
     const [drawVertices, setDrawVertices] = useState(true);
     const { rendererRef, didLoad, toolManagerRef, initializationError } = useWebGPU(canvasRef);
@@ -90,8 +93,10 @@ const Desk: React.FC = () => {
 
     return (
         <>
-            {showPopup && <PopUp didLoad={didLoad} initializationError={initializationError!} setShowPopup={setShowPopup} />}
-            <CommandToolbar activeTool={activeToolName} />
+            {showPopup && <WelcomePopUp didLoad={didLoad} initializationError={initializationError!} setShowPopup={setShowPopup} />}
+            {isSigningIn && <SignInPopUp />}
+            {isSigningUp && <SignUpPopUp />}
+            <CommandToolbar setSigningUp={setSigningUp} setSigningIn={setSigningIn} activeTool={activeToolName} />
             <ButtonToolbar
                 toolManagerRef={toolManagerRef}
                 setActiveToolName={setActiveToolName}
@@ -103,10 +108,7 @@ const Desk: React.FC = () => {
                 activeFont={activeFont}
                 activeFontSize={activeFontSize}
             />
-
             <ViewToolbar renderer={rendererRef.current!} drawGrid={drawGrid} setDrawGrid={setDrawGrid} drawVertices={drawVertices} setDrawVertices={setDrawVertices} />
-
-
             <WebGPUCanvas canvasRef={canvasRef} />
         </>
     );
