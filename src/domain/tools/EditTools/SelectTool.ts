@@ -9,6 +9,7 @@ import { Point } from "../../entities/Point";
 import { Polygon } from "../../entities/Polygon";
 import { Polyline } from "../../entities/Polyline";
 import { Rectangle } from "../../entities/Rectangle";
+import { RenderableEntity } from "../../entities/RenderableEntity";
 import { Spline } from "../../entities/Spline";
 import { AbstractDrawingTool } from "../DrawingTools/AbstractDrawingTool";
 
@@ -17,16 +18,22 @@ const SelectToolSettings = {
 }
 
 export class SelectTool extends AbstractDrawingTool {
+    private selectedEntities: RenderableEntity[] = [];
+
 
     public onLeftClick(event: MouseEvent): void {
         const { x, y } = this.getWorldPosition(event);
         console.log(x, y);
         for (let entity of this.entityManager.getEntities()) {
             if (this.isMouseNearShape(entity, x, y)) {
-                entity.setColor(new Float32Array([1.0, 1.0, 1.0, 1.0])
-                )
+                entity.setSelectedColor();
+                this.selectedEntities.push(entity);
+                return;
             }
-
+        }
+        if (this.selectedEntities.length > 0) {
+            this.selectedEntities.forEach(entity => entity.setColor())
+            this.selectedEntities = [];
         }
     }
 

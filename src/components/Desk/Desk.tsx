@@ -85,8 +85,6 @@ const Desk: React.FC = () => {
         }
     }, [toolManagerRef, activeColor, activeFont, activeFontSize]);
 
-
-
     return (
         <>
             {showPopup && <PopUp didLoad={didLoad} initializationError={initializationError!} setShowPopup={setShowPopup} />}
@@ -102,11 +100,8 @@ const Desk: React.FC = () => {
                 activeFont={activeFont}
                 activeFontSize={activeFontSize}
             />
-
             <ViewToolbar renderer={rendererRef.current!} drawGrid={drawGrid} setDrawGrid={setDrawGrid} drawVertices={drawVertices} setDrawVertices={setDrawVertices} />
-
-
-            <WebGPUCanvas canvasRef={canvasRef} />
+            <WebGPUCanvas activeToolName={activeToolName} canvasRef={canvasRef} />
         </>
     );
 };

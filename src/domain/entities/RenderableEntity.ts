@@ -10,13 +10,14 @@ export abstract class RenderableEntity implements Entity {
   protected bindGroup!: GPUBindGroup;
   protected cameraBuffer!: GPUBuffer;
   protected colorBuffer!: GPUBuffer;
+  protected selectedColor!: Float32Array;
   protected color: Float32Array;
 
   constructor(renderer: Renderer, color?: Float32Array) {
     this.renderer = renderer;
     this.device = renderer.getDevice();
     this.color = color || new Float32Array([1.0, 0.0, 0.0, 1.0]); // Default color: Red
-
+    this.selectedColor = new Float32Array([1.0, 1.0, 1.0, 1.0])
     this.setupPipeline();
     this.createCameraBuffer();
     this.createColorBuffer();
@@ -66,13 +67,19 @@ export abstract class RenderableEntity implements Entity {
     this.device.queue.writeBuffer(this.cameraBuffer, 0, cameraData);
   }
 
-  public setColor(color: Float32Array): void {
+  public setColor(color: Float32Array = this.color): void {
     if (color.length !== 4) {
       throw new Error('Color must be a Float32Array with 4 components (RGBA).');
     }
     this.color = color;
     this.device.queue.writeBuffer(this.colorBuffer, 0, this.color);
   }
+
+  public setSelectedColor(): void {
+    if (this.selectedColor.length !== 4) {
+      throw new Error('Color must be a Float32Array with 4 components (RGBA).');
+    }
+    this.device.queue.writeBuffer(this.colorBuffer, 0, this.selectedColor);  }
 
   public abstract draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void;
   public dispose(): void {
