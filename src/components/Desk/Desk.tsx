@@ -18,8 +18,8 @@ const Desk: React.FC = () => {
     const [activeFont, setActiveFont] = useState('Times New Roman');
     const [activeFontSize, setActiveFontSize] = useState(12);
     const [showPopup, setShowPopup] = useState(true);
-    const [isSigningUp, setSigningUp] = useState(false);
-    const [isSigningIn, setSigningIn] = useState(false);
+    const [isSigningUp, setIsSigningUp] = useState(false);
+    const [isSigningIn, setIsSigningIn] = useState(false);
     const [drawGrid, setDrawGrid] = useState(false);
     const [drawVertices, setDrawVertices] = useState(true);
     const { rendererRef, didLoad, toolManagerRef, initializationError } = useWebGPU(canvasRef);
@@ -94,9 +94,9 @@ const Desk: React.FC = () => {
     return (
         <>
             {showPopup && <WelcomePopUp didLoad={didLoad} initializationError={initializationError!} setShowPopup={setShowPopup} />}
-            {isSigningIn && <SignInPopUp />}
-            {isSigningUp && <SignUpPopUp />}
-            <CommandToolbar setSigningUp={setSigningUp} setSigningIn={setSigningIn} activeTool={activeToolName} />
+            {isSigningIn && <SignInPopUp isSigningIn={isSigningIn} setIsSigningIn={setIsSigningIn} isSigningUp={isSigningUp} setIsSigningUp={setIsSigningUp} />}
+            {isSigningUp && <SignUpPopUp isSigningIn={isSigningIn} setIsSigningIn={setIsSigningIn} isSigningUp={isSigningUp} setIsSigningUp={setIsSigningUp} />}
+            <CommandToolbar isSigningIn={isSigningIn} setSigningUp={setIsSigningUp} isSigningUp={isSigningUp} setSigningIn={setIsSigningIn} activeTool={activeToolName} />
             <ButtonToolbar
                 toolManagerRef={toolManagerRef}
                 setActiveToolName={setActiveToolName}
