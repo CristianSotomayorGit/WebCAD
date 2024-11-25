@@ -93,7 +93,7 @@ const Desk: React.FC = () => {
 
     return (
         <>
-            {showPopup && <WelcomePopUp didLoad={didLoad} initializationError={initializationError!} setShowPopup={setShowPopup} />}
+            {false && <WelcomePopUp didLoad={didLoad} initializationError={initializationError!} setShowPopup={setShowPopup} />}
             {isSigningIn && <SignInPopUp isSigningIn={isSigningIn} setIsSigningIn={setIsSigningIn} isSigningUp={isSigningUp} setIsSigningUp={setIsSigningUp} />}
             {isSigningUp && <SignUpPopUp isSigningIn={isSigningIn} setIsSigningIn={setIsSigningIn} isSigningUp={isSigningUp} setIsSigningUp={setIsSigningUp} />}
             <CommandToolbar isSigningIn={isSigningIn} setSigningUp={setIsSigningUp} isSigningUp={isSigningUp} setSigningIn={setIsSigningIn} activeTool={activeToolName} />
@@ -109,7 +109,7 @@ const Desk: React.FC = () => {
                 activeFontSize={activeFontSize}
             />
             <ViewToolbar renderer={rendererRef.current!} drawGrid={drawGrid} setDrawGrid={setDrawGrid} drawVertices={drawVertices} setDrawVertices={setDrawVertices} />
-            <WebGPUCanvas canvasRef={canvasRef} />
+            {/* <WebGPUCanvas canvasRef={canvasRef} /> */}
         </>
     );
 };
