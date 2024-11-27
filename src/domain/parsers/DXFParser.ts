@@ -73,7 +73,16 @@ export class DXFParser {
         this.index -= 2;
         break;
       } else {
-        entity.properties[code] = value;
+        if (entity.properties.hasOwnProperty(code)) {
+          // If the code already exists, convert it to an array
+          if (Array.isArray(entity.properties[code])) {
+            (entity.properties[code] as any[]).push(value);
+          } else {
+            entity.properties[code] = [entity.properties[code], value];
+          }
+        } else {
+          entity.properties[code] = value;
+        }
       }
     }
     // Avoid adding 'EOF' as an entity

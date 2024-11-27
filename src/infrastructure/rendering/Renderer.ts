@@ -2,6 +2,7 @@ import { EntityManager } from '../../domain/managers/EntityManager';
 import { Camera } from '../../domain/Camera';
 import { Grid } from '../../domain/entities/Grid';
 import { Point } from '../../domain/entities/Point';
+import { Spline } from '../../domain/entities/Spline';
 
 export class Renderer {
   private device!: GPUDevice;
@@ -175,6 +176,7 @@ export class Renderer {
     });
 
     entities.forEach((entity) => {
+      if (entity instanceof Spline) console.log('nigger')
       entity.draw(renderPass, this.drawVertices);
     });
     // }
