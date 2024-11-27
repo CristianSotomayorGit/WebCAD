@@ -7,19 +7,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Dependencies
 node_modules/
-
-# Build output
 dist/
 dist-ssr/
+*.local/
 
-# TypeScript build info
-*.tsbuildinfo
-
-# Temporary or unnecessary files
-todo.txt
-tes.dxf
+# TypeScript
+tsconfig.tsbuildinfo
 
 # Editor directories and files
 .vscode/*
@@ -32,5 +26,10 @@ tes.dxf
 *.sln
 *.sw?
 
-# OS and IDE specific files
-*.log
+# Optional - Personal or unnecessary files
+todo.txt
+
+# Optional - lock files (if you choose to ignore it)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
