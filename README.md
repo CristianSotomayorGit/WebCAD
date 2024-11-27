@@ -58,15 +58,15 @@ Leverages the power of **WebGPU** for high-performance rendering, providing smoo
 ### Future Enhancements:
 
 1. **Additional Drawing Tools**
-    - [ ] Rectangle Tool: Allows users to draw rectangles by specifying two opposite corners.
-    - [ ] Polygon Tool: Enables drawing of regular polygons (e.g., triangles, pentagons) by specifying the number of sides and radius.
+    - [x] Rectangle Tool: Allows users to draw rectangles by specifying two opposite corners.
+    - [x] Polygon Tool: Enables drawing of regular polygons (e.g., triangles, pentagons) by specifying the number of sides and radius.
 
 2. **Arc and Ellipse Tools**
-    - [ ] Arc Tool: Draw arcs by specifying start point, end point, and radius or angle.
-    - [ ] Ellipse Tool: Draw ellipses by specifying the major and minor axes.
+    - [x] Arc Tool: Draw arcs by specifying start point, end point, and radius or angle.
+    - [x] Ellipse Tool: Draw ellipses by specifying the major and minor axes.
 
 3. **Text and Annotation Tools**
-    - [ ] Text Tool: Add text annotations to drawings with options for font style, size, and alignment.
+    - [x] Text Tool: Add text annotations to drawings with options for font style, size, and alignment.
     - [ ] Multiline Text (MTEXT): Supports paragraphs of text with formatting options.
 
 4. **Import/Export Capabilities**
