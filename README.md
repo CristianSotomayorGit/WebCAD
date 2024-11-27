@@ -114,12 +114,3 @@ Incorporating these additional tools and features will significantly enhance **W
 Feel free to ask if you need further details on implementing any of these tools or features!
 
 ---
-
-## Getting Started
-
-To run this project locally:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/webcad.git
-   cd webcad
