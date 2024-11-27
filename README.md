@@ -1,4 +1,4 @@
-# WebCAD
+# OtterCAD
 
 ## License
 
@@ -6,7 +6,7 @@ All rights reserved. You may not use, copy, modify, or share this code without e
 
 ## Overview
 
-Welcome to **WebCAD**! This application leverages **WebGPU** to render an infinite grid that supports intuitive zooming and panning. Additionally, it provides tools to draw lines, polylines, and points on the grid with consistent visual behavior regardless of zoom level.
+Welcome to **OtterCAD**! This application leverages **WebGPU** to render an infinite grid that supports intuitive zooming and panning. Additionally, it provides tools to draw lines, polylines, and points on the grid with consistent visual behavior regardless of zoom level.
 
 This project aims to be a lightweight challenger to professional CAD software like **AutoCAD**, offering essential drawing functionalities in a simplified and accessible web-based environment.
 
@@ -109,7 +109,7 @@ Leverages the power of **WebGPU** for high-performance rendering, providing smoo
 
 ## Conclusion
 
-Incorporating these additional tools and features will significantly enhance **WebCAD**'s capabilities, making it a more viable alternative to established CAD software like AutoCAD. Prioritize the tools based on user needs and the specific industry you're targeting. Engaging with potential users to gather feedback can also guide you in refining the toolset and features.
+Incorporating these additional tools and features will significantly enhance **OtterCAD**'s capabilities, making it a more viable alternative to established CAD software like AutoCAD. Prioritize the tools based on user needs and the specific industry you're targeting. Engaging with potential users to gather feedback can also guide you in refining the toolset and features.
 
 Feel free to ask if you need further details on implementing any of these tools or features!
 
