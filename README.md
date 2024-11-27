@@ -1,5 +1,9 @@
 # WebCAD
 
+## License
+
+All rights reserved. You may not use, copy, modify, or share this code without explicit permission from the author.
+
 ## Overview
 
 Welcome to **WebCAD**! This application leverages **WebGPU** to render an infinite grid that supports intuitive zooming and panning. Additionally, it provides tools to draw lines, polylines, and points on the grid with consistent visual behavior regardless of zoom level.
