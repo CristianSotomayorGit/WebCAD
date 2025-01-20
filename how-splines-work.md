@@ -25,8 +25,6 @@ Bézier curves are defined by control points that influence the shape of the cur
 
 ---
 
-This version avoids broken links and uses the cleanest possible URLs for clarity and functionality.
-
 ## **2. How OtterCAD's Code Handles Splines**
 
 To implement and render splines, the following files are required:
