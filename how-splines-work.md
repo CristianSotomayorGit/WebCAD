@@ -19,8 +19,8 @@ Bézier curves are defined by control points that influence the shape of the cur
 
 ### **Sources**
 
-1. [Cubic Hermite Spline: Catmull–Rom Spline](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline)  
-2. [Bézier Curve](https://en.wikipedia.org/wiki/B%C3%A9zier_curve)  
+1. [Bézier Curve](https://en.wikipedia.org/wiki/B%C3%A9zier_curve)  
+2. [Cubic Hermite Spline: Catmull–Rom Spline](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline)  
 3. [Centripetal Catmull–Rom Spline](https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline)
 
 ---
