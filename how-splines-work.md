@@ -74,17 +74,19 @@ $$
 P_0 \text{ and } P_3
 $$
 
-- 
 #### **Key Features**
 - **Dynamic Control Point Handling**: Points can be added, updated, or removed, and the curve updates in real-time.
 - **Smooth Rendering**: Adjustable segment density ensures high-quality curves.
 - **GPU Acceleration**: Efficient rendering with WebGPU shaders.
 - **Interactive Tool**: `SplineTool` allows users to draw and manipulate splines directly within the application.
 
+Here’s the updated section with the links added:
+
+```markdown
 #### **Steps in Rendering**
 
-1. **User Interaction via `SplineTool`**:
-   Users interact with the spline through `SplineTool`, which provides intuitive controls to:
+1. **User Interaction via `SplineTool`**:  
+   Users interact with the spline through [`SplineTool`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/tools/DrawingTools/SplineTool.ts), which provides intuitive controls to:
    - Add new control points.
    - Update existing control points.
    - Remove unwanted control points.
@@ -97,8 +99,8 @@ $$
    }
    ```
 
-2. **Add Control Points to the Spline**:
-   Once control points are defined, they are passed to the spline:
+2. **Add Control Points to the Spline**:  
+   Once control points are defined, they are passed to the spline, implemented in [`Spline.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/entities/Spline.ts):
    ```typescript
    public addControlPoint(point: Point): void {
      this.controlPoints.push(point);
@@ -106,8 +108,8 @@ $$
    }
    ```
 
-3. **Update the Curve Geometry**:
-   Each time control points change, the GPU buffer is updated to reflect the new spline geometry:
+3. **Update the Curve Geometry**:  
+   Each time control points change, the GPU buffer is updated to reflect the new spline geometry. This is part of the spline's implementation in [`Spline.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/entities/Spline.ts):
    ```typescript
    public updateVertexBuffer(): void {
      const vertices: number[] = [];
@@ -125,8 +127,8 @@ $$
    }
    ```
 
-4. **Render the Curve**:
-   The spline is rendered by drawing the vertices stored in the GPU buffer:
+4. **Render the Curve**:  
+   The spline is rendered by drawing the vertices stored in the GPU buffer. The rendering logic relies on WebGPU and the associated shader defined in [`PolylineShader.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/shaders/PolylineShader.ts):
    ```typescript
    public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
      if (this.numVertices > 0 && this.vertexBuffer) {
@@ -137,7 +139,8 @@ $$
      }
    }
    ```
-
 ---
 
+This version includes links to the corresponding files in the GitHub repository, making it easier to navigate to the relevant code directly.
+```
 This version provides a more in-depth comparison of Bézier curves and Catmull-Rom splines while maintaining clarity and structure. Let me know if you need further refinements!
