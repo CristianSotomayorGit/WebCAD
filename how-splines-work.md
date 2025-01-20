@@ -6,78 +6,6 @@ Bézier curves are defined by control points that influence the shape of the cur
 
 ---
 
-## **1. Difference Between Catmull-Rom Splines and Bézier Curves**
-
-### **Bézier Curves**
-
-Bézier curves are defined by control points that influence the shape of the curve but do not necessarily lie on it. A cubic Bézier curve is mathematically defined as:
-
-$$
-P(t) = (1-t)^3 P_0 + 3(1-t)^2 t P_1 + 3(1-t)t^2 P_2 + t^3 P_3
-$$
-
-Here:
-- \(P_0\) and \(P_3\) are the endpoints.
-- \(P_1\) and \(P_2\) are control points influencing the tangents.
-
-#### **Pros**:
-- Highly precise for detailed design work (e.g., typography, logos).
-- Smooth and continuous control of tangents.
-
-#### **Cons**:
-- Requires user adjustment to achieve a desired shape.
-- May feel unintuitive in interactive applications since control points don’t lie on the curve.
-
----
-
-### **Catmull-Rom Splines**
-
-Catmull-Rom splines are cubic Hermite splines designed to pass through all control points. They automatically calculate tangents based on adjacent control points, making them more intuitive for applications like path drawing or CAD software.
-
-#### **Key Characteristics**:
-- **Direct Interpolation**: The curve passes through all control points, eliminating the need for users to manipulate tangents manually.
-- **Automatic Tangent Calculation**: The tangents are derived from neighboring control points using the formula:
-
-$$
-T_i = \frac{P_{i+1} - P_{i-1}}{2}
-$$
-
-- **Mathematical Definition**:  
-  A Catmull-Rom spline segment between \(P_1\) and \(P_2\), with neighbors \(P_0\) and \(P_3\), is defined as:
-
-$$
-P(t) = 0.5 \times 
-\begin{bmatrix} 
-1 & t & t^2 & t^3 
-\end{bmatrix}
-\begin{bmatrix}
-0 & 2 & 0 & 0 \\
--1 & 0 & 1 & 0 \\
-2 & -5 & 4 & -1 \\
--1 & 3 & -3 & 1
-\end{bmatrix}
-\begin{bmatrix} 
-P_0 \\ 
-P_1 \\ 
-P_2 \\ 
-P_3 
-\end{bmatrix}
-$$
-
----
----
-- **Intuitive Interactivity**: Adjusting a control point directly changes the curve passing through it, which feels natural to users.
-
-#### **Pros**:
-- Automatically smooth and continuous.
-- User-friendly for drawing or path modeling in interactive environments.
-
-#### **Cons**:
-- Limited control over tangents compared to Bézier curves.
-- Less suited for high-precision design tasks where tangent control is critical.
-
----
-
 ### **Summary of Differences**
 
 | **Feature**               | **Bézier Curves**                            | **Catmull-Rom Splines**                  |
@@ -89,7 +17,7 @@ $$
 
 ---
 
-## **2. Files Needed**
+## **2. How OtterCAD's Code Handles Splines**
 
 To implement and render splines, the following files are required:
 
