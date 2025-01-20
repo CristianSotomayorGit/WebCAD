@@ -91,8 +91,6 @@ $$
 
 ---
 
-Here’s the **Steps in Rendering** section with a more specific explanation for the shader part:
-
 #### **Steps in Rendering**
 
 1. **User Interaction via `SplineTool`**:  
@@ -227,5 +225,3 @@ Here’s the **Steps in Rendering** section with a more specific explanation for
    ```
 
    The shaders and rendering pipeline ensure the spline is displayed smoothly, with dynamic adjustments for zoom, pan, and color.
-```
-
