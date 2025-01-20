@@ -93,7 +93,6 @@ $$
 
 Here’s the **Steps in Rendering** section with a more specific explanation for the shader part:
 
-```markdown
 #### **Steps in Rendering**
 
 1. **User Interaction via `SplineTool`**:  
