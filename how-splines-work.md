@@ -102,12 +102,12 @@ $$
 - **GPU Acceleration**: Efficient rendering with WebGPU shaders.
 - **Interactive Tool**: `SplineTool` allows users to draw and manipulate splines directly within the application.
 
-Here’s the updated section with the links added:
+---
 
 #### **Steps in Rendering**
 
 1. **User Interaction via `SplineTool`**:  
-   Users interact with the spline through the [`SplineTool`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/tools/DrawingTools/SplineTool.ts). This tool provides intuitive controls that allow users to:
+   Users interact with the spline through the [`SplineTool.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/tools/DrawingTools/SplineTool.ts). This tool provides intuitive controls that allow users to:
    - **Add new control points** to define the curve.
    - **Update existing control points** to adjust the shape of the curve.
    - **Remove unwanted control points** for editing flexibility.
@@ -160,8 +160,3 @@ Here’s the updated section with the links added:
      }
    }
    ```
----
-
-This version includes links to the corresponding files in the GitHub repository, making it easier to navigate to the relevant code directly.
-```
-This version provides a more in-depth comparison of Bézier curves and Catmull-Rom splines while maintaining clarity and structure. Let me know if you need further refinements!
