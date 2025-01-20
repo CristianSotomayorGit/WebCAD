@@ -104,7 +104,6 @@ $$
 
 Here’s the updated section with the links added:
 
-```markdown
 #### **Steps in Rendering**
 
 1. **User Interaction via `SplineTool`**:  
