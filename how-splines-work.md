@@ -108,18 +108,18 @@ Here’s the updated section with the links added:
 #### **Steps in Rendering**
 
 1. **User Interaction via `SplineTool`**:  
-   Users interact with the spline through [`SplineTool`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/tools/DrawingTools/SplineTool.ts), which provides intuitive controls to:
-   - Add new control points.
-   - Update existing control points.
-   - Remove unwanted control points.
+   Users interact with the spline through the [`SplineTool`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/tools/DrawingTools/SplineTool.ts). This tool provides intuitive controls that allow users to:
+   - **Add new control points** to define the curve.
+   - **Update existing control points** to adjust the shape of the curve.
+   - **Remove unwanted control points** for editing flexibility.
    
-   Example from `SplineTool.ts`:
+   Example of handling a user interaction in `SplineTool.ts`:
    ```typescript
    public onPointerClick(event: PointerEvent): void {
-     const point = new Point(event.x, event.y);
-     this.spline.addControlPoint(point);
+       const point = new Point(event.x, event.y);
+       this.spline.addControlPoint(point);
    }
-   ```
+
 
 2. **Add Control Points to the Spline**:  
    Once control points are defined, they are passed to the spline, implemented in [`Spline.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/entities/Spline.ts):
