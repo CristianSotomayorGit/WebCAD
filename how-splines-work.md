@@ -1,8 +1,4 @@
-Here's the updated documentation with a more detailed technical explanation of the differences between Catmull-Rom splines and Bézier curves:
-
----
-
-# **Understanding and Implementing Splines in Your CAD Application**
+# **How OtterCAD Draws Splines**
 
 ## **1. Difference Between Catmull-Rom Splines and Bézier Curves**
 
