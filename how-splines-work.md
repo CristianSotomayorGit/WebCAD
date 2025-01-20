@@ -5,7 +5,52 @@ While Bexier curves are a popular way of drawings splines in design applications
 Bézier curves are defined by control points that influence the shape of the curve but do not necessarily lie on it, offering precise control over tangents and geometry, making them ideal for detailed designs like typography or logos. In contrast, Catmull-Rom splines pass directly through the control points, with tangents calculated automatically from neighboring points, creating naturally smooth curves without requiring user adjustments. This makes Catmull-Rom splines intuitive and well-suited for interactive applications like CAD tools, where users expect the curve to align seamlessly with their input and point snapping features may be required.
 
 ---
-
+P(t)=(1−t) 
+3
+ P 
+0
+​
+ +3(1−t) 
+2
+ tP 
+1
+​
+ +3(1−t)t 
+2
+ P 
+2
+​
+ +t 
+3
+ P 
+3
+​
+ 
+Here, 
+𝑃
+0
+P 
+0
+​
+  and 
+𝑃
+3
+P 
+3
+​
+  are the endpoints, and 
+𝑃
+1
+P 
+1
+​
+ , 
+𝑃
+2
+P 
+2
+​
+  are control points influencing the tangents.
 ## **1. Difference Between Catmull-Rom Splines and Bézier Curves**
 
 ### **Bézier Curves**
