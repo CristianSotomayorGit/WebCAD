@@ -6,17 +6,6 @@ Bézier curves are defined by control points that influence the shape of the cur
 
 ---
 
-### **Summary of Differences**
-
-| **Feature**               | **Bézier Curves**                            | **Catmull-Rom Splines**                  |
-|---------------------------|---------------------------------------------|------------------------------------------|
-| **Control Point Influence** | Indirect (does not lie on the curve)        | Direct (curve passes through points)     |
-| **Tangent Control**        | Manual with explicit handles                | Automatic, derived from neighbors        |
-| **Ease of Use**            | Requires more manual adjustment             | Intuitive for interactive applications   |
-| **Applications**           | Precise design (e.g., typography, logos)    | Natural paths, CAD modeling, animations  |
-
----
-
 ### **Sources**
 
 1. [Bézier Curve](https://en.wikipedia.org/wiki/B%C3%A9zier_curve)  
