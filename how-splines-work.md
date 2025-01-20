@@ -91,10 +91,13 @@ $$
 
 ---
 
+Here’s the **Steps in Rendering** section with a more specific explanation for the shader part:
+
+```markdown
 #### **Steps in Rendering**
 
 1. **User Interaction via `SplineTool`**:  
-   Users interact with the spline through the [`SplineTool.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/tools/DrawingTools/SplineTool.ts). This tool provides intuitive controls that allow users to:
+   Users interact with the spline through the [`SplineTool`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/tools/DrawingTools/SplineTool.ts). This tool provides intuitive controls that allow users to:
    - **Add new control points** to define the curve.
    - **Update existing control points** to adjust the shape of the curve.
    - **Remove unwanted control points** for editing flexibility.
@@ -105,14 +108,14 @@ $$
        const point = new Point(event.x, event.y);
        this.spline.addControlPoint(point);
    }
-
+   ```
 
 2. **Add Control Points to the Spline**:  
    Once control points are defined, they are passed to the spline, implemented in [`Spline.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/entities/Spline.ts):
    ```typescript
    public addControlPoint(point: Point): void {
-     this.controlPoints.push(point);
-     this.updateVertexBuffer();
+       this.controlPoints.push(point);
+       this.updateVertexBuffer();
    }
    ```
 
@@ -120,30 +123,111 @@ $$
    Each time control points change, the GPU buffer is updated to reflect the new spline geometry. This is part of the spline's implementation in [`Spline.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/entities/Spline.ts):
    ```typescript
    public updateVertexBuffer(): void {
-     const vertices: number[] = [];
-     const numSegments = 20; // Smoothness of the curve
+       const vertices: number[] = [];
+       const numSegments = 20; // Smoothness of the curve
 
-     for (let i = 0; i < this.controlPoints.length - 1; i++) {
-       for (let j = 0; j <= numSegments; j++) {
-         const t = j / numSegments;
-         const point = this.calculateSplinePoint(i, t);
-         vertices.push(point.x, point.y);
+       for (let i = 0; i < this.controlPoints.length - 1; i++) {
+           for (let j = 0; j <= numSegments; j++) {
+               const t = j / numSegments;
+               const point = this.calculateSplinePoint(i, t);
+               vertices.push(point.x, point.y);
+           }
        }
-     }
 
-     // Write vertex data to the GPU buffer...
+       // Write vertex data to the GPU buffer...
+   }
+   ```
+
+   **Catmull-Rom Interpolation Formula**:  
+   The spline point calculation uses Catmull-Rom interpolation to determine the position of the curve at a specific parameter \( t \) within a segment. This is implemented in the following method:
+   ```typescript
+   private calculateSplinePoint(segmentIndex: number, t: number): { x: number; y: number } {
+       const p0 = this.getControlPoint(segmentIndex - 1);
+       const p1 = this.getControlPoint(segmentIndex);
+       const p2 = this.getControlPoint(segmentIndex + 1);
+       const p3 = this.getControlPoint(segmentIndex + 2);
+
+       const t2 = t * t;
+       const t3 = t2 * t;
+
+       const x =
+           0.5 *
+           ((2 * p1.getX()) +
+               (-p0.getX() + p2.getX()) * t +
+               (2 * p0.getX() - 5 * p1.getX() + 4 * p2.getX() - p3.getX()) * t2 +
+               (-p0.getX() + 3 * p1.getX() - 3 * p2.getX() + p3.getX()) * t3);
+
+       const y =
+           0.5 *
+           ((2 * p1.getY()) +
+               (-p0.getY() + p2.getY()) * t +
+               (2 * p0.getY() - 5 * p1.getY() + 4 * p2.getY() - p3.getY()) * t2 +
+               (-p0.getY() + 3 * p1.getY() - 3 * p2.getY() + p3.getY()) * t3);
+
+       return { x, y };
    }
    ```
 
 4. **Render the Curve**:  
-   The spline is rendered by drawing the vertices stored in the GPU buffer. The rendering logic relies on WebGPU and the associated shader defined in [`PolylineShader.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/shaders/PolylineShader.ts):
-   ```typescript
-   public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
-     if (this.numVertices > 0 && this.vertexBuffer) {
-       renderPass.setPipeline(this.pipeline);
-       renderPass.setBindGroup(0, this.bindGroup);
-       renderPass.setVertexBuffer(0, this.vertexBuffer);
-       renderPass.draw(this.numVertices);
-     }
+   The spline is rendered by drawing the vertices stored in the GPU buffer. The rendering relies on a pipeline that includes vertex and fragment shaders written in **WGSL**.
+
+   **Vertex Shader**:  
+   The vertex shader transforms the spline's world-space positions into clip-space for rendering. It also applies zoom and pan transformations using uniforms.
+
+   ```wgsl
+   struct Uniforms {
+       cameraOffset: vec2<f32>,  // Pan offset in world-space
+       zoomFactor: f32,          // Zoom level
+       padding: f32,             // Alignment padding, unused
+   }
+
+   @group(0) @binding(0) var<uniform> uniforms: Uniforms;
+
+   struct VertexOutput {
+       @builtin(position) position: vec4<f32>, // Clip-space position for rendering
+       @location(0) worldPosition: vec2<f32>,  // Pass-through world-space position
+   }
+
+   @vertex
+   fn main(@location(0) position: vec2<f32>) -> VertexOutput {
+       var output: VertexOutput;
+
+       // Transform the position based on the camera offset and zoom factor
+       let transformedPosition = (position - uniforms.cameraOffset) * uniforms.zoomFactor;
+
+       output.position = vec4<f32>(transformedPosition, 0.0, 1.0); // Clip-space position
+       output.worldPosition = position; // Preserve the world-space position
+       return output;
    }
    ```
+
+   **Fragment Shader**:  
+   The fragment shader applies a uniform color to the spline during rendering.
+
+   ```wgsl
+   @group(0) @binding(1) var<uniform> color: vec4<f32>; // Uniform color for the spline
+
+   @fragment
+   fn main(@location(0) worldPosition: vec2<f32>) -> @location(0) vec4<f32> {
+       // Return the uniform color for rendering the spline
+       return color;
+   }
+   ```
+
+   **Render Call**:  
+   The `draw` method in [`Spline.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/entities/Spline.ts) sets up the pipeline and sends the vertex data to the GPU for rendering:
+   ```typescript
+   public override draw(renderPass: GPURenderPassEncoder, drawVertices: boolean): void {
+       if (this.numVertices > 0 && this.vertexBuffer) {
+           renderPass.setPipeline(this.pipeline);  // Set the rendering pipeline
+           renderPass.setBindGroup(0, this.bindGroup);  // Bind uniform data
+           renderPass.setVertexBuffer(0, this.vertexBuffer);  // Provide vertex data
+           renderPass.draw(this.numVertices);  // Draw the spline
+       }
+   }
+   ```
+
+   The shaders and rendering pipeline ensure the spline is displayed smoothly, with dynamic adjustments for zoom, pan, and color.
+```
+
+This version explicitly describes the shaders' roles and ties them directly to the rendering pipeline setup. Let me know if further refinement is needed!
