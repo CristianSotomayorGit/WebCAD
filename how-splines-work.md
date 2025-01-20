@@ -5,66 +5,17 @@ While Bexier curves are a popular way of drawings splines in design applications
 Bézier curves are defined by control points that influence the shape of the curve but do not necessarily lie on it, offering precise control over tangents and geometry, making them ideal for detailed designs like typography or logos. In contrast, Catmull-Rom splines pass directly through the control points, with tangents calculated automatically from neighboring points, creating naturally smooth curves without requiring user adjustments. This makes Catmull-Rom splines intuitive and well-suited for interactive applications like CAD tools, where users expect the curve to align seamlessly with their input and point snapping features may be required.
 
 ---
-P(t)=(1−t) 
-3
- P 
-0
-​
- +3(1−t) 
-2
- tP 
-1
-​
- +3(1−t)t 
-2
- P 
-2
-​
- +t 
-3
- P 
-3
-​
- 
-Here, 
-𝑃
-0
-P 
-0
-​
-  and 
-𝑃
-3
-P 
-3
-​
-  are the endpoints, and 
-𝑃
-1
-P 
-1
-​
- , 
-𝑃
-2
-P 
-2
-​
-  are control points influencing the tangents.
-## **1. Difference Between Catmull-Rom Splines and Bézier Curves**
 
+## **1. Difference Between Catmull-Rom Splines and Bézier Curves**
 ### **Bézier Curves**
 
-Bézier curves are a widely used type of parametric curve, defined by a set of control points. These control points influence the curve but do not necessarily lie on it (except for the first and last control points).
+Bézier curves are defined by control points that influence the shape of the curve but do not necessarily lie on it. A cubic Bézier curve is mathematically defined as:
 
-#### **Key Characteristics**:
-- **Precision and Control**: Bézier curves offer fine control over the curve's shape through their control points. Adjusting a control point impacts the entire curve's geometry.
-- **Handles and Tangents**: Each control point defines a tangent, allowing precise manipulation of curve directions.
-- **Mathematical Definition**: A cubic Bézier curve is defined as:
-  \[
-  P(t) = (1 - t)^3 P_0 + 3(1 - t)^2 t P_1 + 3(1 - t)t^2 P_2 + t^3 P_3
-  \]
-  Here, \( P_0 \) and \( P_3 \) are the endpoints, and \( P_1 \), \( P_2 \) are control points influencing the tangents.
+\[
+P(t) = (1-t)^3 P_0 + 3(1-t)^2 t P_1 + 3(1-t)t^2 P_2 + t^3 P_3
+\]
+
+Here, \( P_0 \) and \( P_3 \) are the endpoints, and \( P_1 \), \( P_2 \) are control points influencing the tangents.
 
 #### **Pros**:
 - Highly precise for detailed design work (e.g., typography, logos).
@@ -86,17 +37,30 @@ Catmull-Rom splines are cubic Hermite splines designed to pass through all contr
   \[
   T_i = \frac{P_{i+1} - P_{i-1}}{2}
   \]
-- **Mathematical Definition**: A Catmull-Rom spline segment between \( P_1 \) and \( P_2 \), with neighbors \( P_0 \) and \( P_3 \), is defined as:
+
+- **Mathematical Definition**:  
+  A Catmull-Rom spline segment between \( P_1 \) and \( P_2 \), with neighbors \( P_0 \) and \( P_3 \), is defined as:
+
   \[
-  P(t) = 0.5 \times \begin{bmatrix} 1 & t & t^2 & t^3 \end{bmatrix}
+  P(t) = 0.5 \times 
+  \begin{bmatrix} 
+  1 & t & t^2 & t^3 
+  \end{bmatrix}
   \begin{bmatrix}
   0 & 2 & 0 & 0 \\
   -1 & 0 & 1 & 0 \\
   2 & -5 & 4 & -1 \\
   -1 & 3 & -3 & 1
   \end{bmatrix}
-  \begin{bmatrix} P_0 \\ P_1 \\ P_2 \\ P_3 \end{bmatrix}
+  \begin{bmatrix} 
+  P_0 \\ 
+  P_1 \\ 
+  P_2 \\ 
+  P_3 
+  \end{bmatrix}
   \]
+
+---
 - **Intuitive Interactivity**: Adjusting a control point directly changes the curve passing through it, which feels natural to users.
 
 #### **Pros**:
