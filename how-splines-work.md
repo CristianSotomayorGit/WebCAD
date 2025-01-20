@@ -53,8 +53,10 @@ Ensure these files are available and properly integrated into your project.
 ### **How the Curve Is Rendered**
 
 #### **Core Concept**
-Catmull-Rom splines interpolate the curve between control points, ensuring smooth transitions. The curve segments are calculated using four control points \( P_0, P_1, P_2, P_3 \), where \( P_1 \) and \( P_2 \) define the current segment, and \( P_0 \) and \( P_3 \) influence the tangents.
+Catmull-Rom splines create smooth transitions by interpolating the curve between control points. Each segment of the curve is calculated using four control points: \( P_0, P_1, P_2, \) and \( P_3 \). Here:  
 
+- \( P_1 \) and \( P_2 \) define the current segment of the curve.  
+- \( P_0 \) and \( P_3 \) influence the tangents, ensuring smooth interpolation.
 #### **Key Features**
 - **Dynamic Control Point Handling**: Points can be added, updated, or removed, and the curve updates in real-time.
 - **Smooth Rendering**: Adjustable segment density ensures high-quality curves.
