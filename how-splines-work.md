@@ -168,7 +168,7 @@ Here’s the **Steps in Rendering** section with a more specific explanation for
    ```
 
 4. **Render the Curve**:  
-   The spline is rendered by drawing the vertices stored in the GPU buffer. The rendering relies on a pipeline that includes vertex and fragment shaders written in **WGSL**.
+   The spline is rendered by drawing the vertices stored in the GPU buffer. The rendering relies on a pipeline that includes vertex and fragment shaders written in **WGSL**. The vertex and fragment shaders are implemented in [`PolylineShader.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/shaders/PolylineShader.ts).
 
    **Vertex Shader**:  
    The vertex shader transforms the spline's world-space positions into clip-space for rendering. It also applies zoom and pan transformations using uniforms.
@@ -229,4 +229,3 @@ Here’s the **Steps in Rendering** section with a more specific explanation for
    The shaders and rendering pipeline ensure the spline is displayed smoothly, with dynamic adjustments for zoom, pan, and color.
 ```
 
-This version explicitly describes the shaders' roles and ties them directly to the rendering pipeline setup. Let me know if further refinement is needed!
