@@ -1,6 +1,6 @@
 # **How OtterCAD Draws Splines**
 
-While Bexier curves are a popular way of drawings splines in design applications. OtterCAD uses Catmull-Rom splines. While both these curves types are used to create smooth curves, they differ fundamentally in how they handle control points. 
+While Bezier curves are a popular way of drawings splines in design applications. OtterCAD uses Catmull-Rom splines. While both these curves types are used to create smooth curves, they differ fundamentally in how they handle control points. 
 
 Bézier curves are defined by control points that influence the shape of the curve but do not necessarily lie on it, offering precise control over tangents and geometry, making them ideal for detailed designs like typography or logos. In contrast, Catmull-Rom splines pass directly through the control points, with tangents calculated automatically from neighboring points, creating naturally smooth curves without requiring user adjustments. This makes Catmull-Rom splines intuitive and well-suited for interactive applications like CAD tools, where users expect the curve to align seamlessly with their input and point snapping features may be required.
 
