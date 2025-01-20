@@ -18,22 +18,20 @@ Bézier curves are defined by control points that influence the shape of the cur
 
 To implement and render splines, the following files are required:
 
-- **`src/domain/entities/Spline.ts`**:
+- **[`src/domain/entities/Spline.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/entities/Spline.ts)**:
   - Manages spline creation, updates, and rendering.
   - Handles GPU buffer updates and control point interpolation.
 
-- **`src/domain/entities/Point.ts`**:
+- **[`src/domain/entities/Point.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/entities/Point.ts)**:
   - Represents individual control points used by the spline.
 
-- **`src/shaders/SplineShader.ts`**:
+- **[`src/shaders/SplineShader.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/shaders/PolylineShader.ts)**:
   - Defines the vertex and fragment shaders for rendering splines.
   - Responsible for transforming curve vertices and applying colors.
 
-- **`src/tools/SplineTool.ts`**:
+- **[`src/tools/SplineTool.ts`](https://github.com/CristianSotomayorGit/WebCAD/blob/master/src/domain/tools/DrawingTools/SplineTool.ts)**:
   - A user-interactive tool that allows adding, updating, and removing control points.
   - Provides the interface for drawing and manipulating splines in the application.
-
-Ensure these files are available and properly integrated into your project.
 
 ---
 
