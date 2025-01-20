@@ -74,6 +74,28 @@ $$
 P_0 \text{ and } P_3
 $$
 
+Mathematically, a Catmull-Rom spline segment between \( P_1 \) and \( P_2 \), with neighbors \( P_0 \) and \( P_3 \), is defined as:
+
+$$
+P(t) = 0.5 \times 
+\begin{bmatrix} 
+1 & t & t^2 & t^3 
+\end{bmatrix}
+\begin{bmatrix}
+0 & 2 & 0 & 0 \\
+-1 & 0 & 1 & 0 \\
+2 & -5 & 4 & -1 \\
+-1 & 3 & -3 & 1
+\end{bmatrix}
+\begin{bmatrix} 
+P_0 \\ 
+P_1 \\ 
+P_2 \\ 
+P_3 
+\end{bmatrix}
+$$
+
+
 #### **Key Features**
 - **Dynamic Control Point Handling**: Points can be added, updated, or removed, and the curve updates in real-time.
 - **Smooth Rendering**: Adjustable segment density ensures high-quality curves.
